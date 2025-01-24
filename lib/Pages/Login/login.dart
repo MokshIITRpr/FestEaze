@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Messages/messages.dart';
+import '/Messages/messages.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,7 +10,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool _obscurePassword = true;
+  String _username = "";
+  String _password = "";
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Username 
+          // Username
           TextField(
             controller: usernameController,
             decoration: InputDecoration(
@@ -30,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           SizedBox(height: 20),
 
-          // Password 
+          // Password
           TextField(
             controller: passwordController,
             obscureText: _obscurePassword,
@@ -45,6 +48,8 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;
+                    _username = usernameController.text;
+                    _password = passwordController.text;
                   });
                 },
               ),
@@ -55,20 +60,20 @@ class _LoginPageState extends State<LoginPage> {
           // Login Button
           ElevatedButton(
             onPressed: () {
-              String username = usernameController.text;
-              String password = passwordController.text;
+              _username = usernameController.text;
+              _password = passwordController.text;
 
               // null check
-              if (username.isEmpty || password.isEmpty) {
+              if (_username.isEmpty || _password.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Please fill in all fields')),
                 );
               } else {
-                
+                Navigator.pushNamed(context, '/homeScreen');
               }
             },
             style: ElevatedButton.styleFrom(
-              minimumSize: Size(double.infinity, 50), 
+              minimumSize: Size(double.infinity, 50),
             ),
             child: Text(loginMessage),
           ),
