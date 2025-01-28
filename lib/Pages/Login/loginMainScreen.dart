@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './imageBuilder.dart';
 import '/Messages/messages.dart';
 import 'login.dart';
 
@@ -24,12 +25,13 @@ class Loginmainscreen extends StatelessWidget {
         centerTitle: true,
         // TODO(Swayam) : add a leading image or icon here maybe
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Center(
-              child: Text("Images go here"),
+            Container(
+              height: 200,
+              child: ImageBuilder(),
             ),
             LoginPage(),
           ],

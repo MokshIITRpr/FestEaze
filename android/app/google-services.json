@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "659207330550",
+    "project_id": "fest---app",
+    "storage_bucket": "fest---app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659207330550:android:a0d8930987ecf681bd2ad7",
+        "android_client_info": {
+          "package_name": "com.example.fest_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNPMqlYXF2TF_2DAnQ_ZyxH3cs5Cn4w2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
