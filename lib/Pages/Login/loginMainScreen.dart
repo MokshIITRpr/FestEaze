@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import './imageBuilder.dart';
 import '/Messages/messages.dart';
-import 'login.dart';
+import 'loginPage.dart';
 
-class Loginmainscreen extends StatelessWidget {
-  const Loginmainscreen({super.key});
+class LoginMainScreen extends StatefulWidget {
+  const LoginMainScreen({super.key});
+  @override
+  _LoginMainScreenState createState() => _LoginMainScreenState();
+}
 
+class _LoginMainScreenState extends State<LoginMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blueAccent[400],
         title: Text(
@@ -23,17 +27,32 @@ class Loginmainscreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        // TODO(Swayam) : add a leading image or icon here maybe
       ),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          children: [
+          children: <Widget>[
             Container(
               height: 200,
               child: ImageBuilder(),
             ),
             LoginPage(),
+            SizedBox(height: 10),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/signupPage');
+                },
+                child: Text(
+                  'Signup Here',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 18,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

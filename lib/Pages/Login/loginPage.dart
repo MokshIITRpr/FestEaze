@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '/Messages/messages.dart';
 
@@ -16,6 +17,24 @@ class _LoginPageState extends State<LoginPage> {
   String _password = "";
 
   @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> loginUser() async {
+    try {
+      final userCredentials = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: _username, password: _password);
+      print(userCredentials);
+    } on FirebaseAuthException catch (e) {
+      print(e.message);
+      rethrow;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -27,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
             controller: usernameController,
             decoration: InputDecoration(
               labelText: usernameMessage,
-              hintText: 'Enter your username',
+              hintText: 'Enter your username or email',
               border: OutlineInputBorder(),
             ),
           ),
@@ -59,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
 
           // Login Button
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               _username = usernameController.text;
               _password = passwordController.text;
 
@@ -69,7 +88,14 @@ class _LoginPageState extends State<LoginPage> {
                   SnackBar(content: Text('Please fill in all fields')),
                 );
               } else {
-                Navigator.pushNamed(context, '/homeScreen');
+                try {
+                  await loginUser();
+                  Navigator.pushNamed(context, '/homeScreen');
+                } on FirebaseAuthException catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.message!)),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(

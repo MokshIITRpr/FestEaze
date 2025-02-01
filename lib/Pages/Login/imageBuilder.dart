@@ -13,7 +13,7 @@ class _ImageBuilderState extends State<ImageBuilder> {
   @override
   Widget build(BuildContext context) {
     // List of image URLs
-    final List<String> images = [
+    final List<String> _images = [
       'assets/Indian_Institute_of_Technology_Ropar_logo.png',
       'assets/Indian_Institute_of_Technology_Ropar_logo.png',
       'assets/Indian_Institute_of_Technology_Ropar_logo.png',
@@ -25,15 +25,23 @@ class _ImageBuilderState extends State<ImageBuilder> {
       child: PageView.builder(
         controller: _pageController,
         scrollDirection: Axis.horizontal,
-        itemCount: images.length,
+        itemCount: _images.length,
         itemBuilder: (context, index) {
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
             width: 65,
             decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  offset: Offset(2, 2),
+                  blurRadius: 12,
+                  color: Color.fromRGBO(0, 0, 0, 0.16),
+                )
+              ],
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage(images[index]),
+                image: AssetImage(_images[index]),
               ),
             ),
           );

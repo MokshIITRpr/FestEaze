@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'Pages/Login/loginMainScreen.dart';
+import 'Pages/Signup/SignupPage.dart';
 import 'Pages/Home/homeMainScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -19,9 +21,31 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Loginmainscreen(),
+      theme: ThemeData(
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+      ),
+      themeMode: ThemeMode.dark,
+      debugShowCheckedModeBanner: false,
+      home: StreamBuilder(
+          stream: FirebaseAuth.instance.idTokenChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator.adaptive(),
+              );
+            }
+            if (snapshot.data != null) {
+              return const HomeMainScreen();
+            }
+            return const SignupPage();
+          }),
       routes: {
-        '/homeScreen': (context) => Homemainscreen(),
+        '/loginScreen': (context) => LoginMainScreen(),
+        '/signupPage': (context) => SignupPage(),
+        '/homeScreen': (context) => HomeMainScreen(),
       },
     );
   }

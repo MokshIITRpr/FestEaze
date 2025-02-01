@@ -3,3 +3,5 @@ const String welcomeMessage = "Fest App";
 const String usernameMessage = "Username";
 const String passwordMessage = "Password";
 const String loginMessage = "Login";
+const String emailMessage = "Email";
+const String signupMessage = "Signup";
