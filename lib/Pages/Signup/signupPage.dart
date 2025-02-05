@@ -28,6 +28,7 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> signupUser() async {
     try {
+      // OTP based signup
       final userCredentials = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: _email, password: _password);
       print(userCredentials);
