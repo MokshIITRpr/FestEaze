@@ -24,10 +24,7 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
       ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-      ),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
       home: StreamBuilder(
           stream: FirebaseAuth.instance.idTokenChanges(),
@@ -37,10 +34,11 @@ class MainApp extends StatelessWidget {
                 child: CircularProgressIndicator.adaptive(),
               );
             }
-            if (snapshot.data != null) {
-              return const HomeMainScreen();
-            }
-            return const SignupPage();
+            //raj ne hataya h home page p jaane k liye baad mai sahi kr lena
+            // if (snapshot.data != null) {
+            //   return const HomeMainScreen();
+            // }
+            return const HomeMainScreen();
           }),
       // home:LoginMainScreen(),
       routes: {
