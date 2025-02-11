@@ -13,6 +13,7 @@ class LoginMainScreen extends StatefulWidget {
 class _LoginMainScreenState extends State<LoginMainScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final _auth = FirebaseAuth.instance;
 
   bool _obscurePassword = true;
   String _username = "";
@@ -27,8 +28,8 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
 
   Future<void> loginUser() async {
     try {
-      final userCredentials = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: _username, password: _password);
+      final userCredentials = await _auth.signInWithEmailAndPassword(
+          email: _username, password: _password);
       print(userCredentials);
     } on FirebaseAuthException catch (e) {
       print(e.message);
@@ -71,7 +72,8 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         child: FadeInUp(
                             duration: Duration(milliseconds: 1600),
                             child: Icon(
-                              Icons.computer_outlined,
+                              Icons.computer_rounded,
+                              color: Colors.white,
                               size: 180,
                             )),
                       ),
@@ -95,7 +97,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         child: FadeInUp(
                             duration: Duration(milliseconds: 1300),
                             child: Icon(Icons.sports_basketball_rounded,
-                                size: 60)),
+                                color: Colors.white, size: 60)),
                       ),
                       Positioned(
                         child: FadeInUp(

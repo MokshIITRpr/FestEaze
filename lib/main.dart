@@ -5,6 +5,7 @@ import 'Pages/Signup/SignupPage.dart';
 import 'Pages/Home/homeMainScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'Pages/Signup/signupVerification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,7 @@ class MainApp extends StatelessWidget {
         '/loginScreen': (context) => LoginMainScreen(),
         '/signupPage': (context) => SignupPage(),
         '/homeScreen': (context) => HomeMainScreen(),
+        '/verificationScreen': (context) => SignupVerificationPage(),
       },
     );
   }
