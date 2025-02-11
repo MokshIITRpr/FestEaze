@@ -1,4 +1,5 @@
 import 'package:fest_app/Pages/Homepages/about_us.dart';
+import 'package:fest_app/Pages/Homepages/exploreEvents.dart';
 import 'package:fest_app/Pages/Homepages/map.dart';
 import 'package:fest_app/Pages/Homepages/past_event.dart';
 import 'package:fest_app/Pages/Login/loginMainScreen.dart';
@@ -16,6 +17,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
 
   final List<Widget> _pages = [
     AboutUs(),
+    ExploreEvents(),
     PastEvents(),
     Clgmap(),
     LoginMainScreen(),
@@ -29,6 +31,13 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List<BottomNavigationBarItem> navItems = [
+      _buildNavItem(Icons.info, 'About Us'),
+      _buildNavItem(Icons.event, 'Explore Events'),
+      _buildNavItem(Icons.event, 'Past Events'),
+      _buildNavItem(Icons.map, 'Map'),
+      _buildNavItem(Icons.login, 'Login'),
+    ];
     return Scaffold(
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 500),
@@ -48,12 +57,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 14,
         unselectedFontSize: 12,
-        items: [
-          _buildNavItem(Icons.info, 'About Us'),
-          _buildNavItem(Icons.event, 'Past Events'),
-          _buildNavItem(Icons.map, 'Map'),
-          _buildNavItem(Icons.login, 'Login'),
-        ],
+        items: navItems,
       ),
     );
   }
@@ -71,7 +75,8 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: _selectedIndex == _pages.indexWhere((page) => label == page.toStringShort())
+              color: _selectedIndex ==
+                      _pages.indexWhere((page) => label == page.toStringShort())
                   ? Colors.deepPurple[400]
                   : Colors.transparent,
             ),

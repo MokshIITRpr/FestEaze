@@ -30,7 +30,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
     try {
       final userCredentials = await _auth.signInWithEmailAndPassword(
           email: _username, password: _password);
-      print(userCredentials);
+      // print(userCredentials);
     } on FirebaseAuthException catch (e) {
       print(e.message);
       rethrow;
