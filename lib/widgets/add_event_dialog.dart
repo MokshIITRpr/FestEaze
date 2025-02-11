@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/event.dart';
+import 'package:fest_app/Pages/Homepages/PastEvents/z24.dart';
 
 void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
   TextEditingController eventNameController = TextEditingController();
@@ -50,6 +51,7 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
                       Colors.blueAccent.withOpacity(0.9),
                       Colors.lightBlue.withOpacity(0.7),
                     ],
+                    navigateTo: Z24(),
                   ));
                   Navigator.of(context).pop();
                 }

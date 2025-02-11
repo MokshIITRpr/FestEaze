@@ -2,16 +2,52 @@ import 'package:fest_app/Pages/Homepages/PastEvents/ad24.dart';
 import 'package:fest_app/Pages/Homepages/PastEvents/ar24.dart';
 import 'package:fest_app/Pages/Homepages/PastEvents/z24.dart';
 import 'package:flutter/material.dart';
+import 'package:fest_app/models/event.dart';
+import 'package:fest_app/widgets/event_list.dart';
 
 class PastEvents extends StatelessWidget {
   const PastEvents({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final List<Event> pastEvents = [
+      Event(
+          name: "Zeitgeist 2024",
+          date: "Oct 17, 2024 - Oct 19, 2024",
+          colors: [Colors.green, Colors.teal],
+          navigateTo: Z24()),
+      Event(
+          name: "Advitiya 2024",
+          date: "Feb 17, 2024 - Feb 19, 2024",
+          colors: [Colors.purple, Colors.deepPurple],
+          navigateTo: Ad24()),
+      Event(
+          name: "Aarohan 2024",
+          date: "March 20, 2024 - March 23, 2024",
+          colors: [
+            const Color.fromARGB(255, 195, 201, 18),
+            const Color.fromARGB(255, 148, 152, 89)
+          ],
+          navigateTo: Ar24()),
+      Event(
+          name: "General Championship 2025",
+          date: "Jan 20, 2024 - Feb 19, 2024",
+          colors: [
+            const Color.fromARGB(255, 3, 68, 234),
+            const Color.fromARGB(255, 70, 74, 114)
+          ],
+          navigateTo: Z24()),
+    ];
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text('Past Events', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Past Events',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Set text color to white
+            fontSize: 20, // Optional: Adjust font size for better visibility
+          ),
+        ),
         backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
@@ -19,29 +55,7 @@ class PastEvents extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildAnimatedContainer(
-              context: context,
-              title: "Zeitgeist 2024",
-              icon: Icons.workspaces_filled,
-              color: Colors.deepOrangeAccent[200]!,
-              navigateTo: Z24(),
-            ),
-            SizedBox(height: 15),
-            _buildAnimatedContainer(
-              context: context,
-              title: "Advitiya 2024",
-              icon: Icons.workspaces_filled,
-              color: Colors.deepOrangeAccent[200]!,
-              navigateTo: Ad24(),
-            ),
-            SizedBox(height: 15),
-            _buildAnimatedContainer(
-              context: context,
-              title: "Aarohan 2024",
-              icon: Icons.workspaces_filled,
-              color: Colors.deepOrangeAccent[200]!,
-              navigateTo: Ar24(),
-            ),
+            EventList(events: pastEvents),
           ],
         ),
       ),
@@ -62,7 +76,7 @@ class PastEvents extends StatelessWidget {
           MaterialPageRoute(builder: (context) => navigateTo),
         );
       },
-      splashColor: Colors.deepPurpleAccent, 
+      splashColor: Colors.deepPurpleAccent,
       borderRadius: BorderRadius.circular(15),
       child: Ink(
         decoration: BoxDecoration(

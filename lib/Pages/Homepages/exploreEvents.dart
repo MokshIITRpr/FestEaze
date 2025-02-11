@@ -3,6 +3,7 @@ import 'package:fest_app/models/event.dart';
 import 'package:fest_app/widgets/section_title.dart';
 import 'package:fest_app/widgets/event_list.dart';
 import 'package:fest_app/widgets/add_event_dialog.dart';
+import 'PastEvents/z24.dart';
 
 class ExploreEvents extends StatefulWidget {
   const ExploreEvents({super.key});
@@ -14,24 +15,32 @@ class ExploreEvents extends StatefulWidget {
 class _ExploreEventsState extends State<ExploreEvents> {
   final List<Event> ongoingEvents = [
     Event(
-        name: "Tech Symposium 2025",
-        date: "Feb 10, 2025",
-        colors: [Colors.orange, Colors.deepOrange]),
+      name: "Tech Symposium 2025",
+      date: "Feb 10, 2025",
+      colors: [Colors.orange, Colors.deepOrange],
+      navigateTo: Z24(),
+    ),
     Event(
-        name: "AI & ML Workshop",
-        date: "Feb 15, 2025",
-        colors: [Colors.blue, Colors.indigo]),
+      name: "AI & ML Workshop",
+      date: "Feb 15, 2025",
+      colors: [Colors.blue, Colors.indigo],
+      navigateTo: Z24(),
+    ),
   ];
 
   final List<Event> upcomingEvents = [
     Event(
-        name: "Cybersecurity Conference",
-        date: "March 5, 2025",
-        colors: [Colors.green, Colors.teal]),
+      name: "Cybersecurity Conference",
+      date: "March 5, 2025",
+      colors: [Colors.green, Colors.teal],
+      navigateTo: Z24(),
+    ),
     Event(
-        name: "Cloud Computing Summit",
-        date: "March 20, 2025",
-        colors: [Colors.purple, Colors.deepPurple]),
+      name: "Cloud Computing Summit",
+      date: "March 20, 2025",
+      colors: [Colors.purple, Colors.deepPurple],
+      navigateTo: Z24(),
+    ),
   ];
 
   void _addNewEvent(Event event) {
@@ -44,11 +53,12 @@ class _ExploreEventsState extends State<ExploreEvents> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Events"),
+        title: const Text("Events",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.deepPurple,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add, color: Colors.white),
             onPressed: () => showAddEventDialog(context, _addNewEvent),
           )
         ],

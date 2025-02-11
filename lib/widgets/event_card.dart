@@ -29,6 +29,12 @@ class EventCard extends StatelessWidget {
           style: const TextStyle(color: Colors.white70),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => event.navigateTo),
+          );
+        },
       ),
     );
   }
