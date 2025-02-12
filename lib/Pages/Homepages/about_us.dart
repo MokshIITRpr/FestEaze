@@ -12,10 +12,10 @@ class _AboutUsState extends State<AboutUs> {
   int _currentIndex = 0;
 
   final List<String> _imagePaths = [
-    'assets/test_img1.jpg',
-    'assets/test_img2.jpg',
-    'assets/test_img3.jpeg',
-    'assets/test_img4.jpeg',
+    'iitrpr.jpeg',
+    'zeitgeist.jpeg',
+    'advitiya.jpeg',
+    'aarohan.jpg',
   ];
 
   @override

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import './imageBuilder.dart';
 import '/Messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
 
@@ -28,7 +27,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
 
   Future<void> loginUser() async {
     try {
-      final userCredentials = await _auth.signInWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
           email: _username, password: _password);
       // print(userCredentials);
     } on FirebaseAuthException catch (e) {
