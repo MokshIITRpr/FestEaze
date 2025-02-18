@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '/Messages/messages.dart';
+import '../../messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
 
 class LoginMainScreen extends StatefulWidget {
@@ -57,7 +57,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         width: 80,
                         height: 200,
                         child: FadeInUp(
-                            duration: Duration(seconds: 1),
+                            duration: Duration(milliseconds: 500),
                             child: Container(
                               decoration: BoxDecoration(
                                   image: DecorationImage(
@@ -65,23 +65,11 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                             )),
                       ),
                       Positioned(
-                        left: 120,
-                        width: 80,
-                        height: 470,
-                        child: FadeInUp(
-                            duration: Duration(milliseconds: 1600),
-                            child: Icon(
-                              Icons.computer_rounded,
-                              color: Colors.white,
-                              size: 180,
-                            )),
-                      ),
-                      Positioned(
                         left: 140,
                         width: 80,
                         height: 150,
                         child: FadeInUp(
-                            duration: Duration(milliseconds: 1200),
+                            duration: Duration(milliseconds: 600),
                             child: Container(
                               decoration: BoxDecoration(
                                   image: DecorationImage(
@@ -94,13 +82,13 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         width: 80,
                         height: 150,
                         child: FadeInUp(
-                            duration: Duration(milliseconds: 1300),
+                            duration: Duration(milliseconds: 750),
                             child: Icon(Icons.sports_basketball_rounded,
                                 color: Colors.white, size: 60)),
                       ),
                       Positioned(
                         child: FadeInUp(
-                            duration: Duration(milliseconds: 1600),
+                            duration: Duration(milliseconds: 800),
                             child: Container(
                               margin: EdgeInsets.only(top: 50),
                               child: Center(
@@ -122,7 +110,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                   child: Column(
                     children: <Widget>[
                       FadeInUp(
-                          duration: Duration(milliseconds: 1800),
+                          duration: Duration(milliseconds: 900),
                           child: Container(
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
@@ -196,7 +184,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         height: 30,
                       ),
                       FadeInUp(
-                          duration: Duration(milliseconds: 1900),
+                          duration: Duration(milliseconds: 950),
                           child: Text(
                             forgotPassword,
                             style: TextStyle(
@@ -206,7 +194,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         height: 20,
                       ),
                       FadeInUp(
-                        duration: Duration(milliseconds: 2000),
+                        duration: Duration(milliseconds: 1000),
                         child: Center(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -247,7 +235,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                       ),
                       SizedBox(height: 10),
                       FadeInUp(
-                        duration: Duration(milliseconds: 2000),
+                        duration: Duration(milliseconds: 1100),
                         child: GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(context, '/signupPage');

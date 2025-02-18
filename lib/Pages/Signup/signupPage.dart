@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '/Messages/messages.dart';
+import '../../messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
 
 class SignupPage extends StatefulWidget {
@@ -197,7 +197,7 @@ class _SignupPageState extends State<SignupPage> {
                         child: GestureDetector(
                             onTap: () {
                               Navigator.pushReplacementNamed(
-                                  context, '/loginScreen');
+                                  context, '/homeScreen');
                             },
                             child: Text(
                               haveAnAccountMessage,
