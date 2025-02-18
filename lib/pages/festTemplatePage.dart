@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TemplatePage extends StatefulWidget {
   const TemplatePage({super.key});
@@ -9,6 +10,10 @@ class TemplatePage extends StatefulWidget {
 
 class _TemplatePageState extends State<TemplatePage> {
   final PageController _pageController = PageController();
+  String docId = "uCZlvtZBNcq2IMtXN7ld";
+  final TextEditingController _controller = TextEditingController();
+  bool isEditing = false;
+
   int _currentIndex = 0;
 
   final List<String> _imagePaths = [
@@ -22,6 +27,7 @@ class _TemplatePageState extends State<TemplatePage> {
   void initState() {
     super.initState();
     _autoSlideImages();
+    _fetchText();
   }
 
   void _autoSlideImages() {
@@ -37,6 +43,34 @@ class _TemplatePageState extends State<TemplatePage> {
         });
         _autoSlideImages();
       }
+    });
+  }
+
+  Future<void> _fetchText() async {
+    var doc = await FirebaseFirestore.instance
+        .collection('festTempText')
+        .doc(docId)
+        .get();
+    if (doc.exists) {
+      setState(() {
+        _controller.text = doc['content'];
+      });
+    } else {
+      _controller.text =
+          "Hardcoded random text"; // Default if no Firestore data
+    }
+  }
+
+  Future<void> updateText() async {
+    await FirebaseFirestore.instance
+        .collection('festTempText')
+        .doc(docId)
+        .update({
+      'content': _controller.text,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    setState(() {
+      isEditing = false;
     });
   }
 
@@ -94,10 +128,29 @@ class _TemplatePageState extends State<TemplatePage> {
                     ),
                   ),
                   SizedBox(height: 8),
-                  Text(
-                    "Zeigeist 2024 dfonskdlcnlskdnclksdnclknsdlkcnklsdncpsdcomsdmcsmdckscdmklsdmclkmdkcmlskdmclkmsckdmclskdmclkdmscoksdnfionsdoipismcpismcpimapij0isjfimiomj8jioifmjiodsjojdfsoj iofjgoijsfiogjiojsfiogjiofdjgo oifjgiojsiodfgjposjfgi iojgfiojsdfiogj oisdfjgiojfdiogjiofdjsogijiodfjgojdsfiojgio oifjgiosjfgiojiosdfjgiojsfog[josdjfguojsouj] pofvjpmvkmkv iosfiojdifsj kdfvlsdfijisfdjijfivjifvojojnfdvisdovifiosijvoisdjfvoijsiodfvjviuhuju oudfjgojsdfoigjgiojf ",
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.justify,
+                  TextField(
+                    controller: _controller,
+                    enabled: isEditing,
+                    maxLines: null,
+                    style: TextStyle(
+                      color: Colors.black, 
+                      fontSize: 16
+                    ), 
+                    decoration: InputDecoration(
+                      border: InputBorder.none, 
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(isEditing ? Icons.check : Icons.edit,
+                        color: Colors.deepPurpleAccent),
+                    onPressed: () {
+                      if (isEditing) {
+                        updateText(); // Save to Firestore
+                      }
+                      setState(() {
+                        isEditing = !isEditing; // Toggle edit mode
+                      });
+                    },
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -109,10 +162,29 @@ class _TemplatePageState extends State<TemplatePage> {
                     ),
                   ),
                   SizedBox(height: 8),
-                  Text(
-                    "Various sub events fnvuidjsfojiopdsdjfvojioddfjviojdojpfguihivniudfhvuddvoidfoivjoijfoviodidjfvoidfoiviojdoifvoudfnovunuddfun oifjoijsdiofjiojfd ifjdvoijdfoijovijviojodifjviojoifjovosjovijodisfjviojdiofjvoijuhuhunvvuinsiviunfovisjfoivjoijfuhsoviosbfviosyfvboisiychsinuishf isdodfbvyidfdiuv iuhifniaavufduv ",
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.justify,
+                  TextField(
+                    controller: _controller,
+                    enabled: isEditing,
+                    maxLines: null,
+                    style: TextStyle(
+                      color: Colors.black, 
+                      fontSize: 16
+                    ), 
+                    decoration: InputDecoration(
+                      border: InputBorder.none, 
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(isEditing ? Icons.check : Icons.edit,
+                        color: Colors.deepPurpleAccent),
+                    onPressed: () {
+                      if (isEditing) {
+                        updateText(); // Save to Firestore
+                      }
+                      setState(() {
+                        isEditing = !isEditing; // Toggle edit mode
+                      });
+                    },
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -124,10 +196,29 @@ class _TemplatePageState extends State<TemplatePage> {
                     ),
                   ),
                   SizedBox(height: 8),
-                  Text(
-                    "Pronite had _______ and the band _______ fnvuidjsfojiopdsdjfvojioddfjviojdojpfguihivniudfhvuddvoidfoivjoijfoviodidjfvoidfoiviojdoifvoudfnovunuddfun oifjoijsdiofjiojfd ifjdvoijdfoijovijviojodifjviojoifjovosjovijodisfjviojdiofjvoijuhuhunvvuinsiviunfovisjfoivjoijfuhsoviosbfviosyfvboisiychsinuishf isdodfbvyidfdiuv iuhifniaavufduv uiavuiohiufuhukaviuphfguphf uahfuphfuihuahuifvhd ahfipuhfcpuahjsddpuchjupjdafpuihvh piausdfhuipahdsuipvhapudshfipadfhguhpdfhgpuvhadpfiughp upfhvauiphfdpguhspfiuhpudfhgpuhapiufhgpuihdfpuihafuphvuphafviupahvpuihafpvuhadpfuvhpiaufhpuihvipuahpfdiuvhuphdfv ",
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.justify,
+                  TextField(
+                    controller: _controller,
+                    enabled: isEditing,
+                    maxLines: null,
+                    style: TextStyle(
+                      color: Colors.black, 
+                      fontSize: 16
+                    ), 
+                    decoration: InputDecoration(
+                      border: InputBorder.none, 
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(isEditing ? Icons.check : Icons.edit,
+                        color: Colors.deepPurpleAccent),
+                    onPressed: () {
+                      if (isEditing) {
+                        updateText(); 
+                      }
+                      setState(() {
+                        isEditing = !isEditing; 
+                      });
+                    },
                   ),
                 ],
               ),
@@ -138,3 +229,4 @@ class _TemplatePageState extends State<TemplatePage> {
     );
   }
 }
+
