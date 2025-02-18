@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:fest_app/Messages/messages.dart';
+import 'package:fest_app/messages/messages.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

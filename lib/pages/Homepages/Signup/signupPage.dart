@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '/Messages/messages.dart';
+import '../../../messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
 
 class SignupPage extends StatefulWidget {

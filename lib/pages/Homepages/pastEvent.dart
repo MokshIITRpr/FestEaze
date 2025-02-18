@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fest_app/models/event.dart';
-import 'package:fest_app/widgets/event_list.dart';
-import 'package:fest_app/Pages/festTemplatePage.dart';
+import 'package:fest_app/collections/event.dart';
+import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/eventList.dart';
+import 'package:fest_app/pages/festTemplatePage.dart';
 
 class PastEvents extends StatelessWidget {
   const PastEvents({super.key});

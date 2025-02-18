@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/event.dart';
-import 'package:fest_app/Pages/festTemplatePage.dart';
+import 'package:fest_app/collections/event.dart';
+import 'package:fest_app/pages/festTemplatePage.dart';
 
 void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
   TextEditingController eventNameController = TextEditingController();

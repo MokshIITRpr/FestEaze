@@ -1,8 +1,8 @@
-import 'package:fest_app/Pages/Homepages/about_us.dart';
-import 'package:fest_app/Pages/Homepages/exploreEvents.dart';
-import 'package:fest_app/Pages/Homepages/map.dart';
-import 'package:fest_app/Pages/Homepages/past_event.dart';
-import 'package:fest_app/Pages/Login/loginMainScreen.dart';
+import 'package:fest_app/pages/Homepages/aboutUs.dart';
+import 'package:fest_app/pages/Homepages/ExploreEvents/exploreEvents.dart';
+import 'package:fest_app/pages/Homepages/map.dart';
+import 'package:fest_app/pages/Homepages/pastEvent.dart';
+import 'package:fest_app/pages/Homepages/Login/loginMainScreen.dart';
 import 'package:flutter/material.dart';
 
 class HomeMainScreen extends StatefulWidget {

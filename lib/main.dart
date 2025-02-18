@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'Pages/Login/loginMainScreen.dart';
-import 'Pages/Signup/signupPage.dart';
-import 'Pages/Home/homeMainScreen.dart';
+import 'pages/Homepages/Login/loginMainScreen.dart';
+import 'pages/Homepages/Signup/signupPage.dart';
+import 'pages/Home/homeMainScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'Pages/Signup/signupVerification.dart';
+import 'firebaseOptions.dart';
+import 'pages/Homepages/Signup/signupVerification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

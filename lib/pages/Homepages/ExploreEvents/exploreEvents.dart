@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fest_app/models/event.dart';
-import 'package:fest_app/widgets/section_title.dart';
-import 'package:fest_app/widgets/event_list.dart';
-import 'package:fest_app/widgets/add_event_dialog.dart';
-import 'package:fest_app/Pages/festTemplatePage.dart';
+import 'package:fest_app/collections/event.dart';
+import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/sectionTitle.dart';
+import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/eventList.dart';
+import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addEventDialog.dart';
+import 'package:fest_app/pages/festTemplatePage.dart';
 
 class ExploreEvents extends StatefulWidget {
   const ExploreEvents({super.key});
