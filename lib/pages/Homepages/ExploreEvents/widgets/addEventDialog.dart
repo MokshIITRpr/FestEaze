@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../models/event.dart';
-import 'package:fest_app/Pages/Homepages/PastEvents/z24.dart';
+import 'package:fest_app/collections/event.dart';
+import 'package:fest_app/pages/festTemplatePage.dart';
 
 void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
   TextEditingController eventNameController = TextEditingController();
   DateTime? startDate;
   DateTime? endDate;
+  String? errorMessage; // Persistent error message
 
   showDialog(
     context: context,
@@ -24,12 +25,44 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
                 ),
               ),
               const SizedBox(height: 10),
-              _datePicker(context, "Start Date", startDate, (picked) {
-                setDialogState(() => startDate = picked);
+              _datePicker(context, "Start Date", startDate, DateTime.now(),
+                  (picked) {
+                setDialogState(() {
+                  if (picked.isBefore(DateTime.now())) {
+                    errorMessage = "Start Date must be after today";
+                  } else {
+                    startDate = picked;
+                    if (endDate != null && endDate!.isBefore(startDate!)) {
+                      endDate =
+                          startDate; // Ensure endDate is at least startDate
+                    }
+                    errorMessage = null; // Clear error when valid
+                  }
+                });
               }),
-              _datePicker(context, "End Date", endDate, (picked) {
-                setDialogState(() => endDate = picked);
+              _datePicker(
+                  context, "End Date", endDate, startDate ?? DateTime.now(),
+                  (picked) {
+                setDialogState(() {
+                  if (startDate == null ||
+                      picked.isAfter(startDate!) ||
+                      picked.isAtSameMomentAs(startDate!)) {
+                    endDate = picked;
+                    errorMessage = null; // Clear error if valid
+                  } else {
+                    errorMessage =
+                        "End Date must be after or equal to Start Date";
+                  }
+                });
               }),
+              if (errorMessage != null) // Show error message only when needed
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                  ),
+                ),
             ],
           ),
           actions: [
@@ -51,9 +84,15 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
                       Colors.blueAccent.withOpacity(0.9),
                       Colors.lightBlue.withOpacity(0.7),
                     ],
-                    navigateTo: Z24(),
+                    navigateTo: TemplatePage(),
                   ));
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            TemplatePage()), // Navigate to Z24
+                  );
                 }
               },
             ),
@@ -65,7 +104,7 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
 }
 
 Widget _datePicker(BuildContext context, String label, DateTime? date,
-    Function(DateTime) onDatePicked) {
+    DateTime minDate, Function(DateTime) onDatePicked) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
@@ -78,9 +117,9 @@ Widget _datePicker(BuildContext context, String label, DateTime? date,
         child: const Text("Select"),
         onPressed: () async {
           DateTime? picked = await showDatePicker(
-            context: context, // Corrected: passing context
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2020),
+            context: context,
+            initialDate: minDate,
+            firstDate: minDate, // Restrict selection to only future dates
             lastDate: DateTime(2030),
           );
           if (picked != null) {

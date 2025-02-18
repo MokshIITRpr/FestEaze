@@ -1,35 +1,36 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../messages/messages.dart';
+import 'package:flutter/material.dart';
+import '../../../messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
 
-class LoginMainScreen extends StatefulWidget {
-  const LoginMainScreen({super.key});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
   @override
-  _LoginMainScreenState createState() => _LoginMainScreenState();
+  _SignupPageState createState() => _SignupPageState();
 }
 
-class _LoginMainScreenState extends State<LoginMainScreen> {
-  final TextEditingController usernameController = TextEditingController();
+class _SignupPageState extends State<SignupPage> {
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
 
-  bool _obscurePassword = true;
-  String _username = "";
+  String _email = "";
   String _password = "";
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
-    usernameController.dispose();
+    emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> loginUser() async {
+  Future<void> signupUser() async {
     try {
-      await _auth.signInWithEmailAndPassword(
-          email: _username, password: _password);
-      // print(userCredentials);
+      // OTP based signup
+      final userCredentials = await _auth.createUserWithEmailAndPassword(
+          email: _email, password: _password);
+      print(userCredentials);
     } on FirebaseAuthException catch (e) {
       print(e.message);
       rethrow;
@@ -53,47 +54,13 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                   child: Stack(
                     children: <Widget>[
                       Positioned(
-                        left: 30,
-                        width: 80,
-                        height: 200,
                         child: FadeInUp(
-                            duration: Duration(milliseconds: 500),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: AssetImage('assets/light-1.png'))),
-                            )),
-                      ),
-                      Positioned(
-                        left: 140,
-                        width: 80,
-                        height: 150,
-                        child: FadeInUp(
-                            duration: Duration(milliseconds: 600),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: AssetImage('assets/light-2.png'))),
-                            )),
-                      ),
-                      Positioned(
-                        right: 40,
-                        top: 40,
-                        width: 80,
-                        height: 150,
-                        child: FadeInUp(
-                            duration: Duration(milliseconds: 750),
-                            child: Icon(Icons.sports_basketball_rounded,
-                                color: Colors.white, size: 60)),
-                      ),
-                      Positioned(
-                        child: FadeInUp(
-                            duration: Duration(milliseconds: 800),
+                            duration: Duration(milliseconds: 1600),
                             child: Container(
                               margin: EdgeInsets.only(top: 50),
                               child: Center(
                                 child: Text(
-                                  "Login",
+                                  "Signup",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 40,
@@ -110,7 +77,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                   child: Column(
                     children: <Widget>[
                       FadeInUp(
-                          duration: Duration(milliseconds: 900),
+                          duration: Duration(milliseconds: 1800),
                           child: Container(
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
@@ -134,7 +101,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                                               color: Color.fromRGBO(
                                                   143, 148, 251, 1)))),
                                   child: TextField(
-                                    controller: usernameController,
+                                    controller: emailController,
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       labelText: emailMessage,
@@ -169,7 +136,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                                           setState(() {
                                             _obscurePassword =
                                                 !_obscurePassword;
-                                            _username = usernameController.text;
+                                            _email = emailController.text;
                                             _password = passwordController.text;
                                           });
                                         },
@@ -184,17 +151,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         height: 30,
                       ),
                       FadeInUp(
-                          duration: Duration(milliseconds: 950),
-                          child: Text(
-                            forgotPassword,
-                            style: TextStyle(
-                                color: Color.fromRGBO(143, 148, 251, 1)),
-                          )),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      FadeInUp(
-                        duration: Duration(milliseconds: 1000),
+                        duration: Duration(milliseconds: 2000),
                         child: Center(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -202,11 +159,11 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                               minimumSize: Size(double.infinity, 50),
                             ),
                             onPressed: () async {
-                              _username = usernameController.text;
+                              _email = emailController.text;
                               _password = passwordController.text;
 
                               // null check
-                              if (_username.isEmpty || _password.isEmpty) {
+                              if (_email.isEmpty || _password.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content:
@@ -214,8 +171,9 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                                 );
                               } else {
                                 try {
-                                  await loginUser();
-                                  Navigator.pushNamed(context, '/homeScreen');
+                                  await signupUser();
+                                  Navigator.pushReplacementNamed(
+                                      context, '/verificationScreen');
                                 } on FirebaseAuthException catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(e.message!)),
@@ -224,7 +182,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                               }
                             },
                             child: Text(
-                              loginMessage,
+                              signupMessage,
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -235,13 +193,14 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                       ),
                       SizedBox(height: 10),
                       FadeInUp(
-                        duration: Duration(milliseconds: 1100),
+                        duration: Duration(milliseconds: 2000),
                         child: GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(context, '/signupPage');
+                              Navigator.pushReplacementNamed(
+                                  context, '/homeScreen');
                             },
                             child: Text(
-                              signupHere,
+                              haveAnAccountMessage,
                               style: TextStyle(
                                 color: Color.fromRGBO(143, 148, 251, 1),
                                 fontSize: 15,
