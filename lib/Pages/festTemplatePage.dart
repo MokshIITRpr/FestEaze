@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class Ar24 extends StatefulWidget {
-  const Ar24({super.key});
+class TemplatePage extends StatefulWidget {
+  const TemplatePage({super.key});
 
   @override
-  State<Ar24> createState() => _Ar24State();
+  State<TemplatePage> createState() => _TemplatePageState();
 }
 
-class _Ar24State extends State<Ar24> {
+class _TemplatePageState extends State<TemplatePage> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
@@ -39,15 +39,16 @@ class _Ar24State extends State<Ar24> {
       }
     });
   }
+
   @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title:
-            Text('Aarohan 2024', style: TextStyle(fontWeight: FontWeight.bold)),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Zeitgeist 2024',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.deepPurple,
-        ),
-        body: Column(
+      ),
+      body: Column(
         children: [
           // Image slider with auto-play
           SizedBox(
@@ -94,13 +95,13 @@ class _Ar24State extends State<Ar24> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "Aarohan 2024 dfonskdlcnlskdnclksdnclknsdlkcnklsdncpsdcomsdmcsmdckscdmklsdmclkmdkcmlskdmclkmsckdmclskdmclkdmscoksdnfionsdoipismcpismcpimapij0isjfimiomj8jioifmjiodsjojdfsoj iofjgoijsfiogjiojsfiogjiofdjgo oifjgiojsiodfgjposjfgi iojgfiojsdfiogj oisdfjgiojfdiogjiofdjsogijiodfjgojdsfiojgio oifjgiosjfgiojiosdfjgiojsfog[josdjfguojsouj] pofvjpmvkmkv iosfiojdifsj kdfvlsdfijisfdjijfivjifvojojnfdvisdovifiosijvoisdjfvoijsiodfvjviuhuju oudfjgojsdfoigjgiojf ",
+                    "Zeigeist 2024 dfonskdlcnlskdnclksdnclknsdlkcnklsdncpsdcomsdmcsmdckscdmklsdmclkmdkcmlskdmclkmsckdmclskdmclkdmscoksdnfionsdoipismcpismcpimapij0isjfimiomj8jioifmjiodsjojdfsoj iofjgoijsfiogjiojsfiogjiofdjgo oifjgiojsiodfgjposjfgi iojgfiojsdfiogj oisdfjgiojfdiogjiofdjsogijiodfjgojdsfiojgio oifjgiosjfgiojiosdfjgiojsfog[josdjfguojsouj] pofvjpmvkmkv iosfiojdifsj kdfvlsdfijisfdjijfivjifvojojnfdvisdovifiosijvoisdjfvoijsiodfvjviuhuju oudfjgojsdfoigjgiojf ",
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.justify,
                   ),
                   SizedBox(height: 16),
                   Text(
-                    "Tournaments & Leaderboard",
+                    "Sub Events",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -109,7 +110,7 @@ class _Ar24State extends State<Ar24> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "Sports such as Football, Basketball, Cricket,  fnvuidjsfojiopdsdjfvojioddfjviojdojpfguihivniudfhvuddvoidfoivjoijfoviodidjfvoidfoiviojdoifvoudfnovunuddfun oifjoijsdiofjiojfd ifjdvoijdfoijovijviojodifjviojoifjovosjovijodisfjviojdiofjvoijuhuhunvvuinsiviunfovisjfoivjoijfuhsoviosbfviosyfvboisiychsinuishf isdodfbvyidfdiuv iuhifniaavufduv ",
+                    "Various sub events fnvuidjsfojiopdsdjfvojioddfjviojdojpfguihivniudfhvuddvoidfoivjoijfoviodidjfvoidfoiviojdoifvoudfnovunuddfun oifjoijsdiofjiojfd ifjdvoijdfoijovijviojodifjviojoifjovosjovijodisfjviojdiofjvoijuhuhunvvuinsiviunfovisjfoivjoijfuhsoviosbfviosyfvboisiychsinuishf isdodfbvyidfdiuv iuhifniaavufduv ",
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.justify,
                   ),
@@ -134,6 +135,6 @@ class _Ar24State extends State<Ar24> {
           ),
         ],
       ),
-      );
-    }
+    );
+  }
 }

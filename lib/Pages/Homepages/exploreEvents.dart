@@ -3,7 +3,7 @@ import 'package:fest_app/models/event.dart';
 import 'package:fest_app/widgets/section_title.dart';
 import 'package:fest_app/widgets/event_list.dart';
 import 'package:fest_app/widgets/add_event_dialog.dart';
-import 'PastEvents/z24.dart';
+import 'package:fest_app/Pages/festTemplatePage.dart';
 
 class ExploreEvents extends StatefulWidget {
   const ExploreEvents({super.key});
@@ -18,13 +18,13 @@ class _ExploreEventsState extends State<ExploreEvents> {
       name: "Tech Symposium 2025",
       date: "Feb 10, 2025",
       colors: [Colors.orange, Colors.deepOrange],
-      navigateTo: Z24(),
+      navigateTo: TemplatePage(),
     ),
     Event(
       name: "AI & ML Workshop",
       date: "Feb 15, 2025",
       colors: [Colors.blue, Colors.indigo],
-      navigateTo: Z24(),
+      navigateTo: TemplatePage(),
     ),
   ];
 
@@ -33,13 +33,13 @@ class _ExploreEventsState extends State<ExploreEvents> {
       name: "Cybersecurity Conference",
       date: "March 5, 2025",
       colors: [Colors.green, Colors.teal],
-      navigateTo: Z24(),
+      navigateTo: TemplatePage(),
     ),
     Event(
       name: "Cloud Computing Summit",
       date: "March 20, 2025",
       colors: [Colors.purple, Colors.deepPurple],
-      navigateTo: Z24(),
+      navigateTo: TemplatePage(),
     ),
   ];
 
