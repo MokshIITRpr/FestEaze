@@ -45,7 +45,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
             child: Column(
               children: <Widget>[
                 Container(
-                  height: 400,
+                  height: 300,
                   decoration: BoxDecoration(
                       image: DecorationImage(
                           image: AssetImage('assets/background.png'),

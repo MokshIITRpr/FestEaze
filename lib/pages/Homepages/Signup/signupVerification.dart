@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fest_app/messages/messages.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupVerificationPage extends StatefulWidget {
   const SignupVerificationPage({super.key});
@@ -12,6 +13,7 @@ class SignupVerificationPage extends StatefulWidget {
 
 class _SignupVerificationPageState extends State<SignupVerificationPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late Timer timer;
   bool isResending = false;
   bool isDeleted = false;
@@ -58,6 +60,7 @@ class _SignupVerificationPageState extends State<SignupVerificationPage> {
     User? user = _auth.currentUser;
     await user?.reload();
     if (user != null && !user.emailVerified) {
+      await _firestore.collection('users').doc(user.uid).delete();
       await user.delete();
       setState(() {
         isDeleted = true;

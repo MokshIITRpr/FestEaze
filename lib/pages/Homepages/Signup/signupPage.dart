@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import '../../../messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
 
@@ -31,6 +30,7 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
+  /// Signup user along with auth and QR generation.
   Future<void> signupUser() async {
     try {
       // OTP-based signup
@@ -42,16 +42,18 @@ class _SignupPageState extends State<SignupPage> {
       User? user = userCredential.user;
 
       if (user != null) {
-        // Store user details in Firestore
+        // User and QR details
         await _firestore.collection('users').doc(user.uid).set({
           'uid': user.uid,
-          'name': _name,
+          'username': _name,
           'email': _email,
-          //'emailVerified': false,
-          'qrCodeData': user.uid, // QR stores user UID
+          // QR stores user UID
+          'qrCodeData': user.uid,
+          // auth
+          'admin': false,
+          'fest-head': "None",
+          'event-head': "None",
         });
-
-        print("User registered: ${user.uid}");
       }
     } on FirebaseAuthException catch (e) {
       print(e.message);
@@ -67,7 +69,7 @@ class _SignupPageState extends State<SignupPage> {
         child: Column(
           children: <Widget>[
             Container(
-              height: 400,
+              height: 300,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/background.png'),
@@ -78,7 +80,7 @@ class _SignupPageState extends State<SignupPage> {
                 children: <Widget>[
                   Positioned(
                     child: FadeInUp(
-                      duration: Duration(milliseconds: 1600),
+                      duration: Duration(milliseconds: 800),
                       child: Container(
                         margin: EdgeInsets.only(top: 50),
                         child: Center(
@@ -98,17 +100,18 @@ class _SignupPageState extends State<SignupPage> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(30.0),
+              padding: EdgeInsets.all(20.0),
               child: Column(
                 children: <Widget>[
                   FadeInUp(
-                    duration: Duration(milliseconds: 1800),
+                    duration: Duration(milliseconds: 900),
                     child: Container(
                       padding: EdgeInsets.all(5),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Color.fromRGBO(143, 148, 251, 1)),
+                        border:
+                            Border.all(color: Color.fromRGBO(143, 148, 251, 1)),
                         boxShadow: [
                           BoxShadow(
                             color: Color.fromRGBO(143, 148, 251, .2),
@@ -124,15 +127,16 @@ class _SignupPageState extends State<SignupPage> {
                             padding: EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
                               border: Border(
-                                bottom: BorderSide(color: Color.fromRGBO(143, 148, 251, 1)),
+                                bottom: BorderSide(
+                                    color: Color.fromRGBO(143, 148, 251, 1)),
                               ),
                             ),
                             child: TextField(
                               controller: nameController,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                labelText: "Name",
-                                hintText: "Enter your name",
+                                labelText: usernameMessage,
+                                hintText: "Enter your username",
                                 hintStyle: TextStyle(color: Colors.grey[800]),
                                 labelStyle: TextStyle(color: Colors.black),
                               ),
@@ -143,7 +147,8 @@ class _SignupPageState extends State<SignupPage> {
                             padding: EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
                               border: Border(
-                                bottom: BorderSide(color: Color.fromRGBO(143, 148, 251, 1)),
+                                bottom: BorderSide(
+                                    color: Color.fromRGBO(143, 148, 251, 1)),
                               ),
                             ),
                             child: TextField(
@@ -171,7 +176,9 @@ class _SignupPageState extends State<SignupPage> {
                                 labelStyle: TextStyle(color: Colors.black),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                    _obscurePassword
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -189,7 +196,7 @@ class _SignupPageState extends State<SignupPage> {
                   SizedBox(height: 30),
                   // Signup Button
                   FadeInUp(
-                    duration: Duration(milliseconds: 2000),
+                    duration: Duration(milliseconds: 1000),
                     child: Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -201,14 +208,18 @@ class _SignupPageState extends State<SignupPage> {
                           _email = emailController.text.trim();
                           _password = passwordController.text.trim();
 
-                          if (_name.isEmpty || _email.isEmpty || _password.isEmpty) {
+                          if (_name.isEmpty ||
+                              _email.isEmpty ||
+                              _password.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Please fill in all fields')),
+                              SnackBar(
+                                  content: Text('Please fill in all fields')),
                             );
                           } else {
                             try {
                               await signupUser();
-                              Navigator.pushReplacementNamed(context, '/verificationScreen');
+                              Navigator.pushReplacementNamed(
+                                  context, '/verificationScreen');
                             } on FirebaseAuthException catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text(e.message!)),
@@ -218,7 +229,10 @@ class _SignupPageState extends State<SignupPage> {
                         },
                         child: Text(
                           signupMessage,
-                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -226,7 +240,7 @@ class _SignupPageState extends State<SignupPage> {
                   SizedBox(height: 10),
                   // Already have an account? Login
                   FadeInUp(
-                    duration: Duration(milliseconds: 2000),
+                    duration: Duration(milliseconds: 1000),
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pushReplacementNamed(context, '/homeScreen');

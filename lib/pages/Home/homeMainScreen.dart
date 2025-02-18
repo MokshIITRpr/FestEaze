@@ -21,7 +21,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     //print(user != null ? user.uid : "NO USER");
-    
+
     // If user is logged in, show QR screen, otherwise show Login screen
     final List<Widget> _pages = [
       AboutUs(),
@@ -59,7 +59,8 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
           _buildNavItem(Icons.event, 'Explore Events'),
           _buildNavItem(Icons.event, 'Past Events'),
           _buildNavItem(Icons.map, 'Map'),
-          _buildNavItem(user != null ?Icons.account_circle :Icons.login, user != null ? 'Profile' : 'Login'),
+          _buildNavItem(user != null ? Icons.account_circle : Icons.login,
+              user != null ? 'Profile' : 'Login'),
         ],
       ),
     );
