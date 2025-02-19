@@ -6,7 +6,9 @@ import './utils/database.dart';
 
 class TemplatePage extends StatefulWidget {
   final String title;
-  const TemplatePage({super.key, required this.title});
+  final String docId; // Accept docId
+
+  const TemplatePage({super.key, required this.title, required this.docId});
 
   @override
   State<TemplatePage> createState() => _TemplatePageState();
@@ -38,13 +40,13 @@ class _TemplatePageState extends State<TemplatePage> {
   }
 
   void _autoSlideImages() {
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
           _currentIndex = (_currentIndex + 1) % _imagePaths.length;
           _pageController.animateToPage(
             _currentIndex,
-            duration: Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOut,
           );
         });
@@ -55,7 +57,7 @@ class _TemplatePageState extends State<TemplatePage> {
   Future<void> _fetchText() async {
     var docSnapshot = await FirebaseFirestore.instance
         .collection('fests')
-        .doc('8t7CFRKi6lwMdtthuACO')
+        .doc(widget.docId) // Use dynamic docId
         .get();
 
     if (docSnapshot.exists) {
@@ -71,7 +73,7 @@ class _TemplatePageState extends State<TemplatePage> {
 
   Future<void> updateText(String field, String text) async {
     await updateDataInFirestore(
-      docId: '8t7CFRKi6lwMdtthuACO',
+      docId: widget.docId, // Use dynamic docId
       field: field,
       text: text,
     );
@@ -81,16 +83,16 @@ class _TemplatePageState extends State<TemplatePage> {
   }
 
   void _addEvent(String field) {
-    showEventDialog(context, field, "8t7CFRKi6lwMdtthuACO", setState,
-        proniteEvents, subEventsList, _fetchText);
+    showEventDialog(context, field, widget.docId, setState, proniteEvents,
+        subEventsList, _fetchText);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(widget.title,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -100,7 +102,7 @@ class _TemplatePageState extends State<TemplatePage> {
             children: [
               ImageSlider(
                   pageController: _pageController, imagePaths: _imagePaths),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFieldSection(
                 title: "About",
                 controller: _aboutController,
@@ -114,11 +116,11 @@ class _TemplatePageState extends State<TemplatePage> {
                   });
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               buildEditableSection(
                   "Pronite", _proniteController, 'pronite', proniteEvents),
               buildEventList(proniteEvents),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               buildEditableSection("Sub Events", _subEventsController,
                   'subEvents', subEventsList),
               buildEventList(subEventsList),
@@ -139,10 +141,10 @@ class _TemplatePageState extends State<TemplatePage> {
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             IconButton(
-              icon: Icon(Icons.add, color: Colors.blue),
+              icon: const Icon(Icons.add, color: Colors.blue),
               onPressed: () {
                 if (isEditing) {
                   updateText(field, controller.text);
@@ -165,28 +167,29 @@ class _TemplatePageState extends State<TemplatePage> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         if (snapshot.hasData && snapshot.data!.exists) {
                           var eventData =
                               snapshot.data!.data() as Map<String, dynamic>;
                           return Card(
                             elevation: 4,
-                            margin: EdgeInsets.symmetric(vertical: 8),
+                            margin: const EdgeInsets.symmetric(vertical: 8),
                             child: ListTile(
                               title: Text(eventData['title'] ?? 'No title',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
                               subtitle: Text(
                                   'Venue: ${eventData['venue'] ?? 'Unknown'}\nDate: ${eventData['datetime'] ?? 'Unknown'}'),
                             ),
                           );
                         }
-                        return SizedBox();
+                        return const SizedBox();
                       },
                     ))
                 .toList(),
           )
-        : SizedBox();
+        : const SizedBox();
   }
 }

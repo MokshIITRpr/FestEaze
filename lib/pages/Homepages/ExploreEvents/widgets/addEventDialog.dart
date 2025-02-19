@@ -1,12 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fest_app/collections/event.dart';
 import 'package:fest_app/pages/Fests/festTemplatePage.dart';
 
-void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
+void showAddEventDialog(BuildContext context) {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   TextEditingController eventNameController = TextEditingController();
   DateTime? startDate;
   DateTime? endDate;
-  String? errorMessage; // Persistent error message
+  String? errorMessage;
 
   showDialog(
     context: context,
@@ -33,10 +34,9 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
                   } else {
                     startDate = picked;
                     if (endDate != null && endDate!.isBefore(startDate!)) {
-                      endDate =
-                          startDate; // Ensure endDate is at least startDate
+                      endDate = startDate;
                     }
-                    errorMessage = null; // Clear error when valid
+                    errorMessage = null;
                   }
                 });
               }),
@@ -48,14 +48,14 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
                       picked.isAfter(startDate!) ||
                       picked.isAtSameMomentAs(startDate!)) {
                     endDate = picked;
-                    errorMessage = null; // Clear error if valid
+                    errorMessage = null;
                   } else {
                     errorMessage =
                         "End Date must be after or equal to Start Date";
                   }
                 });
               }),
-              if (errorMessage != null) // Show error message only when needed
+              if (errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
@@ -72,28 +72,38 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
             ),
             ElevatedButton(
               child: const Text("Save"),
-              onPressed: () {
+              onPressed: () async {
                 if (eventNameController.text.isNotEmpty &&
                     startDate != null &&
                     endDate != null) {
-                  addEvent(Event(
-                    name: eventNameController.text,
-                    date:
-                        "${startDate!.toLocal().toString().split(' ')[0]} - ${endDate!.toLocal().toString().split(' ')[0]}",
-                    colors: [
-                      Colors.blueAccent.withOpacity(0.9),
-                      Colors.lightBlue.withOpacity(0.7),
-                    ],
-                    navigateTo: TemplatePage(title: eventNameController.text),
-                  ));
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
+                  try {
+                    // Store event in Firestore
+                    DocumentReference docRef =
+                        await _firestore.collection('fests').add({
+                      'title': eventNameController.text,
+                      'startDate': Timestamp.fromDate(startDate!),
+                      'endDate': Timestamp.fromDate(endDate!),
+                      'pronite': [],
+                      'subEvents': [],
+                      'about':
+                          "Add text here ...", // Fixed: Should be a string, not a list
+                    });
+
+                    print("Event added with ID: ${docRef.id}");
+
+                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
                         builder: (context) => TemplatePage(
-                            title: eventNameController
-                                .text)), // Navigate to TemplatePage
-                  );
+                          title: eventNameController.text,
+                          docId: docRef.id, // Pass docId
+                        ),
+                      ),
+                    );
+                  } catch (e) {
+                    print("Error adding event: $e");
+                  }
                 }
               },
             ),
@@ -120,7 +130,7 @@ Widget _datePicker(BuildContext context, String label, DateTime? date,
           DateTime? picked = await showDatePicker(
             context: context,
             initialDate: minDate,
-            firstDate: minDate, // Restrict selection to only future dates
+            firstDate: minDate,
             lastDate: DateTime(2030),
           );
           if (picked != null) {
