@@ -26,7 +26,7 @@ class _QRScreenState extends State<QRScreen> {
 
     if (user == null) {
       // Redirect to login if not logged in
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.pushReplacementNamed(context, '/loginScreen');
       return;
     }
 
@@ -39,7 +39,7 @@ class _QRScreenState extends State<QRScreen> {
       if (userDoc.exists && userDoc.data() != null) {
         setState(() {
           qrData = userDoc['qrCodeData'];
-          userName = userDoc['name']; // Ensure Firestore contains this field
+          userName = userDoc['username'];
           isLoading = false;
         });
       } else {
@@ -76,12 +76,14 @@ class _QRScreenState extends State<QRScreen> {
       appBar: AppBar(
         title: Text("Your QR Code"),
         backgroundColor: Colors.deepPurple,
+        elevation: 0,
       ),
       body: Center(
         child: isLoading
             ? CircularProgressIndicator()
             : qrData == null
-                ? Text("No QR Code found!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
+                ? Text("No QR Code found!",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -94,19 +96,22 @@ class _QRScreenState extends State<QRScreen> {
                       if (userName != null)
                         Text(
                           "Hello, $userName!",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       SizedBox(height: 20),
                       Text(
                         "Scan this QR code to get user details.",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 30),
                       ElevatedButton(
                         onPressed: _logout, // ✅ Logout function
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
-                          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 15),
                         ),
                         child: Text(
                           "Logout",
