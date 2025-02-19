@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fest_app/collections/event.dart';
-import 'package:fest_app/pages/festTemplatePage.dart';
+import 'package:fest_app/pages/Fests/festTemplatePage.dart';
 
 void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
   TextEditingController eventNameController = TextEditingController();
@@ -84,14 +84,15 @@ void showAddEventDialog(BuildContext context, Function(Event) addEvent) {
                       Colors.blueAccent.withOpacity(0.9),
                       Colors.lightBlue.withOpacity(0.7),
                     ],
-                    navigateTo: TemplatePage(),
+                    navigateTo: TemplatePage(title: eventNameController.text),
                   ));
                   Navigator.of(context).pop(); // Close dialog
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            TemplatePage()), // Navigate to Z24
+                        builder: (context) => TemplatePage(
+                            title: eventNameController
+                                .text)), // Navigate to TemplatePage
                   );
                 }
               },
