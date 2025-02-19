@@ -35,13 +35,9 @@ class MainApp extends StatelessWidget {
                 child: CircularProgressIndicator.adaptive(),
               );
             }
-            //raj ne hataya h home page p jaane k liye baad mai sahi kr lena
-            // if (snapshot.data != null) {
-            //   return const HomeMainScreen();
-            // }
+            
             return const HomeMainScreen();
           }),
-      // home:LoginMainScreen(),
       routes: {
         '/loginScreen': (context) => LoginMainScreen(),
         '/signupPage': (context) => SignupPage(),
