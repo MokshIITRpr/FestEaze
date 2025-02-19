@@ -26,7 +26,7 @@ class _QRScreenState extends State<QRScreen> {
 
     if (user == null) {
       // Redirect to login if not logged in
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.pushReplacementNamed(context, '/loginScreen');
       return;
     }
 
@@ -76,6 +76,7 @@ class _QRScreenState extends State<QRScreen> {
       appBar: AppBar(
         title: Text("Your QR Code"),
         backgroundColor: Colors.deepPurple,
+        elevation: 0,
       ),
       body: Center(
         child: isLoading

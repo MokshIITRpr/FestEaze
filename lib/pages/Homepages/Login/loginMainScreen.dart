@@ -215,7 +215,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                               } else {
                                 try {
                                   await loginUser();
-                                  Navigator.pushNamed(context, '/homeScreen');
+                                  Navigator.pushReplacementNamed(context, '/homeScreen');
                                 } on FirebaseAuthException catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(e.message!)),
