@@ -15,12 +15,10 @@ class TemplatePage extends StatefulWidget {
 }
 
 class _TemplatePageState extends State<TemplatePage> {
-  final PageController _pageController = PageController();
   final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _proniteController = TextEditingController();
   final TextEditingController _subEventsController = TextEditingController();
   bool isEditing = false;
-  int _currentIndex = 0;
 
   final List<String> _imagePaths = [
     'assets/test_img1.jpg',
