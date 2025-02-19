@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import './widgets/imageSlider.dart';
+import 'widgets/autoImageSlider.dart';
 import './widgets/textFieldSection.dart';
 import './utils/database.dart';
 
@@ -35,24 +35,25 @@ class _TemplatePageState extends State<TemplatePage> {
   @override
   void initState() {
     super.initState();
-    _autoSlideImages();
+    // _autoSlideImages();
     _fetchText();
   }
 
-  void _autoSlideImages() {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _currentIndex = (_currentIndex + 1) % _imagePaths.length;
-          _pageController.animateToPage(
-            _currentIndex,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        });
-      }
-    });
-  }
+  // void _autoSlideImages() {
+  //   Future.delayed(const Duration(seconds: 3), () {
+  //     if (mounted) {
+  //       setState(() {
+  //         _currentIndex = (_currentIndex + 1) % _imagePaths.length;
+  //         _pageController.animateToPage(
+  //           _currentIndex,
+  //           duration: const Duration(milliseconds: 500),
+  //           curve: Curves.easeInOut,
+  //         );
+  //       });
+  //     }
+  //     _autoSlideImages();
+  //   });
+  // }
 
   Future<void> _fetchText() async {
     var docSnapshot = await FirebaseFirestore.instance
@@ -100,8 +101,7 @@ class _TemplatePageState extends State<TemplatePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ImageSlider(
-                  pageController: _pageController, imagePaths: _imagePaths),
+              AutoImageSlider(imagePaths: _imagePaths),
               const SizedBox(height: 20),
               TextFieldSection(
                 title: "About",

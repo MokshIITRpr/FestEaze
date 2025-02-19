@@ -79,11 +79,11 @@ class _ExploreEventsState extends State<ExploreEvents> {
                     color: Colors.white, fontWeight: FontWeight.bold)),
             backgroundColor: Colors.deepPurple,
             actions: [
-              // if (_isAdmin)
-              IconButton(
-                icon: const Icon(Icons.add, color: Colors.white),
-                onPressed: () => showAddEventDialog(context),
-              ),
+              if (_isAdmin)
+                IconButton(
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  onPressed: () => showAddEventDialog(context),
+                ),
             ],
           ),
           backgroundColor: Colors.grey[200],
