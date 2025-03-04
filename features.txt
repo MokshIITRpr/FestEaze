@@ -1,0 +1,8 @@
+4th March
+
+done > add upcoming and ongoing events. 
+> complete authorizations of giving access to events.
+done > make UI better of fest template.
+> make editable event page - events details, register now (open a google form)
+
+---------------------------------------------------------------

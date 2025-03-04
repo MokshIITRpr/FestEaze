@@ -38,23 +38,47 @@ class _ExploreEventsState extends State<ExploreEvents> {
     }
   }
 
-  Stream<List<Event>> _fetchEvents() {
+  Stream<Map<String, List<Event>>> _fetchEvents() {
     return _firestore.collection('fests').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
+      List<Event> pastEvents = [];
+      List<Event> ongoingEvents = [];
+      List<Event> upcomingEvents = [];
+
+      DateTime now = DateTime.now();
+
+      for (var doc in snapshot.docs) {
         final data = doc.data();
-        return Event(
+        DateTime startDate = (data['startDate'] as Timestamp).toDate();
+        DateTime endDate = (data['endDate'] as Timestamp).toDate();
+
+        Event event = Event(
           name: data['title'] ?? 'Unnamed Event',
           date:
-              "${(data['startDate'] as Timestamp).toDate().toLocal().toString().split(' ')[0]} - ${(data['endDate'] as Timestamp).toDate().toLocal().toString().split(' ')[0]}",
+              "${startDate.toLocal().toString().split(' ')[0]} - ${endDate.toLocal().toString().split(' ')[0]}",
           colors: [
             Colors.blueAccent.withOpacity(0.9),
             Colors.lightBlue.withOpacity(0.7)
           ],
           navigateTo: TemplatePage(
-              title: data['title'] ?? 'Unnamed Event',
-              docId: doc.id), // Pass docId
+            title: data['title'] ?? 'Unnamed Event',
+            docId: doc.id,
+          ),
         );
-      }).toList();
+
+        if (endDate.isBefore(now)) {
+          pastEvents.add(event);
+        } else if (startDate.isBefore(now) && endDate.isAfter(now)) {
+          ongoingEvents.add(event);
+        } else {
+          upcomingEvents.add(event);
+        }
+      }
+
+      return {
+        "Past Events": pastEvents,
+        "Ongoing Events": ongoingEvents,
+        "Upcoming Events": upcomingEvents,
+      };
     });
   }
 
@@ -89,7 +113,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
           backgroundColor: Colors.grey[200],
           body: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: StreamBuilder<List<Event>>(
+            child: StreamBuilder<Map<String, List<Event>>>(
               stream: _fetchEvents(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -100,13 +124,23 @@ class _ExploreEventsState extends State<ExploreEvents> {
                   return const Center(child: Text("No events available."));
                 }
 
-                List<Event> events = snapshot.data!;
+                Map<String, List<Event>> eventsMap = snapshot.data!;
                 return SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SectionTitle(title: "Upcoming Events"),
-                      EventList(events: events),
+                      if (eventsMap["Ongoing Events"]!.isNotEmpty) ...[
+                        const SectionTitle(title: "Ongoing Events"),
+                        EventList(events: eventsMap["Ongoing Events"]!),
+                      ],
+                      if (eventsMap["Upcoming Events"]!.isNotEmpty) ...[
+                        const SectionTitle(title: "Upcoming Events"),
+                        EventList(events: eventsMap["Upcoming Events"]!),
+                      ],
+                      if (eventsMap["Past Events"]!.isNotEmpty) ...[
+                        const SectionTitle(title: "Past Events"),
+                        EventList(events: eventsMap["Past Events"]!),
+                      ],
                     ],
                   ),
                 );

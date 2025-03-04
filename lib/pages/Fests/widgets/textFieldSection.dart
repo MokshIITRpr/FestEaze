@@ -27,13 +27,15 @@ class TextFieldSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
+                color: Colors.white, // Change title text color to white
               ),
             ),
             Spacer(), // Adds space between the title and the button
             IconButton(
-              icon: Icon(isEditing ? Icons.check : Icons.edit,
-                  color: Colors.deepPurpleAccent),
+              icon: Icon(
+                isEditing ? Icons.check : Icons.edit,
+                color: Color(0xFF1DB954), // Spotify Green color for the icon
+              ),
               onPressed: onEdit,
             ),
           ],
@@ -43,8 +45,11 @@ class TextFieldSection extends StatelessWidget {
           controller: controller,
           enabled: isEditing,
           maxLines: null,
-          style: TextStyle(color: Colors.black, fontSize: 16),
+          style:
+              TextStyle(color: Colors.white, fontSize: 16), // White text color
           decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.black, // Black background color for text field
             border: InputBorder.none,
           ),
         ),

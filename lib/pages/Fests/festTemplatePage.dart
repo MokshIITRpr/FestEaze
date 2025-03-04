@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'widgets/autoImageSlider.dart';
 import './widgets/textFieldSection.dart';
 import './utils/database.dart';
+import 'package:intl/intl.dart';
 
 class TemplatePage extends StatefulWidget {
   final String title;
@@ -18,6 +19,8 @@ class _TemplatePageState extends State<TemplatePage> {
   final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _proniteController = TextEditingController();
   final TextEditingController _subEventsController = TextEditingController();
+  final TextEditingController _searchController =
+      TextEditingController(); // Search controller
   bool isEditing = false;
 
   final List<String> _imagePaths = [
@@ -29,29 +32,16 @@ class _TemplatePageState extends State<TemplatePage> {
 
   List<DocumentReference> proniteEvents = [];
   List<DocumentReference> subEventsList = [];
+  List<DocumentReference> filteredEvents =
+      []; // For filtered events based on search query
 
   @override
   void initState() {
     super.initState();
-    // _autoSlideImages();
     _fetchText();
+    filteredEvents =
+        proniteEvents; // Initially set filtered events to all events
   }
-
-  // void _autoSlideImages() {
-  //   Future.delayed(const Duration(seconds: 3), () {
-  //     if (mounted) {
-  //       setState(() {
-  //         _currentIndex = (_currentIndex + 1) % _imagePaths.length;
-  //         _pageController.animateToPage(
-  //           _currentIndex,
-  //           duration: const Duration(milliseconds: 500),
-  //           curve: Curves.easeInOut,
-  //         );
-  //       });
-  //     }
-  //     _autoSlideImages();
-  //   });
-  // }
 
   Future<void> _fetchText() async {
     var docSnapshot = await FirebaseFirestore.instance
@@ -66,6 +56,31 @@ class _TemplatePageState extends State<TemplatePage> {
             List<DocumentReference>.from(docSnapshot['pronite'] ?? []);
         subEventsList =
             List<DocumentReference>.from(docSnapshot['subEvents'] ?? []);
+        filteredEvents = subEventsList; // Initial events list
+      });
+    }
+  }
+
+  // This function filters the events based on the search query
+  Future<void> _filterEvents(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        filteredEvents = subEventsList; // If query is empty, show all events
+      });
+    } else {
+      List<DocumentReference> filteredList = [];
+
+      for (var eventRef in subEventsList) {
+        var eventSnapshot = await eventRef.get();
+        var eventData = eventSnapshot.data() as Map<String, dynamic>;
+        String eventName = eventData['eventName']?.toLowerCase() ?? '';
+        if (eventName.contains(query.toLowerCase())) {
+          filteredList.add(eventRef);
+        }
+      }
+
+      setState(() {
+        filteredEvents = filteredList;
       });
     }
   }
@@ -82,47 +97,75 @@ class _TemplatePageState extends State<TemplatePage> {
   }
 
   void _addEvent(String field) {
-    showEventDialog(context, field, widget.docId, setState, proniteEvents,
-        subEventsList, _fetchText);
+    showEventDialog(context, field, widget.docId, setState, _fetchText);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.black, // Black background for app bar
+        title: Text(
+          widget.title,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoImageSlider(imagePaths: _imagePaths),
-              const SizedBox(height: 20),
-              TextFieldSection(
-                title: "About",
-                controller: _aboutController,
-                isEditing: isEditing,
-                onEdit: () {
-                  if (isEditing) {
-                    updateText('about', _aboutController.text);
-                  }
-                  setState(() {
-                    isEditing = !isEditing;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              buildEditableSection(
-                  "Pronite", _proniteController, 'pronite', proniteEvents),
-              buildEventList(proniteEvents),
-              const SizedBox(height: 20),
-              buildEditableSection("Sub Events", _subEventsController,
-                  'subEvents', subEventsList),
-              buildEventList(subEventsList),
-            ],
+      body: Container(
+        decoration: BoxDecoration(
+          color: Colors.black, // Black background for the body
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AutoImageSlider(imagePaths: _imagePaths),
+                const SizedBox(height: 20),
+                TextFieldSection(
+                  title: "About",
+                  controller: _aboutController,
+                  isEditing: isEditing,
+                  onEdit: () {
+                    if (isEditing) {
+                      updateText('about', _aboutController.text);
+                    }
+                    setState(() {
+                      isEditing = !isEditing;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+                buildEditableSection("Flagship Events", _proniteController,
+                    'pronite', proniteEvents),
+
+                const SizedBox(height: 20),
+                buildEventList(proniteEvents), // Display filtered events
+                const SizedBox(height: 20),
+                buildEditableSection("Explore Club Events",
+                    _subEventsController, 'subEvents', subEventsList),
+                const SizedBox(height: 20),
+                // Search bar for searching events
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    labelText: 'Search Events',
+                    prefixIcon: const Icon(Icons.search,
+                        color: Colors.white), // White icon
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(
+                        0.2), // Slightly transparent white background
+                    labelStyle: const TextStyle(color: Colors.white),
+                  ),
+                  onChanged: (query) {
+                    _filterEvents(query); // Filter events as the user types
+                  },
+                ),
+                buildEventList(filteredEvents),
+              ],
+            ),
           ),
         ),
       ),
@@ -139,10 +182,14 @@ class _TemplatePageState extends State<TemplatePage> {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white), // White text for section titles
             ),
             IconButton(
-              icon: const Icon(Icons.add, color: Colors.blue),
+              icon: const Icon(Icons.add,
+                  color: Color.fromRGBO(30, 215, 96, 1)), // Spotify Green color
               onPressed: () {
                 if (isEditing) {
                   updateText(field, controller.text);
@@ -158,36 +205,155 @@ class _TemplatePageState extends State<TemplatePage> {
 
   Widget buildEventList(List<DocumentReference> eventList) {
     return eventList.isNotEmpty
-        ? Column(
-            children: eventList
-                .map((eventRef) => FutureBuilder<DocumentSnapshot>(
-                      future: eventRef.get(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasData && snapshot.data!.exists) {
-                          var eventData =
-                              snapshot.data!.data() as Map<String, dynamic>;
-                          return Card(
-                            elevation: 4,
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            child: ListTile(
-                              title: Text(eventData['title'] ?? 'No title',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              subtitle: Text(
-                                  'Venue: ${eventData['venue'] ?? 'Unknown'}\nDate: ${eventData['datetime'] ?? 'Unknown'}'),
-                            ),
-                          );
-                        }
-                        return const SizedBox();
-                      },
-                    ))
-                .toList(),
+        ? SizedBox(
+            height: 250, // Fixed height for square cards
+            child: ListView(
+              scrollDirection: Axis.horizontal, // Horizontal scrolling
+              children: eventList
+                  .map((eventRef) => FutureBuilder<DocumentSnapshot>(
+                        future: eventRef.get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasData && snapshot.data!.exists) {
+                            var eventData =
+                                snapshot.data!.data() as Map<String, dynamic>;
+
+                            // Convert Timestamp to String (using DateFormat)
+                            String eventName =
+                                eventData['eventName'] ?? 'No title';
+                            String venue = eventData['venue'] ?? 'Unknown';
+
+                            // Handle Timestamp fields
+                            Timestamp timestampDate =
+                                eventData['date'] ?? Timestamp.now();
+                            Timestamp timestampStartTime =
+                                eventData['startTime'] ?? Timestamp.now();
+                            Timestamp timestampEndTime =
+                                eventData['endTime'] ?? Timestamp.now();
+
+                            // Convert Timestamp to DateTime
+                            DateTime date = timestampDate.toDate();
+                            DateTime startTime = timestampStartTime.toDate();
+                            DateTime endTime = timestampEndTime.toDate();
+
+                            // Format the date and time
+                            String formattedDate =
+                                DateFormat('yyyy-MM-dd').format(date);
+                            String formattedStartTime =
+                                DateFormat('HH:mm').format(startTime);
+                            String formattedEndTime =
+                                DateFormat('HH:mm').format(endTime);
+
+                            String timeRange =
+                                '$formattedStartTime - $formattedEndTime';
+
+                            return Container(
+                              width: 200, // Fixed width for square-shaped card
+                              margin: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // Background color
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Card(
+                                elevation: 4,
+                                margin: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    // Image at the top of the card
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(12),
+                                          topRight: Radius.circular(12)),
+                                      child: Image.network(
+                                        eventData['imageUrl'] ??
+                                            'https://cdn.pixabay.com/photo/2016/06/02/02/33/triangles-1430105_640.png', // Image URL (add placeholder)
+                                        height: 120, // Set height for image
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            eventName,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.calendar_today,
+                                                  size: 20, color: Colors.grey),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Date: $formattedDate',
+                                                style: const TextStyle(
+                                                    color: Colors.grey),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.access_time,
+                                                  size: 20, color: Colors.grey),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Time: $timeRange',
+                                                style: const TextStyle(
+                                                    color: Colors.grey),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.location_on,
+                                                  size: 20, color: Colors.grey),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Venue: $venue',
+                                                style: const TextStyle(
+                                                    color: Colors.grey),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox();
+                        },
+                      ))
+                  .toList(),
+            ),
           )
-        : const SizedBox();
+        : const Center(child: Text('No events available.'));
   }
 }

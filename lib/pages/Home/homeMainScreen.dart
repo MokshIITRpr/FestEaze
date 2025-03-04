@@ -1,7 +1,7 @@
 import 'package:fest_app/pages/Homepages/aboutUs.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/exploreEvents.dart';
 import 'package:fest_app/pages/Homepages/map.dart';
-import 'package:fest_app/pages/Homepages/pastEvent.dart';
+// import 'package:fest_app/pages/Homepages/pastEvent.dart';
 import 'package:fest_app/pages/Homepages/Login/loginMainScreen.dart';
 import 'package:fest_app/pages/Homepages/qr_screen.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +26,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
     final List<Widget> _pages = [
       AboutUs(),
       ExploreEvents(),
-      PastEvents(),
+      // PastEvents(),
       Clgmap(),
       user != null ? QRScreen() : LoginMainScreen(),
     ];
@@ -57,7 +57,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
         items: [
           _buildNavItem(Icons.info, 'About Us'),
           _buildNavItem(Icons.event, 'Explore Events'),
-          _buildNavItem(Icons.event, 'Past Events'),
+          // _buildNavItem(Icons.event, 'Past Events'),
           _buildNavItem(Icons.map, 'Map'),
           _buildNavItem(user != null ? Icons.account_circle : Icons.login,
               user != null ? 'Profile' : 'Login'),
