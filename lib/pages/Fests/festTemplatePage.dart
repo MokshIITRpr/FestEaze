@@ -104,7 +104,7 @@ class _TemplatePageState extends State<TemplatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black, // Black background for app bar
+        backgroundColor: Colors.deepPurple, // Black background for app bar
         title: Text(
           widget.title,
           style:
@@ -113,7 +113,7 @@ class _TemplatePageState extends State<TemplatePage> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          color: Colors.black, // Black background for the body
+          color: Colors.white, 
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -152,7 +152,7 @@ class _TemplatePageState extends State<TemplatePage> {
                   decoration: InputDecoration(
                     labelText: 'Search Events',
                     prefixIcon: const Icon(Icons.search,
-                        color: Colors.white), // White icon
+                        color: Colors.black), // White icon
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.white.withOpacity(
@@ -183,9 +183,9 @@ class _TemplatePageState extends State<TemplatePage> {
             Text(
               title,
               style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white), // White text for section titles
+                  color: Colors.black), 
             ),
             IconButton(
               icon: const Icon(Icons.add,
@@ -250,7 +250,6 @@ class _TemplatePageState extends State<TemplatePage> {
 
                             String timeRange =
                                 '$formattedStartTime - $formattedEndTime';
-
                             return Container(
                               width: 200, // Fixed width for square-shaped card
                               margin: const EdgeInsets.all(8),
@@ -280,11 +279,14 @@ class _TemplatePageState extends State<TemplatePage> {
                                       borderRadius: BorderRadius.only(
                                           topLeft: Radius.circular(12),
                                           topRight: Radius.circular(12)),
-                                      child: Image.network(
-                                        eventData['imageUrl'] ??
-                                            'https://cdn.pixabay.com/photo/2016/06/02/02/33/triangles-1430105_640.png', // Image URL (add placeholder)
-                                        height: 120, // Set height for image
+                                      child:Image.asset(
+                                        'assets/test_img2.jpg',
+                                        height: 120,
+                                        width: double.infinity,
                                         fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Icon(Icons.broken_image, size: 100, color: Colors.red);
+                                        },
                                       ),
                                     ),
                                     Padding(
@@ -305,12 +307,12 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.calendar_today,
-                                                  size: 20, color: Colors.grey),
+                                                  size: 20, color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
                                                 'Date: $formattedDate',
                                                 style: const TextStyle(
-                                                    color: Colors.grey),
+                                                    color: Colors.black),
                                               ),
                                             ],
                                           ),
@@ -318,12 +320,12 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.access_time,
-                                                  size: 20, color: Colors.grey),
+                                                  size: 20, color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
                                                 'Time: $timeRange',
                                                 style: const TextStyle(
-                                                    color: Colors.grey),
+                                                    color: Colors.black),
                                               ),
                                             ],
                                           ),
@@ -331,12 +333,12 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.location_on,
-                                                  size: 20, color: Colors.grey),
+                                                  size: 20, color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
                                                 'Venue: $venue',
                                                 style: const TextStyle(
-                                                    color: Colors.grey),
+                                                    color: Colors.black),
                                               ),
                                             ],
                                           ),

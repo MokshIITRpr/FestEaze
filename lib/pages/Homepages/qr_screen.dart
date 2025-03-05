@@ -74,7 +74,7 @@ class _QRScreenState extends State<QRScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Your QR Code"),
+        title: Text("Your QR Code", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
       ),

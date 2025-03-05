@@ -23,7 +23,7 @@ class _ClgmapState extends State<Clgmap> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("College Map", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("College Map", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.deepPurple.withOpacity(0.8),
         elevation: 0,
       ),
@@ -46,7 +46,7 @@ class _ClgmapState extends State<Clgmap> {
               // Instruction text, just below the AppBar
               SizedBox(height: 70), // Adjust this height for better spacing
               Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Text(
                   "📌 Pinch to zoom & drag to move",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),

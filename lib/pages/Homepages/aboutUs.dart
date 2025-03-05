@@ -45,7 +45,7 @@ class _AboutUsState extends State<AboutUs> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text('About Us', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('About Us', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.deepPurple,
       ),
       body: Column(

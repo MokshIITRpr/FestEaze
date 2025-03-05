@@ -25,9 +25,9 @@ class TextFieldSection extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.white, // Change title text color to white
+                color: Colors.black, // Change title text color to white
               ),
             ),
             Spacer(), // Adds space between the title and the button
@@ -45,12 +45,25 @@ class TextFieldSection extends StatelessWidget {
           controller: controller,
           enabled: isEditing,
           maxLines: null,
-          style:
-              TextStyle(color: Colors.white, fontSize: 16), // White text color
+          style: TextStyle(color: Colors.black, fontSize: 16),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.black, // Black background color for text field
-            border: InputBorder.none,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              // Default border
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey, width: 1.5),
+            ),
+            enabledBorder: OutlineInputBorder(
+              // Border when TextField is not focused
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              // Border when TextField is focused
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.blue, width: 2),
+            ),
           ),
         ),
       ],
