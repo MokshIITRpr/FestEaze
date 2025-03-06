@@ -16,6 +16,8 @@ dependencies:
   cloud_firestore: ^5.6.3
   qr_flutter: ^4.1.0
   intl: ^0.18.0
+  google_maps_flutter: ^2.5.0
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
@@ -39,4 +41,7 @@ flutter:
     - assets/iitrpr.jpeg  
     - assets/zeitgeist.jpeg  
     - assets/advitiya.jpeg  
-    - assets/aarohan.jpg  
+    - assets/aarohan.jpg 
+    - assets/sponsor.jpeg 
+    - assets/sponsor_2.jpeg 
+    - assets/sponsor_3.jpg 

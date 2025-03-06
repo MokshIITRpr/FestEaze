@@ -46,7 +46,7 @@ class _AboutUsState extends State<AboutUs> {
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text('About Us', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
       ),
       body: Column(
         children: [

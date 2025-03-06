@@ -101,7 +101,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
             title: const Text("Events",
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: const Color.fromARGB(255, 84, 91, 216),
             actions: [
               if (_isAdmin)
                 IconButton(

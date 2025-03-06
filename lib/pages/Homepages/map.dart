@@ -1,91 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class Clgmap extends StatefulWidget {
-  const Clgmap({super.key});
+class ClgMap extends StatefulWidget {
+  const ClgMap({super.key});
 
   @override
-  _ClgmapState createState() => _ClgmapState();
+  _ClgMapState createState() => _ClgMapState();
 }
 
-class _ClgmapState extends State<Clgmap> {
-  TransformationController _controller = TransformationController();
-  bool _isZoomed = false;
+class _ClgMapState extends State<ClgMap> {
+  late GoogleMapController mapController;
 
-  void _resetZoom() {
-    setState(() {
-      _controller.value = Matrix4.identity();
-      _isZoomed = false;
-    });
+  final LatLng _collegeLocation = const LatLng(30.9754, 76.5274); // Change this to your college coordinates
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("College Map", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: Colors.deepPurple.withOpacity(0.8),
-        elevation: 0,
+        title: const Text("College Map"),
+        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
       ),
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.deepPurple.shade900, Colors.deepPurple.shade500],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: CameraPosition(
+          target: _collegeLocation,
+          zoom: 15.0, // Adjust zoom level as needed
+        ),
+        markers: {
+          Marker(
+            markerId: MarkerId("college_marker"),
+            position: _collegeLocation,
+            infoWindow: InfoWindow(
+              title: "IIT Ropar",
+              snippet: "This is the college location",
             ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
           ),
-
-          // Content below the AppBar
-          Column(
-            children: [
-              // Instruction text, just below the AppBar
-              SizedBox(height: 70), // Adjust this height for better spacing
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Text(
-                  "📌 Pinch to zoom & drag to move",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ),
-              Expanded(
-                child: InteractiveViewer(
-                  transformationController: _controller,
-                  panEnabled: true,
-                  minScale: 1.0,
-                  maxScale: 4.0,
-                  onInteractionEnd: (details) {
-                    setState(() {
-                      _isZoomed = true;
-                    });
-                  },
-                  child: Center(
-                    child: Image.asset(
-                      'assets/campus_map.jpg',
-                      fit: BoxFit.contain, // Ensures full image is visible
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+        },
       ),
-
-      // Reset Zoom Button (only shows if zoomed)
-      floatingActionButton: _isZoomed
-          ? FloatingActionButton(
-              onPressed: _resetZoom,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.zoom_out_map, color: Colors.deepPurple),
-            )
-          : null,
     );
   }
 }

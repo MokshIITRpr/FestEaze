@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'dart:math';
 
 class QRScreen extends StatefulWidget {
   const QRScreen({Key? key}) : super(key: key);
@@ -15,6 +16,15 @@ class _QRScreenState extends State<QRScreen> {
   String? userName;
   bool isLoading = true;
 
+  final List<String> sponsorImages = [
+    'assets/sponsor.jpeg',
+    'assets/sponsor_2.jpeg',
+    'assets/sponsor_3.jpg',
+    'assets/sponsor_2.jpeg',
+    'assets/sponsor_3.jpg',
+    'assets/sponsor.jpeg',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -25,7 +35,6 @@ class _QRScreenState extends State<QRScreen> {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      // Redirect to login if not logged in
       Navigator.pushReplacementNamed(context, '/loginScreen');
       return;
     }
@@ -58,12 +67,8 @@ class _QRScreenState extends State<QRScreen> {
   Future<void> _logout() async {
     try {
       await FirebaseAuth.instance.signOut();
-      print("User signed out successfully");
-
-      // Navigate to login page and remove all previous routes
       Navigator.pushReplacementNamed(context, '/homeScreen');
     } catch (e) {
-      print("Logout failed: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Logout failed. Please try again!")),
       );
@@ -72,54 +77,117 @@ class _QRScreenState extends State<QRScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Random random = Random();
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Your QR Code", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-      ),
-      body: Center(
-        child: isLoading
-            ? CircularProgressIndicator()
-            : qrData == null
-                ? Text("No QR Code found!",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      QrImageView(
-                        data: qrData!,
-                        version: QrVersions.auto,
-                        size: 200.0,
-                      ),
-                      SizedBox(height: 20),
-                      if (userName != null)
-                        Text(
-                          "Hello, $userName!",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      SizedBox(height: 20),
-                      Text(
-                        "Scan this QR code to get user details.",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: _logout, // ✅ Logout function
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 15),
-                        ),
-                        child: Text(
-                          "Logout",
-                          style: TextStyle(fontSize: 18, color: Colors.white),
-                        ),
-                      ),
-                    ],
+      body: Stack(
+        children: [
+          // Background Sponsors - Fill the entire screen with repeated images
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.4, // Increased visibility
+              child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(), // Keep it static
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // Controls how many images in a row
+                ),
+                itemCount: 30, // Repeats sponsors multiple times
+                itemBuilder: (context, index) {
+                  return Image.asset(
+                    sponsorImages[index % sponsorImages.length], // Cycle through images
+                    fit: BoxFit.cover,
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // Gradient Overlay for better readability
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withOpacity(0.2),
+                    Colors.blue.withOpacity(0.2),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
+          ),
+
+          // Centered Content
+          Center(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 123, 129, 234).withOpacity(0.8),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    spreadRadius: 3,
                   ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Your QR Code",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  isLoading
+                      ? CircularProgressIndicator()
+                      : QrImageView(
+                          data: qrData!,
+                          version: QrVersions.auto,
+                          size: 200.0,
+                          backgroundColor: Colors.white,
+                        ),
+                  SizedBox(height: 10),
+                  if (userName != null)
+                    Text(
+                      "Hello, $userName!",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Scan this QR code to get user details.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _logout,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Text(
+                      "Logout",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
