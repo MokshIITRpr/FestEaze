@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fest_app/collections/event.dart';
+import 'package:fest_app/data.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/sectionTitle.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/eventList.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addEventDialog.dart';
@@ -17,25 +18,19 @@ class ExploreEvents extends StatefulWidget {
 class _ExploreEventsState extends State<ExploreEvents> {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final UserData _userData = UserData();
   late Future<DocumentSnapshot> _user;
   bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
-    _user = _fetchUser();
+    _loadUser();
   }
 
-  Future<DocumentSnapshot> _fetchUser() async {
-    try {
-      return await _firestore
-          .collection('users')
-          .doc(_auth.currentUser?.uid)
-          .get();
-    } catch (e) {
-      throw Exception("Failed to load user: $e");
-    }
+  void _loadUser() async {
+    _user = _userData.getUser(); // Get cached user data
+    setState(() {}); // Refresh UI
   }
 
   Stream<Map<String, List<Event>>> _fetchEvents() {

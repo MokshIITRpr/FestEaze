@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:fest_app/data.dart';
 import 'dart:math';
 
 class QRScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class QRScreen extends StatefulWidget {
 }
 
 class _QRScreenState extends State<QRScreen> {
+  final _userData = UserData();
   String? qrData;
   String? userName;
   bool isLoading = true;
@@ -40,10 +42,7 @@ class _QRScreenState extends State<QRScreen> {
     }
 
     try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      DocumentSnapshot userDoc = await _userData.getUser();
 
       if (userDoc.exists && userDoc.data() != null) {
         setState(() {
@@ -66,6 +65,7 @@ class _QRScreenState extends State<QRScreen> {
 
   Future<void> _logout() async {
     try {
+      _userData.clearCache();
       await FirebaseAuth.instance.signOut();
       Navigator.pushReplacementNamed(context, '/homeScreen');
     } catch (e) {
@@ -93,7 +93,8 @@ class _QRScreenState extends State<QRScreen> {
                 itemCount: 30, // Repeats sponsors multiple times
                 itemBuilder: (context, index) {
                   return Image.asset(
-                    sponsorImages[index % sponsorImages.length], // Cycle through images
+                    sponsorImages[
+                        index % sponsorImages.length], // Cycle through images
                     fit: BoxFit.cover,
                   );
                 },
@@ -123,7 +124,8 @@ class _QRScreenState extends State<QRScreen> {
               padding: EdgeInsets.all(20),
               margin: EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 123, 129, 234).withOpacity(0.8),
+                color:
+                    const Color.fromARGB(255, 123, 129, 234).withOpacity(0.8),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -147,17 +149,20 @@ class _QRScreenState extends State<QRScreen> {
                   SizedBox(height: 20),
                   isLoading
                       ? CircularProgressIndicator()
-                      : QrImageView(
-                          data: qrData!,
-                          version: QrVersions.auto,
-                          size: 200.0,
-                          backgroundColor: Colors.white,
-                        ),
+                      : qrData != null
+                          ? QrImageView(
+                              data: qrData!,
+                              version: QrVersions.auto,
+                              size: 200.0,
+                              backgroundColor: Colors.white,
+                            )
+                          : Text("No QR info"),
                   SizedBox(height: 10),
                   if (userName != null)
                     Text(
                       "Hello, $userName!",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   SizedBox(height: 10),
                   Text(
@@ -170,7 +175,8 @@ class _QRScreenState extends State<QRScreen> {
                     onPressed: _logout,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
