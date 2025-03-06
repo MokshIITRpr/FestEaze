@@ -6,6 +6,7 @@ import 'pages/Home/homeMainScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebaseOptions.dart';
 import 'pages/Homepages/Signup/signupVerification.dart';
+import 'package:fest_app/data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,17 +28,23 @@ class MainApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
-      home: StreamBuilder(
-          stream: FirebaseAuth.instance.idTokenChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator.adaptive(),
-              );
-            }
-            
-            return const HomeMainScreen();
-          }),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // While checking the authentication state
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              body: Center(child: CircularProgressIndicator.adaptive()),
+            );
+          }
+          if (snapshot.hasData) {
+            UserData().clearCache();
+            return HomeMainScreen();
+          } else {
+            return HomeMainScreen();
+          }
+        },
+      ),
       routes: {
         '/loginScreen': (context) => LoginMainScreen(),
         '/signupPage': (context) => SignupPage(),
