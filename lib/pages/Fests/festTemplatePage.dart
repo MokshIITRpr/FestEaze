@@ -104,7 +104,7 @@ class _TemplatePageState extends State<TemplatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple, // Black background for app bar
+        backgroundColor: const Color.fromARGB(255, 84, 91, 216), // Black background for app bar
         title: Text(
           widget.title,
           style:

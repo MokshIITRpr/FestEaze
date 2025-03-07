@@ -4,9 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fest_app/collections/event.dart';
 import 'package:fest_app/data.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/sectionTitle.dart';
-import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/eventList.dart';
-import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addEventDialog.dart';
 import 'package:fest_app/pages/Fests/festTemplatePage.dart';
+import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addEventDialog.dart';
 
 class ExploreEvents extends StatefulWidget {
   const ExploreEvents({super.key});
@@ -27,7 +26,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
     super.initState();
     _loadUser();
   }
-
+  
   void _loadUser() async {
     _user = _userData.getUser(); // Get cached user data
     setState(() {}); // Refresh UI
@@ -52,7 +51,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
               "${startDate.toLocal().toString().split(' ')[0]} - ${endDate.toLocal().toString().split(' ')[0]}",
           colors: [
             Colors.blueAccent.withOpacity(0.9),
-            Colors.lightBlue.withOpacity(0.7)
+            Colors.deepPurple.withOpacity(0.7)
           ],
           navigateTo: TemplatePage(
             title: data['title'] ?? 'Unnamed Event',
@@ -77,6 +76,68 @@ class _ExploreEventsState extends State<ExploreEvents> {
     });
   }
 
+  /// Builds a card widget for the given event.
+  Widget _buildEventCard(Event event) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        elevation: 4,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12.0),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => event.navigateTo),
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.0),
+              gradient: LinearGradient(
+                colors: event.colors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  event.date,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds a list view of event cards.
+  Widget _buildEventList(List<Event> events) {
+    return ListView.builder(
+      itemCount: events.length,
+      itemBuilder: (context, index) => _buildEventCard(events[index]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
@@ -91,55 +152,82 @@ class _ExploreEventsState extends State<ExploreEvents> {
           _isAdmin = userData['admin'] ?? false;
         }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text("Events",
+        return DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text(
+                "Events",
                 style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
-            backgroundColor: const Color.fromARGB(255, 84, 91, 216),
-            actions: [
-              if (_isAdmin)
-                IconButton(
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  onPressed: () => showAddEventDialog(context),
-                ),
-            ],
-          ),
-          backgroundColor: Colors.grey[200],
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: StreamBuilder<Map<String, List<Event>>>(
-              stream: _fetchEvents(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No events available."));
-                }
-
-                Map<String, List<Event>> eventsMap = snapshot.data!;
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (eventsMap["Ongoing Events"]!.isNotEmpty) ...[
-                        const SectionTitle(title: "Ongoing Events"),
-                        EventList(events: eventsMap["Ongoing Events"]!),
-                      ],
-                      if (eventsMap["Upcoming Events"]!.isNotEmpty) ...[
-                        const SectionTitle(title: "Upcoming Events"),
-                        EventList(events: eventsMap["Upcoming Events"]!),
-                      ],
-                      if (eventsMap["Past Events"]!.isNotEmpty) ...[
-                        const SectionTitle(title: "Past Events"),
-                        EventList(events: eventsMap["Past Events"]!),
-                      ],
-                    ],
+                    color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+              actions: [
+                if (_isAdmin)
+                  IconButton(
+                    icon: const Icon(Icons.add, color: Colors.white),
+                    onPressed: () => showAddEventDialog(context),
                   ),
-                );
-              },
+              ],
+              bottom: const TabBar(
+                tabs: [
+                  Tab(
+                    child: Text(
+                      "Ongoing",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      "Upcoming",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      "Past",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            backgroundColor: Colors.grey[200],
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: StreamBuilder<Map<String, List<Event>>>(
+                stream: _fetchEvents(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text("No events available."));
+                  }
+
+                  final eventsMap = snapshot.data!;
+                  return TabBarView(
+                    children: [
+                      // Ongoing Events Tab
+                      eventsMap["Ongoing Events"]!.isNotEmpty
+                          ? _buildEventList(eventsMap["Ongoing Events"]!)
+                          : const Center(child: Text("No Ongoing Events available.")),
+                      // Upcoming Events Tab
+                      eventsMap["Upcoming Events"]!.isNotEmpty
+                          ? _buildEventList(eventsMap["Upcoming Events"]!)
+                          : const Center(child: Text("No Upcoming Events available.")),
+                      // Past Events Tab
+                      eventsMap["Past Events"]!.isNotEmpty
+                          ? _buildEventList(eventsMap["Past Events"]!)
+                          : const Center(child: Text("No Past Events available.")),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         );
