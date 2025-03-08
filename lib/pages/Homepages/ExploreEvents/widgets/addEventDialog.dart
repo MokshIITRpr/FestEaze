@@ -28,7 +28,8 @@ void showAddEventDialog(BuildContext context) {
                   ),
                 ),
                 const SizedBox(height: 10),
-                _datePicker(context, "Start Dt.", startDate, DateTime.now(), (picked) {
+                _datePicker(context, "Start Dt.", startDate, DateTime.now(),
+                    (picked) {
                   setDialogState(() {
                     if (picked.isBefore(DateTime.now())) {
                       errorMessage = "Start Date must be after today";
@@ -41,7 +42,9 @@ void showAddEventDialog(BuildContext context) {
                     }
                   });
                 }),
-                _datePicker(context, "End Dt.", endDate, startDate ?? DateTime.now(), (picked) {
+                _datePicker(
+                    context, "End Dt.", endDate, startDate ?? DateTime.now(),
+                    (picked) {
                   setDialogState(() {
                     if (startDate == null ||
                         picked.isAfter(startDate!) ||
@@ -49,7 +52,8 @@ void showAddEventDialog(BuildContext context) {
                       endDate = picked;
                       errorMessage = null;
                     } else {
-                      errorMessage = "End Date must be after or equal to Start Date";
+                      errorMessage =
+                          "End Date must be after or equal to Start Date";
                     }
                   });
                 }),
@@ -76,10 +80,12 @@ void showAddEventDialog(BuildContext context) {
                       endDate != null) {
                     try {
                       // Store event in Firestore
-                      DocumentReference docRef = await _firestore.collection('fests').add({
+                      DocumentReference docRef =
+                          await _firestore.collection('fests').add({
                         'title': eventNameController.text,
                         'startDate': Timestamp.fromDate(startDate!),
                         'endDate': Timestamp.fromDate(endDate!),
+                        'manager': [],
                         'pronite': [],
                         'subEvents': [],
                         'about': "Add text here ...", // Should be a string

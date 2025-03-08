@@ -64,11 +64,12 @@ class _TemplatePageState extends State<TemplatePage> {
         if (userDoc.exists) {
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
-          // print(userData[]);
+          bool a1 = userData['admin'] ?? false;
+          bool a2 = docSnapshot['manager'].contains(userData['email']) ?? false;
+
           setState(() {
-            _isAdmin = userData['admin'] ??
-                docSnapshot['manager'].contains(userData['email']) ??
-                false;
+            _isAdmin = (a1 || a2);
+            // print(_isAdmin);
           });
         }
       }
