@@ -24,10 +24,10 @@ class _TemplatePageState extends State<TemplatePage> {
   bool isEditing = false;
 
   final List<String> _imagePaths = [
-    'assets/test_img1.jpg',
-    'assets/test_img2.jpg',
-    'assets/test_img3.jpeg',
-    'assets/test_img4.jpeg',
+    'assets/aarohan.jpg',
+    'assets/zeitgeist.jpeg',
+    'assets/advitiya.jpeg',
+    'assets/sponsor.jpeg',
   ];
 
   List<DocumentReference> proniteEvents = [];
@@ -67,23 +67,29 @@ class _TemplatePageState extends State<TemplatePage> {
       setState(() {
         filteredEvents = subEventsList; // If query is empty, show all events
       });
-    } else {
-      List<DocumentReference> filteredList = [];
-
-      for (var eventRef in subEventsList) {
-        var eventSnapshot = await eventRef.get();
-        var eventData = eventSnapshot.data() as Map<String, dynamic>;
-        String eventName = eventData['eventName']?.toLowerCase() ?? '';
-        if (eventName.contains(query.toLowerCase())) {
-          filteredList.add(eventRef);
-        }
-      }
-
-      setState(() {
-        filteredEvents = filteredList;
-      });
+      return;
     }
-  }
+    
+    List<DocumentReference> filteredList = [];
+    
+    for (var eventRef in subEventsList) {
+      var eventSnapshot = await eventRef.get();
+      // Check if the document exists and its data is not null
+      if (!eventSnapshot.exists || eventSnapshot.data() == null) {
+        continue;
+      }
+      var eventData = eventSnapshot.data() as Map<String, dynamic>;
+      String eventName = (eventData['eventName'] ?? '').toLowerCase();
+      if (eventName.contains(query.toLowerCase())) {
+        filteredList.add(eventRef);
+      }
+    }
+  
+  setState(() {
+    filteredEvents = filteredList;
+  });
+}
+
 
   Future<void> updateText(String field, String text) async {
     await updateDataInFirestore(
@@ -155,8 +161,7 @@ class _TemplatePageState extends State<TemplatePage> {
                         color: Colors.black), // White icon
                     border: OutlineInputBorder(),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(
-                        0.2), // Slightly transparent white background
+                    fillColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2), // Slightly transparent white background
                     labelStyle: const TextStyle(color: Colors.white),
                   ),
                   onChanged: (query) {
@@ -242,7 +247,7 @@ class _TemplatePageState extends State<TemplatePage> {
 
                             // Format the date and time
                             String formattedDate =
-                                DateFormat('yyyy-MM-dd').format(date);
+                                DateFormat('dd-MM-yyyy').format(date);
                             String formattedStartTime =
                                 DateFormat('HH:mm').format(startTime);
                             String formattedEndTime =
@@ -280,7 +285,7 @@ class _TemplatePageState extends State<TemplatePage> {
                                           topLeft: Radius.circular(12),
                                           topRight: Radius.circular(12)),
                                       child:Image.asset(
-                                        'assets/test_img2.jpg',
+                                        'assets/iitrpr.jpeg',
                                         height: 120,
                                         width: double.infinity,
                                         fit: BoxFit.cover,

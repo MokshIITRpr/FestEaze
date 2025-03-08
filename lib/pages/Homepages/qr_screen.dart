@@ -109,7 +109,7 @@ class _QRScreenState extends State<QRScreen> {
               margin: EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color:
-                    const Color.fromARGB(255, 123, 129, 234).withOpacity(0.8),
+                    const Color.fromARGB(255, 84, 91, 216).withOpacity(0.8),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(

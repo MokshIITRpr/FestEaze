@@ -6,6 +6,7 @@ import 'package:fest_app/data.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/sectionTitle.dart';
 import 'package:fest_app/pages/Fests/festTemplatePage.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addEventDialog.dart';
+import 'package:intl/intl.dart'; // Import intl for date formatting
 
 class ExploreEvents extends StatefulWidget {
   const ExploreEvents({super.key});
@@ -45,10 +46,13 @@ class _ExploreEventsState extends State<ExploreEvents> {
         DateTime startDate = (data['startDate'] as Timestamp).toDate();
         DateTime endDate = (data['endDate'] as Timestamp).toDate();
 
+        // Format startDate and endDate as dd/MM/yyyy
+        String formattedStartDate = DateFormat('dd/MM/yyyy').format(startDate.toLocal());
+        String formattedEndDate = DateFormat('dd/MM/yyyy').format(endDate.toLocal());
+
         Event event = Event(
           name: data['title'] ?? 'Unnamed Event',
-          date:
-              "${startDate.toLocal().toString().split(' ')[0]} - ${endDate.toLocal().toString().split(' ')[0]}",
+          date: "$formattedStartDate - $formattedEndDate",
           colors: [
             Colors.blueAccent.withOpacity(0.9),
             Colors.deepPurple.withOpacity(0.7)

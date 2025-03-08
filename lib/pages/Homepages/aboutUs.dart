@@ -45,7 +45,8 @@ class _AboutUsState extends State<AboutUs> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text('About Us', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text('About Us',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: const Color.fromARGB(255, 84, 91, 216),
       ),
       body: Column(
@@ -84,41 +85,65 @@ class _AboutUsState extends State<AboutUs> {
           // About IIT Ropar & Annual Festivals
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     "Indian Institute of Technology Ropar",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      color: Color.fromARGB(255, 84, 91, 216),
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "IIT Ropar is one of the premier institutes of technology in India. Established in 2008, it is known for its cutting-edge research, world-class faculty, and vibrant student community. The institute offers a range of undergraduate, postgraduate, and doctoral programs across multiple disciplines.",
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Indian Institute of Technology Ropar (IIT Ropar) is one of the premier institutions of higher education in India. Established in 2008 by the Government of India under the mentorship of IIT Delhi, IIT Ropar has rapidly gained recognition for its excellence in academics, research, and innovation. The institute is located in Rupnagar, Punjab, along the banks of the Sutlej River, providing a serene and conducive environment for learning and research.",
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.justify,
                   ),
-                  SizedBox(height: 16),
-                  Text(
+                  const SizedBox(height: 16),
+                  const Text(
                     "Annual Festivals",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      color: Color.fromARGB(255, 84, 91, 216),
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "IIT Ropar hosts several exciting events throughout the year. Some of the major festivals include:\n\n"
-                    "🎵 **Zeitgeist** - The annual cultural fest, featuring music, dance, drama, and fun competitions.\n\n"
-                    "🔬 **Advitiya** - The technical fest, bringing together students from across the country for coding, robotics, and innovative challenges.\n\n"
-                    "🏆 **Sports Events** - Various intercollegiate and intramural sports events fostering teamwork and competition.",
-                    style: TextStyle(fontSize: 16),
+                  const SizedBox(height: 8),
+                  RichText(
                     textAlign: TextAlign.justify,
+                    text: const TextSpan(
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                      children: [
+                        TextSpan(
+                          text: "Zeitgeist",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text:
+                              " is the annual cultural festival of IIT Ropar and one of the most anticipated college fests in North India. It features a mix of music, dance, drama, fashion, and literary events. The fest brings together students from different colleges and universities, providing a vibrant platform for artistic expression and entertainment.\n\n",
+                        ),
+                        TextSpan(
+                          text: "Advitiya",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text:
+                              " is IIT Ropar's annual technical festival, aimed at fostering innovation, creativity, and problem-solving skills. It serves as a platform for students to showcase their technical expertise through various competitions, workshops, and exhibitions.\n\n",
+                        ),
+                        TextSpan(
+                          text: "Aarohan",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text:
+                              " is the annual sports fest of IIT Ropar, bringing together athletes and sports enthusiasts from various colleges across the country. It serves as a platform to showcase sporting talent, teamwork, and competitive spirit in a variety of sports and fitness challenges. The fest promotes a culture of sportsmanship and healthy competition among students.",
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
