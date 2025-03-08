@@ -102,22 +102,6 @@ class _QRScreenState extends State<QRScreen> {
             ),
           ),
 
-          // Gradient Overlay for better readability
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withOpacity(0.2),
-                    Colors.blue.withOpacity(0.2),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
-          ),
-
           // Centered Content
           Center(
             child: Container(

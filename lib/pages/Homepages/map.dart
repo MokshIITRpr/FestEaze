@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -9,10 +11,11 @@ class ClgMap extends StatefulWidget {
 }
 
 class _ClgMapState extends State<ClgMap> {
-  late GoogleMapController mapController;
+  late GoogleMapController _mapController;
 
   // IIT Ropar Center Coordinates
-  final LatLng _iitRoparCenter = LatLng(30.967570616980478, 76.47100921898688);
+  final LatLng _iitRoparCenter =
+      LatLng(30.967570616980478, 76.47100921898688);
 
   // Important Buildings (Latitude, Longitude)
   final Map<String, LatLng> _importantPlaces = {
@@ -41,89 +44,150 @@ class _ClgMapState extends State<ClgMap> {
     "S.S.Bhatnagr Block(Chem.)": LatLng(30.969015403612165, 76.47060347687236),
   };
 
+  // A map to hold the custom marker icons with labels
+  final Map<String, BitmapDescriptor> _customMarkerIcons = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomMarkerIcons();
+  }
+
+  Future<void> _loadCustomMarkerIcons() async {
+    for (var entry in _importantPlaces.entries) {
+      // Use the helper to choose the same color as your original pins.
+      Color markerColor = _getMarkerColor(entry.key);
+      BitmapDescriptor icon =
+          await _createCustomMarkerBitmap(entry.key, markerColor);
+      _customMarkerIcons[entry.key] = icon;
+    }
+    setState(() {});
+  }
+
+  // Returns the color for a given location name following your original logic.
+  Color _getMarkerColor(String placeName) {
+    if (placeName.contains("Main Gate")) {
+      return Colors.red;
+    } else if (placeName.contains("Cafeteria")) {
+      return Colors.red;
+    } else if (placeName.contains("Auditorium")) {
+      return Colors.red;
+    } else if (placeName.contains("Medical Center/Utility Block")) {
+      return Colors.red;
+    } else if (placeName.contains("Chenab Hostel")) {
+      return Colors.green;
+    } else if (placeName.contains("Sutlej Hostel")) {
+      return Colors.green;
+    } else if (placeName.contains("Beas Hostel")) {
+      return Colors.green;
+    } else if (placeName.contains("Ravi Hostel")) {
+      return Colors.green;
+    } else if (placeName.contains("Brahmaputra Hostel")) {
+      return Colors.green;
+    } else if (placeName.contains("Vollyball Court")) {
+      return Colors.blue;
+    } else if (placeName.contains("Basketball Court")) {
+      return Colors.blue;
+    } else if (placeName.contains("Lawn Tennis")) {
+      return Colors.blue;
+    } else if (placeName.contains("Athletics/Football Ground")) {
+      return Colors.blue;
+    } else if (placeName.contains("Cricket Ground")) {
+      return Colors.blue;
+    } else if (placeName.contains("Hockey Ground")) {
+      return Colors.blue;
+    } else if (placeName.contains("Lecture Hall Complex(LHC)")) {
+      return Colors.orange;
+    } else if (placeName.contains("Super Acadmic Building(SAB)")) {
+      return Colors.orange;
+    } else if (placeName.contains("S.Ramanujan Block(CSE)")) {
+      return Colors.orange;
+    } else if (placeName.contains("JC Bose Block(ECE)")) {
+      return Colors.orange;
+    } else if (placeName.contains("Satish Dhawan Block(Mech.)")) {
+      return Colors.orange;
+    } else if (placeName.contains("S.S.Bhatnagr Block(Chem.)")) {
+      return Colors.orange;
+    } else if (placeName.contains("Admin")) {
+      return Colors.orange;
+    } else if (placeName.contains("Library")) {
+      return Colors.orange;
+    } else {
+      return Colors.purple;
+    }
+  }
+
+  // Create a custom marker icon with a colored background and the text label.
+  Future<BitmapDescriptor> _createCustomMarkerBitmap(
+      String label, Color markerColor) async {
+    final int width = 150;
+    final int height = 60;
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    // Draw a rounded rectangle with the provided marker color.
+    final Paint paint = Paint()..color = markerColor;
+    final RRect rRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+      Radius.circular(8),
+    );
+    canvas.drawRRect(rRect, paint);
+
+    // Draw the label text centered in the rectangle.
+    final TextSpan span = TextSpan(
+      style: const TextStyle(
+          color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+      text: label,
+    );
+    final TextPainter textPainter = TextPainter(
+      text: span,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+    textPainter.layout(maxWidth: width.toDouble());
+    final double xCenter = (width - textPainter.width) / 2;
+    final double yCenter = (height - textPainter.height) / 2;
+    textPainter.paint(canvas, Offset(xCenter, yCenter));
+
+    // Convert the canvas drawing to an image and then to a BitmapDescriptor.
+    final ui.Image image =
+        await recorder.endRecording().toImage(width, height);
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
+  }
+
+  // Create markers using the custom icons.
   Set<Marker> _createMarkers() {
     return _importantPlaces.entries.map((entry) {
       return Marker(
         markerId: MarkerId(entry.key),
         position: entry.value,
-        infoWindow: InfoWindow(title: entry.key),
-        icon: _getMarkerColor(entry.key), // Assign different colors
+        icon: _customMarkerIcons[entry.key] ?? BitmapDescriptor.defaultMarker,
       );
     }).toSet();
   }
 
-  BitmapDescriptor _getMarkerColor(String placeName) {
-    if (placeName.contains("Main Gate")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed); // Hostel - Orange
-    } else if (placeName.contains("Cafeteria")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed); // Library - Green
-    } else if (placeName.contains("Auditorium")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed); // Sports - Red
-    } else if (placeName.contains("Medical Center/Utility Block")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed); // Admin - Blue
-    } else if (placeName.contains("Chenab Hostel")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen); // Admin - Blue
-    } else if (placeName.contains("Sutlej Hostel")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen); // Admin - Blue
-    } else if (placeName.contains("Beas Hostel")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen); // Admin - Blue
-    } else if (placeName.contains("Ravi Hostel")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen); // Admin - Blue
-    } else if (placeName.contains("Brahmaputra Hostel")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen); // Admin - Blue
-    } else if (placeName.contains("Vollyball Court")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue); // Admin - Blue
-    } else if (placeName.contains("Basketball Court")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue); // Admin - Blue
-    } else if (placeName.contains("Lawn Tennis")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue); // Admin - Blue
-    } else if (placeName.contains("Athletics/Football Ground")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue); // Admin - Blue
-    } else if (placeName.contains("Cricket Ground")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue); // Admin - Blue
-    } else if (placeName.contains("Hockey Ground")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue); // Admin - Blue
-    } else if (placeName.contains("Lecture Hall Complex(LHC)")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else if (placeName.contains("Super Acadmic Building(SAB)")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else if (placeName.contains("S.Ramanujan Block(CSE)")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else if (placeName.contains("JC Bose Block(ECE)")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else if (placeName.contains("Satish Dhawan Block(Mech.)")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else if (placeName.contains("S.S.Bhatnagr Block(Chem.)")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else if (placeName.contains("Admin")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else if (placeName.contains("Library")) {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange); // Admin - Blue
-    } else {
-      return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet); // Default - Violet
-    }
-  }
-
   void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+    _mapController = controller;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("IIT Ropar Campus Map", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: Color.fromARGB(255, 84, 91, 216),
+        title: const Text("IIT Ropar Campus Map",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
       ),
       body: GoogleMap(
         onMapCreated: _onMapCreated,
         initialCameraPosition: CameraPosition(
           target: _iitRoparCenter,
-          zoom: 17.0, // Adjust zoom for better road visibility
+          zoom: 17.0,
         ),
-        //mapType: MapType.hybrid, // Hybrid for better road visibility
-        trafficEnabled: true, // Highlights road traffic
-        myLocationEnabled: true, // User location button
+        trafficEnabled: true,
+        myLocationEnabled: true,
         myLocationButtonEnabled: true,
         markers: _createMarkers(),
       ),
