@@ -6,7 +6,8 @@ import 'package:fest_app/data.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/sectionTitle.dart';
 import 'package:fest_app/pages/Fests/festTemplatePage.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addEventDialog.dart';
-import 'package:intl/intl.dart'; // Import intl for date formatting
+import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addAuth.dart';
+import 'package:intl/intl.dart';
 
 class ExploreEvents extends StatefulWidget {
   const ExploreEvents({super.key});
@@ -27,7 +28,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
     super.initState();
     _loadUser();
   }
-  
+
   void _loadUser() async {
     _user = _userData.getUser(); // Get cached user data
     setState(() {}); // Refresh UI
@@ -107,23 +108,36 @@ class _ExploreEventsState extends State<ExploreEvents> {
               ),
             ),
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  event.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      event.date,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  event.date,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
+                SizedBox(width: 140),
+                // Icon for adding a manager for the event
+                if(_isAdmin)GestureDetector(
+                  onTap: () => showAuthDialog(context, event.name),
+                  child: Icon(
+                    Icons.person_add_alt_1_outlined,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -162,8 +176,8 @@ class _ExploreEventsState extends State<ExploreEvents> {
             appBar: AppBar(
               title: const Text(
                 "Events",
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               backgroundColor: const Color.fromARGB(255, 84, 91, 216),
               actions: [
@@ -219,15 +233,18 @@ class _ExploreEventsState extends State<ExploreEvents> {
                       // Ongoing Events Tab
                       eventsMap["Ongoing Events"]!.isNotEmpty
                           ? _buildEventList(eventsMap["Ongoing Events"]!)
-                          : const Center(child: Text("No Ongoing Events available.")),
+                          : const Center(
+                              child: Text("No Ongoing Events available.")),
                       // Upcoming Events Tab
                       eventsMap["Upcoming Events"]!.isNotEmpty
                           ? _buildEventList(eventsMap["Upcoming Events"]!)
-                          : const Center(child: Text("No Upcoming Events available.")),
+                          : const Center(
+                              child: Text("No Upcoming Events available.")),
                       // Past Events Tab
                       eventsMap["Past Events"]!.isNotEmpty
                           ? _buildEventList(eventsMap["Past Events"]!)
-                          : const Center(child: Text("No Past Events available.")),
+                          : const Center(
+                              child: Text("No Past Events available.")),
                     ],
                   );
                 },

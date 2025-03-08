@@ -110,7 +110,8 @@ class _TemplatePageState extends State<TemplatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 84, 91, 216), // Black background for app bar
+        backgroundColor: const Color.fromARGB(
+            255, 84, 91, 216), // Black background for app bar
         title: Text(
           widget.title,
           style:
@@ -119,7 +120,7 @@ class _TemplatePageState extends State<TemplatePage> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          color: Colors.white, 
+          color: Colors.white,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -190,7 +191,7 @@ class _TemplatePageState extends State<TemplatePage> {
               style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black), 
+                  color: Colors.black),
             ),
             IconButton(
               icon: const Icon(Icons.add,
@@ -289,8 +290,10 @@ class _TemplatePageState extends State<TemplatePage> {
                                         height: 120,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Icon(Icons.broken_image, size: 100, color: Colors.red);
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Icon(Icons.broken_image,
+                                              size: 100, color: Colors.red);
                                         },
                                       ),
                                     ),
@@ -312,10 +315,11 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.calendar_today,
-                                                  size: 20, color: Colors.black),
+                                                  size: 20,
+                                                  color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
-                                                'Date: $formattedDate',
+                                                ' $formattedDate',
                                                 style: const TextStyle(
                                                     color: Colors.black),
                                               ),
@@ -325,10 +329,11 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.access_time,
-                                                  size: 20, color: Colors.black),
+                                                  size: 20,
+                                                  color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
-                                                'Time: $timeRange',
+                                                ' $timeRange',
                                                 style: const TextStyle(
                                                     color: Colors.black),
                                               ),
@@ -338,10 +343,11 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.location_on,
-                                                  size: 20, color: Colors.black),
+                                                  size: 20,
+                                                  color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
-                                                'Venue: $venue',
+                                                ' $venue',
                                                 style: const TextStyle(
                                                     color: Colors.black),
                                               ),

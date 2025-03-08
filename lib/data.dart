@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Singleton cache for theuser data
+/// Singleton cache for the user data
 class UserData {
   static final UserData _instance = UserData._internal();
   factory UserData() => _instance;
