@@ -46,25 +46,11 @@ class _TemplatePageState extends State<TemplatePage> {
   void initState() {
     super.initState();
     _fetchText();
-    _fetchUserData(); // Fetch user data to determine admin status
+    _fetchUserData();
     filteredEvents = proniteEvents;
   }
 
   Future<void> _fetchUserData() async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-        setState(() {
-          _isAdmin = userData['admin'] ?? false; // Set _isAdmin from Firestore
-        });
-      }
-    }
-  }
-
-  Future<void> _fetchText() async {
     var docSnapshot = await FirebaseFirestore.instance
         .collection('fests')
         .doc(widget.docId) // Use dynamic docId
@@ -81,9 +67,22 @@ class _TemplatePageState extends State<TemplatePage> {
           setState(() {
             _isAdmin = docSnapshot['manager']
                 .contains(userData['email']); // Set _isAdmin from Firestore
+            if (userData['admin'] == true) {
+              _isAdmin = true;
+            }
           });
         }
       }
+    }
+  }
+
+  Future<void> _fetchText() async {
+    var docSnapshot = await FirebaseFirestore.instance
+        .collection('fests')
+        .doc(widget.docId) // Use dynamic docId
+        .get();
+
+    if (docSnapshot.exists) {
       setState(() {
         _aboutController.text = docSnapshot['about'] ?? '';
         proniteEvents =
