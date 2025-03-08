@@ -64,12 +64,11 @@ class _TemplatePageState extends State<TemplatePage> {
         if (userDoc.exists) {
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
+          // print(userData[]);
           setState(() {
-            _isAdmin = docSnapshot['manager']
-                .contains(userData['email']); // Set _isAdmin from Firestore
-            if (userData['admin'] == true) {
-              _isAdmin = true;
-            }
+            _isAdmin = userData['admin'] ??
+                docSnapshot['manager'].contains(userData['email']) ??
+                false;
           });
         }
       }
