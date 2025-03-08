@@ -71,13 +71,14 @@ void showEventDialog(
   String? errorMessage;
 
   showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text("Add Event"),
-            content: Column(
+  context: context,
+  builder: (BuildContext context) {
+    return StatefulBuilder(
+      builder: (context, setDialogState) {
+        return AlertDialog(
+          title: const Text("Add Event"),
+          content: SingleChildScrollView(  // Wrap in SingleChildScrollView
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
@@ -92,7 +93,7 @@ void showEventDialog(
                 const SizedBox(height: 10),
 
                 // Event Date Picker
-                _datePicker(context, "Event Date", eventDate, DateTime.now(),
+                _datePicker(context, "Date", eventDate, DateTime.now(),
                     (picked) {
                   setDialogState(() {
                     if (picked.isBefore(DateTime.now())) {
@@ -148,75 +149,77 @@ void showEventDialog(
                   ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  if (titleController.text.isNotEmpty &&
-                      venueController.text.isNotEmpty &&
-                      eventDate != null &&
-                      startTime != null &&
-                      endTime != null) {
-                    try {
-                      // Combine date and time into DateTime objects
-                      DateTime startDateTime = DateTime(
-                        eventDate!.year,
-                        eventDate!.month,
-                        eventDate!.day,
-                        startTime!.hour,
-                        startTime!.minute,
-                      );
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                if (titleController.text.isNotEmpty &&
+                    venueController.text.isNotEmpty &&
+                    eventDate != null &&
+                    startTime != null &&
+                    endTime != null) {
+                  try {
+                    // Combine date and time into DateTime objects
+                    DateTime startDateTime = DateTime(
+                      eventDate!.year,
+                      eventDate!.month,
+                      eventDate!.day,
+                      startTime!.hour,
+                      startTime!.minute,
+                    );
 
-                      DateTime endDateTime = DateTime(
-                        eventDate!.year,
-                        eventDate!.month,
-                        eventDate!.day,
-                        endTime!.hour,
-                        endTime!.minute,
-                      );
+                    DateTime endDateTime = DateTime(
+                      eventDate!.year,
+                      eventDate!.month,
+                      eventDate!.day,
+                      endTime!.hour,
+                      endTime!.minute,
+                    );
 
-                      // Add event to Firestore in 'events' collection
-                      DocumentReference newEvent = await FirebaseFirestore
-                          .instance
-                          .collection('events')
-                          .add({
-                        'eventName': titleController.text,
-                        'venue': venueController.text,
-                        'date': Timestamp.fromDate(eventDate!),
-                        'startTime': Timestamp.fromDate(startDateTime),
-                        'endTime': Timestamp.fromDate(endDateTime),
-                        'parentFest': FirebaseFirestore.instance
-                            .collection('fests')
-                            .doc(docId),
-                        'createdAt': FieldValue.serverTimestamp(),
-                      });
-
-                      // Link event in parent fest document
-                      await FirebaseFirestore.instance
+                    // Add event to Firestore in 'events' collection
+                    DocumentReference newEvent = await FirebaseFirestore
+                        .instance
+                        .collection('events')
+                        .add({
+                      'eventName': titleController.text,
+                      'venue': venueController.text,
+                      'date': Timestamp.fromDate(eventDate!),
+                      'startTime': Timestamp.fromDate(startDateTime),
+                      'endTime': Timestamp.fromDate(endDateTime),
+                      'parentFest': FirebaseFirestore.instance
                           .collection('fests')
-                          .doc(docId)
-                          .update({
-                        field: FieldValue.arrayUnion([newEvent]),
-                      });
+                          .doc(docId),
+                      'createdAt': FieldValue.serverTimestamp(),
+                    });
 
-                      Navigator.pop(context); // Close the dialog
-                      _fetchText(); // Refresh UI
-                    } catch (e) {
-                      print("Error adding event: $e");
-                    }
+                    // Link event in parent fest document
+                    await FirebaseFirestore.instance
+                        .collection('fests')
+                        .doc(docId)
+                        .update({
+                      field: FieldValue.arrayUnion([newEvent]),
+                    });
+
+                    Navigator.pop(context); // Close the dialog
+                    _fetchText(); // Refresh UI
+                  } catch (e) {
+                    print("Error adding event: $e");
                   }
-                },
-                child: const Text("Add Event"),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
+                }
+              },
+              child: const Text("Add"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+          ],
+        );
+      },
+    );
+  },
+);
+
 }
 
 // Date Picker Function
