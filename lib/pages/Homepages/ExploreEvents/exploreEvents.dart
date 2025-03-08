@@ -48,8 +48,10 @@ class _ExploreEventsState extends State<ExploreEvents> {
         DateTime endDate = (data['endDate'] as Timestamp).toDate();
 
         // Format startDate and endDate as dd/MM/yyyy
-        String formattedStartDate = DateFormat('dd/MM/yyyy').format(startDate.toLocal());
-        String formattedEndDate = DateFormat('dd/MM/yyyy').format(endDate.toLocal());
+        String formattedStartDate =
+            DateFormat('dd/MM/yyyy').format(startDate.toLocal());
+        String formattedEndDate =
+            DateFormat('dd/MM/yyyy').format(endDate.toLocal());
 
         Event event = Event(
           name: data['title'] ?? 'Unnamed Event',
@@ -131,15 +133,16 @@ class _ExploreEventsState extends State<ExploreEvents> {
                     ),
                   ],
                 ),
-                SizedBox(width: 140),
+                Spacer(),
                 // Icon for adding a manager for the event
-                if(_isAdmin)GestureDetector(
-                  onTap: () => showAuthDialog(context, event.name),
-                  child: Icon(
-                    Icons.person_add_alt_1_outlined,
-                    color: Colors.white,
+                if (_isAdmin)
+                  GestureDetector(
+                    onTap: () => showAuthDialog(context, event.name),
+                    child: Icon(
+                      Icons.person_add_alt_1_outlined,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
