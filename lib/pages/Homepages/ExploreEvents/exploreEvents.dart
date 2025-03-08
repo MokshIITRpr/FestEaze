@@ -26,7 +26,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
     super.initState();
     _loadUser();
   }
-  
+
   void _loadUser() async {
     _user = _userData.getUser(); // Get cached user data
     setState(() {}); // Refresh UI
@@ -158,8 +158,8 @@ class _ExploreEventsState extends State<ExploreEvents> {
             appBar: AppBar(
               title: const Text(
                 "Events",
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               backgroundColor: const Color.fromARGB(255, 84, 91, 216),
               actions: [
@@ -215,15 +215,18 @@ class _ExploreEventsState extends State<ExploreEvents> {
                       // Ongoing Events Tab
                       eventsMap["Ongoing Events"]!.isNotEmpty
                           ? _buildEventList(eventsMap["Ongoing Events"]!)
-                          : const Center(child: Text("No Ongoing Events available.")),
+                          : const Center(
+                              child: Text("No Ongoing Events available.")),
                       // Upcoming Events Tab
                       eventsMap["Upcoming Events"]!.isNotEmpty
                           ? _buildEventList(eventsMap["Upcoming Events"]!)
-                          : const Center(child: Text("No Upcoming Events available.")),
+                          : const Center(
+                              child: Text("No Upcoming Events available.")),
                       // Past Events Tab
                       eventsMap["Past Events"]!.isNotEmpty
                           ? _buildEventList(eventsMap["Past Events"]!)
-                          : const Center(child: Text("No Past Events available.")),
+                          : const Center(
+                              child: Text("No Past Events available.")),
                     ],
                   );
                 },

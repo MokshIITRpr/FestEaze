@@ -4,6 +4,8 @@ import 'widgets/autoImageSlider.dart';
 import './widgets/textFieldSection.dart';
 import './utils/database.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fest_app/data.dart';
 
 class TemplatePage extends StatefulWidget {
   final String title;
@@ -16,6 +18,12 @@ class TemplatePage extends StatefulWidget {
 }
 
 class _TemplatePageState extends State<TemplatePage> {
+  final _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final UserData _userData = UserData();
+  late Future<DocumentSnapshot> _user;
+  bool _isAdmin = false;
+
   final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _proniteController = TextEditingController();
   final TextEditingController _subEventsController = TextEditingController();
@@ -39,8 +47,24 @@ class _TemplatePageState extends State<TemplatePage> {
   void initState() {
     super.initState();
     _fetchText();
+    _fetchUserData(); // Fetch user data to determine admin status
+
     filteredEvents =
         proniteEvents; // Initially set filtered events to all events
+  }
+
+  Future<void> _fetchUserData() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+        setState(() {
+          _isAdmin = userData['admin'] ?? false; // Set _isAdmin from Firestore
+        });
+      }
+    }
   }
 
   Future<void> _fetchText() async {
@@ -104,7 +128,8 @@ class _TemplatePageState extends State<TemplatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 84, 91, 216), // Black background for app bar
+        backgroundColor: const Color.fromARGB(
+            255, 84, 91, 216), // Black background for app bar
         title: Text(
           widget.title,
           style:
@@ -113,7 +138,7 @@ class _TemplatePageState extends State<TemplatePage> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          color: Colors.white, 
+          color: Colors.white,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -135,6 +160,7 @@ class _TemplatePageState extends State<TemplatePage> {
                       isEditing = !isEditing;
                     });
                   },
+                  isAdmin: _isAdmin,
                 ),
                 const SizedBox(height: 20),
                 buildEditableSection("Flagship Events", _proniteController,
@@ -185,18 +211,20 @@ class _TemplatePageState extends State<TemplatePage> {
               style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black), 
+                  color: Colors.black),
             ),
-            IconButton(
-              icon: const Icon(Icons.add,
-                  color: Color.fromRGBO(30, 215, 96, 1)), // Spotify Green color
-              onPressed: () {
-                if (isEditing) {
-                  updateText(field, controller.text);
-                }
-                _addEvent(field);
-              },
-            )
+            if (_isAdmin)
+              IconButton(
+                icon: const Icon(Icons.add,
+                    color:
+                        Color.fromRGBO(30, 215, 96, 1)), // Spotify Green color
+                onPressed: () {
+                  if (isEditing) {
+                    updateText(field, controller.text);
+                  }
+                  _addEvent(field);
+                },
+              )
           ],
         ),
       ],
@@ -279,13 +307,15 @@ class _TemplatePageState extends State<TemplatePage> {
                                       borderRadius: BorderRadius.only(
                                           topLeft: Radius.circular(12),
                                           topRight: Radius.circular(12)),
-                                      child:Image.asset(
+                                      child: Image.asset(
                                         'assets/test_img2.jpg',
                                         height: 120,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Icon(Icons.broken_image, size: 100, color: Colors.red);
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Icon(Icons.broken_image,
+                                              size: 100, color: Colors.red);
                                         },
                                       ),
                                     ),
@@ -307,10 +337,11 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.calendar_today,
-                                                  size: 20, color: Colors.black),
+                                                  size: 20,
+                                                  color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
-                                                'Date: $formattedDate',
+                                                '$formattedDate',
                                                 style: const TextStyle(
                                                     color: Colors.black),
                                               ),
@@ -320,10 +351,11 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.access_time,
-                                                  size: 20, color: Colors.black),
+                                                  size: 20,
+                                                  color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
-                                                'Time: $timeRange',
+                                                '$timeRange',
                                                 style: const TextStyle(
                                                     color: Colors.black),
                                               ),
@@ -333,10 +365,11 @@ class _TemplatePageState extends State<TemplatePage> {
                                           Row(
                                             children: [
                                               const Icon(Icons.location_on,
-                                                  size: 20, color: Colors.black),
+                                                  size: 20,
+                                                  color: Colors.black),
                                               const SizedBox(width: 8),
                                               Text(
-                                                'Venue: $venue',
+                                                '$venue',
                                                 style: const TextStyle(
                                                     color: Colors.black),
                                               ),
