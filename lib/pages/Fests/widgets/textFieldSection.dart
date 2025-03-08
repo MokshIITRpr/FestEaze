@@ -5,13 +5,14 @@ class TextFieldSection extends StatelessWidget {
   final TextEditingController controller;
   final bool isEditing;
   final VoidCallback onEdit;
-
+  final bool isAdmin;
   const TextFieldSection({
     super.key,
     required this.title,
     required this.controller,
     required this.isEditing,
     required this.onEdit,
+    required this.isAdmin,
   });
 
   @override
@@ -31,13 +32,14 @@ class TextFieldSection extends StatelessWidget {
               ),
             ),
             Spacer(), // Adds space between the title and the button
-            IconButton(
-              icon: Icon(
-                isEditing ? Icons.check : Icons.edit,
-                color: Color(0xFF1DB954), // Spotify Green color for the icon
+            if (isAdmin)
+              IconButton(
+                icon: Icon(
+                  isEditing ? Icons.check : Icons.edit,
+                  color: Color(0xFF1DB954), // Spotify Green color for the icon
+                ),
+                onPressed: onEdit,
               ),
-              onPressed: onEdit,
-            ),
           ],
         ),
         SizedBox(height: 8),

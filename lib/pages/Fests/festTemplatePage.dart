@@ -4,6 +4,8 @@ import 'widgets/autoImageSlider.dart';
 import './widgets/textFieldSection.dart';
 import './utils/database.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fest_app/data.dart';
 
 class TemplatePage extends StatefulWidget {
   final String title;
@@ -22,6 +24,11 @@ class _TemplatePageState extends State<TemplatePage> {
   final TextEditingController _searchController =
       TextEditingController(); // Search controller
   bool isEditing = false;
+  final _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final UserData _userData = UserData();
+  late Future<DocumentSnapshot> _user;
+  bool _isAdmin = false;
 
   final List<String> _imagePaths = [
     'assets/aarohan.jpg',
@@ -39,8 +46,22 @@ class _TemplatePageState extends State<TemplatePage> {
   void initState() {
     super.initState();
     _fetchText();
-    filteredEvents =
-        proniteEvents; // Initially set filtered events to all events
+    _fetchUserData(); // Fetch user data to determine admin status
+    filteredEvents = proniteEvents;
+  }
+
+  Future<void> _fetchUserData() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+        setState(() {
+          _isAdmin = userData['admin'] ?? false; // Set _isAdmin from Firestore
+        });
+      }
+    }
   }
 
   Future<void> _fetchText() async {
@@ -69,9 +90,9 @@ class _TemplatePageState extends State<TemplatePage> {
       });
       return;
     }
-    
+
     List<DocumentReference> filteredList = [];
-    
+
     for (var eventRef in subEventsList) {
       var eventSnapshot = await eventRef.get();
       // Check if the document exists and its data is not null
@@ -84,12 +105,11 @@ class _TemplatePageState extends State<TemplatePage> {
         filteredList.add(eventRef);
       }
     }
-  
-  setState(() {
-    filteredEvents = filteredList;
-  });
-}
 
+    setState(() {
+      filteredEvents = filteredList;
+    });
+  }
 
   Future<void> updateText(String field, String text) async {
     await updateDataInFirestore(
@@ -134,6 +154,7 @@ class _TemplatePageState extends State<TemplatePage> {
                   title: "About",
                   controller: _aboutController,
                   isEditing: isEditing,
+                  isAdmin: _isAdmin,
                   onEdit: () {
                     if (isEditing) {
                       updateText('about', _aboutController.text);
@@ -162,7 +183,9 @@ class _TemplatePageState extends State<TemplatePage> {
                         color: Colors.black), // White icon
                     border: OutlineInputBorder(),
                     filled: true,
-                    fillColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2), // Slightly transparent white background
+                    fillColor: const Color.fromARGB(255, 255, 255, 255)
+                        .withOpacity(
+                            0.2), // Slightly transparent white background
                     labelStyle: const TextStyle(color: Colors.white),
                   ),
                   onChanged: (query) {
@@ -193,16 +216,18 @@ class _TemplatePageState extends State<TemplatePage> {
                   fontWeight: FontWeight.bold,
                   color: Colors.black),
             ),
-            IconButton(
-              icon: const Icon(Icons.add,
-                  color: Color.fromRGBO(30, 215, 96, 1)), // Spotify Green color
-              onPressed: () {
-                if (isEditing) {
-                  updateText(field, controller.text);
-                }
-                _addEvent(field);
-              },
-            )
+            if (_isAdmin)
+              IconButton(
+                icon: const Icon(Icons.add,
+                    color:
+                        Color.fromRGBO(30, 215, 96, 1)), // Spotify Green color
+                onPressed: () {
+                  if (isEditing) {
+                    updateText(field, controller.text);
+                  }
+                  _addEvent(field);
+                },
+              )
           ],
         ),
       ],
@@ -285,7 +310,7 @@ class _TemplatePageState extends State<TemplatePage> {
                                       borderRadius: BorderRadius.only(
                                           topLeft: Radius.circular(12),
                                           topRight: Radius.circular(12)),
-                                      child:Image.asset(
+                                      child: Image.asset(
                                         'assets/iitrpr.jpeg',
                                         height: 120,
                                         width: double.infinity,
