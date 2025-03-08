@@ -28,7 +28,7 @@ void showAddEventDialog(BuildContext context) {
                   ),
                 ),
                 const SizedBox(height: 10),
-                _datePicker(context, "Start Date", startDate, DateTime.now(), (picked) {
+                _datePicker(context, "Start Dt.", startDate, DateTime.now(), (picked) {
                   setDialogState(() {
                     if (picked.isBefore(DateTime.now())) {
                       errorMessage = "Start Date must be after today";
@@ -41,7 +41,7 @@ void showAddEventDialog(BuildContext context) {
                     }
                   });
                 }),
-                _datePicker(context, "End Date", endDate, startDate ?? DateTime.now(), (picked) {
+                _datePicker(context, "End Dt.", endDate, startDate ?? DateTime.now(), (picked) {
                   setDialogState(() {
                     if (startDate == null ||
                         picked.isAfter(startDate!) ||
