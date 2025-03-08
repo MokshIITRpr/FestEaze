@@ -71,6 +71,19 @@ class _TemplatePageState extends State<TemplatePage> {
         .get();
 
     if (docSnapshot.exists) {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
+          setState(() {
+            _isAdmin = docSnapshot['manager']
+                .contains(userData['email']); // Set _isAdmin from Firestore
+          });
+        }
+      }
       setState(() {
         _aboutController.text = docSnapshot['about'] ?? '';
         proniteEvents =

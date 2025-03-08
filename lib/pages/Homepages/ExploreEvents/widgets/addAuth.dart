@@ -18,7 +18,7 @@ void showAuthDialog(BuildContext context, String eventName) {
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
-                  labelText: "Name",
+                  labelText: "Email Id",
                   border: OutlineInputBorder(),
                 ),
               ),
