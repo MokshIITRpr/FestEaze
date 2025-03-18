@@ -193,7 +193,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                           child: Text(
                             forgotPassword,
                             style: TextStyle(
-                                color: Color.fromRGBO(143, 148, 251, 1)),
+                                color: const Color.fromARGB(255, 84, 91, 216)),
                           ))),
                       SizedBox(
                         height: 20,
@@ -203,7 +203,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         child: Center(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromRGBO(143, 148, 251, 1),
+                              backgroundColor: const Color.fromARGB(255, 84, 91, 216),
                               minimumSize: Size(double.infinity, 50),
                             ),
                             onPressed: () async {
@@ -248,7 +248,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                             child: Text(
                               signupHere,
                               style: TextStyle(
-                                color: Color.fromRGBO(143, 148, 251, 1),
+                                color: const Color.fromARGB(255, 84, 91, 216),
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400,
                               ),
