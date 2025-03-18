@@ -111,7 +111,7 @@ class _SignupPageState extends State<SignupPage> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border:
-                            Border.all(color: Color.fromRGBO(143, 148, 251, 1)),
+                            Border.all(color: const Color.fromARGB(255, 84, 91, 216)),
                         boxShadow: [
                           BoxShadow(
                             color: Color.fromRGBO(143, 148, 251, .2),
@@ -128,7 +128,7 @@ class _SignupPageState extends State<SignupPage> {
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
-                                    color: Color.fromRGBO(143, 148, 251, 1)),
+                                    color: const Color.fromARGB(255, 84, 91, 216)),
                               ),
                             ),
                             child: TextField(
@@ -200,7 +200,7 @@ class _SignupPageState extends State<SignupPage> {
                     child: Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromRGBO(143, 148, 251, 1),
+                          backgroundColor: const Color.fromARGB(255, 84, 91, 216),
                           minimumSize: Size(double.infinity, 50),
                         ),
                         onPressed: () async {
@@ -248,7 +248,7 @@ class _SignupPageState extends State<SignupPage> {
                       child: Text(
                         haveAnAccountMessage,
                         style: TextStyle(
-                          color: Color.fromRGBO(143, 148, 251, 1),
+                          color: const Color.fromARGB(255, 84, 91, 216),
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                         ),

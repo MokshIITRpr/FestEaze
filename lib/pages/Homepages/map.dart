@@ -197,7 +197,7 @@ class _ClgMapState extends State<ClgMap> {
         ),
         trafficEnabled: true,
         myLocationEnabled: true,
-        myLocationButtonEnabled: true,
+        myLocationButtonEnabled: false,
         markers: _createMarkers(),
       ),
     );
