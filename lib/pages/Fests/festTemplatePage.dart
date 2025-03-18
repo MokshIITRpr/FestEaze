@@ -203,6 +203,7 @@ class _TemplatePageState extends State<TemplatePage> {
                     _filterEvents(query); // Filter events as the user types
                   },
                 ),
+                const SizedBox(height: 20),
                 buildEventList(filteredEvents),
               ],
             ),

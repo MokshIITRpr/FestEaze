@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fest_app/pages/Events/widgets/addAuth.dart';
+import 'package:fest_app/pages/Fests/widgets/autoImageSlider.dart';
 
 class EventTemplatePage extends StatefulWidget {
   final String title;
@@ -26,7 +27,12 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   Map<String, dynamic>? eventData;
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final List<String> _imagePaths = [
+    'assets/aarohan.jpg',
+    'assets/zeitgeist.jpeg',
+    'assets/advitiya.jpeg',
+    'assets/sponsor.jpeg',
+  ];
   bool _isAdmin = false;
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
@@ -152,6 +158,9 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        AutoImageSlider(imagePaths: _imagePaths),
+                        const SizedBox(height: 20),
+
                         Text(
                           eventData!['eventName'] ?? "No Title",
                           style: const TextStyle(
@@ -239,7 +248,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                         const SizedBox(height: 20),
 
                         Text(
-                          "About",
+                          "What's new?",
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
