@@ -27,9 +27,9 @@ class _ClgMapState extends State<ClgMap> {
     "Beas Hostel": LatLng(30.96926481836463, 76.46671590437404),
     "Ravi Hostel": LatLng(30.967418956095425, 76.46983082119206),
     "Brahmaputra Hostel": LatLng(30.966986576357574, 76.46676773847858),
-    "Vollyball Court": LatLng(30.96326526975179, 76.47218043625986),
-    "Basketball Court": LatLng(30.963274469699535, 76.47248084368039),
-    "Lawn Tennis": LatLng(30.96292027107216, 76.47248620809863),
+    "Vollyball Court": LatLng(30.96310378471496, 76.47206830094933),
+    "Basketball Court": LatLng(30.96335392421597, 76.47258486841018),
+    "Lawn Tennis": LatLng(30.962744208034376, 76.4723448164725),
     "Athletics/Football Ground": LatLng(30.963141070369627, 76.47534007847555),
     "Cricket Ground": LatLng(30.96093765446312, 76.47547955337636),
     "Hockey Ground": LatLng(30.9616460651144, 76.47425110169115),
@@ -42,6 +42,9 @@ class _ClgMapState extends State<ClgMap> {
     "JC Bose Block(ECE)": LatLng(30.96878284514457, 76.4746905127549),
     "Satish Dhawan Block(Mech.)": LatLng(30.96884539540658, 76.47156678283248),
     "S.S.Bhatnagr Block(Chem.)": LatLng(30.969015403612165, 76.47060347687236),
+    "Konark Mess": LatLng(30.966992146063077, 76.4675903028953),
+    "Anusha Mess": LatLng(30.967020033282857, 76.46801174568209),
+    "Ideal Mess": LatLng(30.966185869704955, 76.47164035363653),
   };
 
   // A map to hold the custom marker icons with labels
@@ -112,7 +115,13 @@ class _ClgMapState extends State<ClgMap> {
       return Colors.orange;
     } else if (placeName.contains("Library")) {
       return Colors.orange;
-    } else {
+    } else if (placeName.contains("Konark Mess")) {
+      return const ui.Color.fromARGB(255, 152, 30, 150);
+    } else if (placeName.contains("Anusha Mess")) {
+      return const ui.Color.fromARGB(255, 152, 30, 150);
+    } else if (placeName.contains("Ideal Mess")) {
+      return const ui.Color.fromARGB(255, 152, 30, 150);
+    }else {
       return Colors.purple;
     }
   }
@@ -120,8 +129,8 @@ class _ClgMapState extends State<ClgMap> {
   // Create a custom marker icon with a colored background and the text label.
   Future<BitmapDescriptor> _createCustomMarkerBitmap(
       String label, Color markerColor) async {
-    final int width = 150;
-    final int height = 60;
+    final int width = 200;
+    final int height = 80;
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 
@@ -129,14 +138,14 @@ class _ClgMapState extends State<ClgMap> {
     final Paint paint = Paint()..color = markerColor;
     final RRect rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
-      Radius.circular(8),
+      Radius.circular(12),
     );
     canvas.drawRRect(rRect, paint);
 
     // Draw the label text centered in the rectangle.
     final TextSpan span = TextSpan(
       style: const TextStyle(
-          color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          color: ui.Color.fromARGB(255, 255, 255, 255), fontSize: 20, fontWeight: FontWeight.bold),
       text: label,
     );
     final TextPainter textPainter = TextPainter(
