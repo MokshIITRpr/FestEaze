@@ -243,7 +243,7 @@ class _SignupPageState extends State<SignupPage> {
                     duration: Duration(milliseconds: 1000),
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.pushReplacementNamed(context, '/homeScreen');
+                        Navigator.pop(context);
                       },
                       child: Text(
                         haveAnAccountMessage,

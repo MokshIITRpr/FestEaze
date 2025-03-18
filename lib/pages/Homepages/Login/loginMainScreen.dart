@@ -186,11 +186,15 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                       ),
                       FadeInUp(
                           duration: Duration(milliseconds: 950),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/forgotPassword');
+                            },
                           child: Text(
                             forgotPassword,
                             style: TextStyle(
                                 color: Color.fromRGBO(143, 148, 251, 1)),
-                          )),
+                          ))),
                       SizedBox(
                         height: 20,
                       ),

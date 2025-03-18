@@ -1,3 +1,4 @@
+import 'package:fest_app/pages/Homepages/ForgotPass/forgot_pass.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'pages/Homepages/Login/loginMainScreen.dart';
@@ -48,6 +49,7 @@ class MainApp extends StatelessWidget {
       routes: {
         '/loginScreen': (context) => LoginMainScreen(),
         '/signupPage': (context) => SignupPage(),
+        '/forgotPassword': (context) => ForgotPass(),
         '/homeScreen': (context) => HomeMainScreen(),
         '/verificationScreen': (context) => SignupVerificationPage(),
       },
