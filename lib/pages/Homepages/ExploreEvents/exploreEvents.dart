@@ -101,16 +101,21 @@ class _ExploreEventsState extends State<ExploreEvents> {
             );
           },
           child: Container(
+            height: 150.0,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12.0),
-              gradient: LinearGradient(
-                colors: event.colors,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+              image: DecorationImage(
+                image: AssetImage('assets/night_iitrpr.jpg'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.5),
+                  BlendMode.darken,
+                ),
               ),
             ),
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 30.0, 16.0, 10.0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,17 +123,17 @@ class _ExploreEventsState extends State<ExploreEvents> {
                     Text(
                       event.name,
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     Text(
                       event.date,
                       style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
+                        fontSize: 15,
+                        color: Colors.white,
                       ),
                     ),
                   ],
