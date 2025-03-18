@@ -1,8 +1,22 @@
-4th March
+===> New features to show on wednesday 
+--------------------------------------------------------------------------------------------------------------------------------
+Feature 1 >> Add to calendar
 
-done > add upcoming and ongoing events. 
-> complete authorizations of giving access to events.
-done > make UI better of fest template.
-> make editable event page - events details, register now (open a google form)
+Description : Add a star on the event card. which when clicked by the user turns yellow, and the event is added to favEventList of the user document. Then on click a pop-up appears asking user to the permission to add the event in their google calender, and get all updates regarding the event through notification.
+--------------------------------------------------------------------------------------------------------------------------------
+Feature 2 >> Event Page & Assigning events 
 
----------------------------------------------------------------
+Description : Make a EventTemplatePage. When the Fest Manager adds an event, they also have the option to assign event managers of the event.
+--------------------------------------------------------------------------------------------------------------------------------
+Feature 3 >> Profile Page
+
+Description : On scrolling the profile page, first the starred events cards must appear. And then for Event managers another section will appear displaying the events they are managing.
+--------------------------------------------------------------------------------------------------------------------------------
+Feature 4 >> Event Categories
+
+Description : Instead of "Explore Club Events", change it to "Event Categories". Whenever the user clicks on certain category, the events of that category appears. Search Events is removed.
+
+> Implementation 1 : add a category field in all the events. Manager adds the category while adding the event. Fest document has a eventCategoryList field, which is updated whenever a new category is added by the manager. (less changes required)
+
+> Implementation 2 : make a new collection eventCategory. Manager adds a category. Then when he clicks on some category, he has the option to add events in that particular eventCategory. (more changes required, but extendable and more efficient)
+--------------------------------------------------------------------------------------------------------------------------------

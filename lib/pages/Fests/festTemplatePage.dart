@@ -6,6 +6,7 @@ import './utils/database.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fest_app/data.dart';
+import 'package:fest_app/pages/Events/eventTemplatePage.dart';
 
 class TemplatePage extends StatefulWidget {
   final String title;
@@ -26,8 +27,6 @@ class _TemplatePageState extends State<TemplatePage> {
   bool isEditing = false;
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final UserData _userData = UserData();
-  late Future<DocumentSnapshot> _user;
   bool _isAdmin = false;
 
   final List<String> _imagePaths = [
@@ -265,10 +264,11 @@ class _TemplatePageState extends State<TemplatePage> {
                             var eventData =
                                 snapshot.data!.data() as Map<String, dynamic>;
 
-                            // Convert Timestamp to String (using DateFormat)
+                            // Extract event details
                             String eventName =
                                 eventData['eventName'] ?? 'No title';
                             String venue = eventData['venue'] ?? 'Unknown';
+                            String docId = eventRef.id; // Get document ID
 
                             // Handle Timestamp fields
                             Timestamp timestampDate =
@@ -293,107 +293,123 @@ class _TemplatePageState extends State<TemplatePage> {
 
                             String timeRange =
                                 '$formattedStartTime - $formattedEndTime';
-                            return Container(
-                              width: 200, // Fixed width for square-shaped card
-                              margin: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white, // Background color
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 6,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Card(
-                                elevation: 4,
-                                margin: EdgeInsets.zero,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    // Image at the top of the card
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          topRight: Radius.circular(12)),
-                                      child: Image.asset(
-                                        'assets/iitrpr.jpeg',
-                                        height: 120,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Icon(Icons.broken_image,
-                                              size: 100, color: Colors.red);
-                                        },
-                                      ),
+
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigate to TemplatePage
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EventTemplatePage(
+                                      title: eventName,
+                                      docId: docId,
+                                      isSuperAdmin: _isAdmin,
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            eventName,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(Icons.calendar_today,
-                                                  size: 20,
-                                                  color: Colors.black),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                ' $formattedDate',
-                                                style: const TextStyle(
-                                                    color: Colors.black),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(Icons.access_time,
-                                                  size: 20,
-                                                  color: Colors.black),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                ' $timeRange',
-                                                style: const TextStyle(
-                                                    color: Colors.black),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(Icons.location_on,
-                                                  size: 20,
-                                                  color: Colors.black),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                ' $venue',
-                                                style: const TextStyle(
-                                                    color: Colors.black),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width:
+                                    200, // Fixed width for square-shaped card
+                                margin: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white, // Background color
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 6,
+                                      offset: Offset(0, 2),
                                     ),
                                   ],
+                                ),
+                                child: Card(
+                                  elevation: 4,
+                                  margin: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(12),
+                                            topRight: Radius.circular(12)),
+                                        child: Image.asset(
+                                          'assets/iitrpr.jpeg',
+                                          height: 120,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Icon(Icons.broken_image,
+                                                size: 100, color: Colors.red);
+                                          },
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              eventName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.calendar_today,
+                                                    size: 20,
+                                                    color: Colors.black),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  ' $formattedDate',
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.access_time,
+                                                    size: 20,
+                                                    color: Colors.black),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  ' $timeRange',
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.location_on,
+                                                    size: 20,
+                                                    color: Colors.black),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  ' $venue',
+                                                  style: const TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
