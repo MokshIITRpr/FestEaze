@@ -124,14 +124,14 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
+      appBar: _isLoading
+          ? AppBar() : AppBar(
+        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (widget.isSuperAdmin)
               Text(
-                "Add Event Manager",
+                eventData!['eventName'],
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
