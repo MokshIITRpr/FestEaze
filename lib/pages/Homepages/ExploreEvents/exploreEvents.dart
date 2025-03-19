@@ -120,14 +120,14 @@ class _ExploreEventsState extends State<ExploreEvents> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                      Text(
                       event.name,
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                    ),
+                      ),
                     const SizedBox(height: 16),
                     Text(
                       event.date,

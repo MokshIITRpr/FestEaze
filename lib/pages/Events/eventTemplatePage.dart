@@ -61,7 +61,12 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
           bool a1 = widget.isSuperAdmin;
-          bool a2 = docSnapshot['manager'].contains(userData['email']) ?? false;
+          bool a2 = false;
+          try {
+            a2 = docSnapshot['manager'].contains(userData['email']);
+          } catch (e) {
+            print(e);
+          }
           setState(() {
             _isAdmin = (a1 || a2);
           });
@@ -125,29 +130,30 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _isLoading
-          ? AppBar() : AppBar(
-        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-              Text(
-                eventData!['eventName'],
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+          ? AppBar()
+          : AppBar(
+              backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    eventData!['eventName'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (widget.isSuperAdmin)
+                    GestureDetector(
+                      onTap: () => showAuthDialog(context, widget.docId),
+                      child: const Icon(
+                        Icons.person_add_alt_1_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                ],
               ),
-            if (widget.isSuperAdmin)
-              GestureDetector(
-                onTap: () => showAuthDialog(context, widget.docId),
-                child: const Icon(
-                  Icons.person_add_alt_1_outlined,
-                  color: Colors.white,
-                ),
-              ),
-          ],
-        ),
-      ),
+            ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : eventData == null
