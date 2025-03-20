@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fest_app/pages/Fests/festTemplatePage.dart';
+import './csvImporter.dart'; // Import the new file
 
 void showAddEventDialog(BuildContext context) {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -9,6 +10,7 @@ void showAddEventDialog(BuildContext context) {
   DateTime? startDate;
   DateTime? endDate;
   String? errorMessage;
+  String? selectedFileName; // Stores the CSV file name
 
   showDialog(
     context: context,
@@ -20,43 +22,76 @@ void showAddEventDialog(BuildContext context) {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: eventNameController,
-                  decoration: const InputDecoration(
-                    labelText: "Event Name",
-                    border: OutlineInputBorder(),
+                // Import from CSV Button
+
+                // Show file name if selected
+                if (selectedFileName != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    selectedFileName!,
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 10),
-                _datePicker(context, "Start Dt.", startDate, DateTime.now(),
-                    (picked) {
-                  setDialogState(() {
-                    if (picked.isBefore(DateTime.now())) {
-                      errorMessage = "Start Date must be after today";
-                    } else {
-                      startDate = picked;
-                      if (endDate != null && endDate!.isBefore(startDate!)) {
-                        endDate = startDate;
+                ],
+
+                // Hide manual input if file is selected
+                if (selectedFileName == null) ...[
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: eventNameController,
+                    decoration: const InputDecoration(
+                      labelText: "Event Name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _datePicker(context, "Start Dt.", startDate, DateTime.now(),
+                      (picked) {
+                    setDialogState(() {
+                      if (picked.isBefore(DateTime.now())) {
+                        errorMessage = "Start Date must be after today";
+                      } else {
+                        startDate = picked;
+                        if (endDate != null && endDate!.isBefore(startDate!)) {
+                          endDate = startDate;
+                        }
+                        errorMessage = null;
                       }
-                      errorMessage = null;
+                    });
+                  }),
+                  _datePicker(
+                      context, "End Dt.", endDate, startDate ?? DateTime.now(),
+                      (picked) {
+                    setDialogState(() {
+                      if (startDate == null ||
+                          picked.isAfter(startDate!) ||
+                          picked.isAtSameMomentAs(startDate!)) {
+                        endDate = picked;
+                        errorMessage = null;
+                      } else {
+                        errorMessage =
+                            "End Date must be after or equal to Start Date";
+                      }
+                    });
+                  }),
+                ],
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    var csvData = await CsvImporter.importCsvFile();
+                    if (csvData != null) {
+                      setDialogState(() {
+                        eventNameController.text = csvData["eventName"];
+                        startDate = csvData["startDate"];
+                        endDate = csvData["endDate"];
+                        selectedFileName =
+                            "Selected File: event_data.csv"; // Placeholder
+                      });
                     }
-                  });
-                }),
-                _datePicker(
-                    context, "End Dt.", endDate, startDate ?? DateTime.now(),
-                    (picked) {
-                  setDialogState(() {
-                    if (startDate == null ||
-                        picked.isAfter(startDate!) ||
-                        picked.isAtSameMomentAs(startDate!)) {
-                      endDate = picked;
-                      errorMessage = null;
-                    } else {
-                      errorMessage =
-                          "End Date must be after or equal to Start Date";
-                    }
-                  });
-                }),
+                  },
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text("Import from CSV"),
+                ),
+                // Show error message
                 if (errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
@@ -75,9 +110,10 @@ void showAddEventDialog(BuildContext context) {
               ElevatedButton(
                 child: const Text("Save"),
                 onPressed: () async {
-                  if (eventNameController.text.isNotEmpty &&
-                      startDate != null &&
-                      endDate != null) {
+                  if (selectedFileName != null || // CSV selected
+                      (eventNameController.text.isNotEmpty &&
+                          startDate != null &&
+                          endDate != null)) {
                     try {
                       // Store event in Firestore
                       DocumentReference docRef =
@@ -88,7 +124,7 @@ void showAddEventDialog(BuildContext context) {
                         'manager': [],
                         'pronite': [],
                         'subEvents': [],
-                        'about': "Add text here ...", // Should be a string
+                        'about': "Add text here ...",
                       });
 
                       print("Event added with ID: ${docRef.id}");
@@ -99,7 +135,7 @@ void showAddEventDialog(BuildContext context) {
                         MaterialPageRoute(
                           builder: (context) => TemplatePage(
                             title: eventNameController.text,
-                            docId: docRef.id, // Pass docId
+                            docId: docRef.id,
                           ),
                         ),
                       );
