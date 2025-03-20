@@ -24,16 +24,12 @@ class EventTemplatePage extends StatefulWidget {
 
 class _EventTemplatePageState extends State<EventTemplatePage> {
   bool _isLoading = true;
+  bool _isPreviewMode = false; // Track preview mode
   Map<String, dynamic>? eventData;
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final List<String> _imagePaths = [
-    'assets/aarohan.jpg',
-    'assets/zeitgeist.jpeg',
-    'assets/advitiya.jpeg',
-    'assets/sponsor.jpeg',
-  ];
   bool _isAdmin = false;
+
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
@@ -51,7 +47,6 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   Future<void> _fetchUserData() async {
     var docSnapshot =
         await _firestore.collection('events').doc(widget.docId).get();
-
     if (docSnapshot.exists) {
       User? user = _auth.currentUser;
       if (user != null) {
@@ -68,7 +63,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
             print(e);
           }
           setState(() {
-            _isAdmin = (a1 || a2);
+            _isAdmin = a1 || a2;
           });
         }
       }
@@ -78,7 +73,6 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   Future<void> _fetchEventData() async {
     var docSnapshot =
         await _firestore.collection('events').doc(widget.docId).get();
-
     if (docSnapshot.exists) {
       setState(() {
         eventData = docSnapshot.data();
@@ -117,13 +111,21 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
 
   void _launchGoogleForm() {
     String? googleFormLink = eventData?['googleFormLink'];
-    if (googleFormLink != null && googleFormLink.isNotEmpty) {
+    if (googleFormLink != null &&
+        googleFormLink.isNotEmpty &&
+        googleFormLink != "") {
       launchUrl(Uri.parse(googleFormLink));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No registration link available!")),
       );
     }
+  }
+
+  void _togglePreviewMode() {
+    setState(() {
+      _isPreviewMode = !_isPreviewMode;
+    });
   }
 
   @override
@@ -133,26 +135,28 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
           ? AppBar()
           : AppBar(
               backgroundColor: const Color.fromARGB(255, 84, 91, 216),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    eventData!['eventName'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+              title: Text(eventData!['eventName'],
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.white)),
+              actions: [
+                if (_isAdmin)
+                  IconButton(
+                    icon: Icon(
+                        _isPreviewMode
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.white),
+                    onPressed: _togglePreviewMode,
+                    tooltip: _isPreviewMode ? "Exit Preview" : "Preview Mode",
                   ),
-                  if (widget.isSuperAdmin)
-                    GestureDetector(
-                      onTap: () => showAuthDialog(context, widget.docId),
-                      child: const Icon(
-                        Icons.person_add_alt_1_outlined,
-                        color: Colors.white,
-                      ),
-                    ),
-                ],
-              ),
+                if (widget.isSuperAdmin)
+                  IconButton(
+                    icon: const Icon(Icons.person_add_alt_1_outlined,
+                        color: Colors.white),
+                    onPressed: () => showAuthDialog(context, widget.docId),
+                    tooltip: "Add Manager",
+                  ),
+              ],
             ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -164,123 +168,96 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AutoImageSlider(imagePaths: _imagePaths),
+                        AutoImageSlider(imagePaths: [
+                          'assets/aarohan.jpg',
+                          'assets/zeitgeist.jpeg',
+                          'assets/advitiya.jpeg',
+                          'assets/sponsor.jpeg',
+                        ]),
                         const SizedBox(height: 20),
-
-                        Text(
-                          eventData!['eventName'] ?? "No Title",
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
+                        Text(eventData!['eventName'],
+                            style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87)),
                         const SizedBox(height: 10),
-                        _isAdmin
-                            ? TextField(
+                        _isPreviewMode || !_isAdmin
+                            ? Text("📅 Date: ${_dateController.text}")
+                            : TextField(
                                 controller: _dateController,
                                 decoration: const InputDecoration(
-                                  labelText: "Event Date",
-                                  border: OutlineInputBorder(),
-                                ),
-                              )
+                                    labelText: "Event Date",
+                                    border: OutlineInputBorder())),
+                        const SizedBox(height: 10),
+                        _isPreviewMode || !_isAdmin
+                            ? Text(
+                                "⏰ Time: ${_startTimeController.text} - ${_endTimeController.text}")
                             : Row(
                                 children: [
-                                  const Icon(Icons.calendar_today,
-                                      color: Colors.black),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _dateController.text,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ],
-                              ),
-                        const SizedBox(height: 10),
-                        _isAdmin
-                            ? Row(
-                                children: [
                                   Expanded(
-                                    child: TextField(
-                                      controller: _startTimeController,
-                                      decoration: const InputDecoration(
-                                        labelText: "Start Time",
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ),
+                                      child: TextField(
+                                          controller: _startTimeController,
+                                          decoration: const InputDecoration(
+                                              labelText: "Start Time",
+                                              border: OutlineInputBorder()))),
                                   const SizedBox(width: 10),
                                   Expanded(
-                                    child: TextField(
-                                      controller: _endTimeController,
-                                      decoration: const InputDecoration(
-                                        labelText: "End Time",
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                children: [
-                                  const Icon(Icons.access_time,
-                                      color: Colors.black),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "${_startTimeController.text} - ${_endTimeController.text}",
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
+                                      child: TextField(
+                                          controller: _endTimeController,
+                                          decoration: const InputDecoration(
+                                              labelText: "End Time",
+                                              border: OutlineInputBorder()))),
                                 ],
                               ),
                         const SizedBox(height: 10),
-                        _isAdmin
-                            ? TextField(
+                        _isPreviewMode || !_isAdmin
+                            ? Text("📍 Venue: ${_venueController.text}")
+                            : TextField(
                                 controller: _venueController,
                                 decoration: const InputDecoration(
-                                  labelText: "Venue",
-                                  border: OutlineInputBorder(),
-                                ),
-                              )
-                            : Row(
-                                children: [
-                                  const Icon(Icons.location_on,
-                                      color: Colors.black),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _venueController.text,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ],
-                              ),
-                        const SizedBox(height: 20),
+                                    labelText: "Venue",
+                                    border: OutlineInputBorder())),
 
-                        Text(
-                          "What's new?",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                        const SizedBox(height: 20),
+                        if (_isPreviewMode || !_isAdmin)
+                          const Text(
+                            "📝 Event Description:",
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87),
                           ),
-                        ),
+
                         const SizedBox(height: 10),
 
-                        // If admin, allow editing the description
-                        _isAdmin
-                            ? TextField(
+                        _isPreviewMode || !_isAdmin
+                            ? Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  _descriptionController.text.isNotEmpty
+                                      ? _descriptionController.text
+                                      : "No description available",
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              )
+                            : TextField(
                                 controller: _descriptionController,
                                 maxLines: 5,
                                 decoration: const InputDecoration(
                                   labelText: "Event Description",
                                   border: OutlineInputBorder(),
                                 ),
-                              )
-                            : Text(
-                                _descriptionController.text,
-                                style: const TextStyle(fontSize: 16),
                               ),
 
                         const SizedBox(height: 20),
 
-                        if (_isAdmin)
+// If admin and NOT in preview mode, allow editing the Google Form link
+                        if (_isAdmin && !_isPreviewMode)
                           TextField(
                             controller: _googleFormController,
                             decoration: const InputDecoration(
@@ -288,39 +265,35 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                               border: OutlineInputBorder(),
                             ),
                           ),
-                        const SizedBox(height: 30),
-                        // Check if the user is an admin
-                        if (_isAdmin)
-                          Center(
-                            child: ElevatedButton(
+                        const SizedBox(height: 20),
+                        if (!_isPreviewMode && _isAdmin)
+                          ElevatedButton(
                               onPressed: _updateEventData,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 40, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Text(
-                                "Save Changes",
+                              child: const Text("Save Changes")),
+                        if (_isPreviewMode || !_isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "🔗 Registration Link:",
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
-                            ),
-                          ),
-                        const SizedBox(height: 20),
-
-                        // Register button (for non-admins)
-                        if (!_isAdmin)
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: _launchGoogleForm,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                              ),
-                              child: const Text("Register"),
-                            ),
+                              eventData?['googleFormLink'] != null &&
+                                      eventData!['googleFormLink'].isNotEmpty
+                                  ? TextButton(
+                                      onPressed: _launchGoogleForm,
+                                      child: const Text(
+                                          "Click here to Register",
+                                          style: TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 16)),
+                                    )
+                                  : const Text(
+                                      "No registration link available!",
+                                      style: TextStyle(
+                                          color: Colors.red, fontSize: 16)),
+                            ],
                           ),
                       ],
                     ),
