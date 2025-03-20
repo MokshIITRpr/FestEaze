@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-void showAuthDialog(BuildContext context, String docId) {
+void showAuthDialog(BuildContext context, String docId, String position) {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   TextEditingController nameController = TextEditingController();
   String? errorMessage;
@@ -11,7 +11,9 @@ void showAuthDialog(BuildContext context, String docId) {
     builder: (context) => StatefulBuilder(
       builder: (context, setDialogState) {
         return AlertDialog(
-          title: const Text("Add Event Manager"),
+          title: position == 'manager'
+              ? const Text("Add Event Manager")
+              : const Text("Add Volunteer"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -49,17 +51,28 @@ void showAuthDialog(BuildContext context, String docId) {
 
                     if (docSnapshot.exists) {
                       DocumentReference eventDoc = docSnapshot.reference;
-                      await eventDoc.update({
-                        'manager': FieldValue.arrayUnion([nameController.text])
-                      });
+                      position == 'manager'
+                          ? await eventDoc.update({
+                              'manager':
+                                  FieldValue.arrayUnion([nameController.text])
+                            })
+                          : await eventDoc.update({
+                              'volunteers':
+                                  FieldValue.arrayUnion([nameController.text])
+                            });
 
                       // TODO : add checks for username matching in database and add user id here
-                      print("Manager added successfully to the event!");
+                      position == 'manager'
+                          ? print("Manager added successfully to the event!")
+                          : print("Volunteer added successfully to the event!");
                       Navigator.of(context).pop(); // Close dialog
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content: Text(
-                                '${nameController.text} updated as manager')),
+                            content: position == 'manager'
+                                ? Text(
+                                    '${nameController.text} updated as manager')
+                                : Text(
+                                    '${nameController.text} updated as volunteer')),
                       );
                     } else {
                       print("No event found with the docId : $docId");
@@ -67,7 +80,10 @@ void showAuthDialog(BuildContext context, String docId) {
                   } catch (e) {
                     print("Error adding manager: $e");
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error adding manager: ${e}')),
+                      SnackBar(
+                          content: position == 'manager'
+                              ? Text('Error adding manager: ${e}')
+                              : Text('Error adding volunteer: ${e}')),
                     );
                   }
                 }

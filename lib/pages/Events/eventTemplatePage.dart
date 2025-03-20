@@ -149,11 +149,18 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                     onPressed: _togglePreviewMode,
                     tooltip: _isPreviewMode ? "Exit Preview" : "Preview Mode",
                   ),
+                if (_isAdmin && !widget.isSuperAdmin)
+                  IconButton(
+                    icon: const Icon(Icons.person_add_alt_1_outlined,
+                        color: Colors.white),
+                    onPressed: () => showAuthDialog(context, widget.docId, "volunteer"),
+                    tooltip: "Add Volunteers",
+                  ),
                 if (widget.isSuperAdmin)
                   IconButton(
                     icon: const Icon(Icons.person_add_alt_1_outlined,
                         color: Colors.white),
-                    onPressed: () => showAuthDialog(context, widget.docId),
+                    onPressed: () => showAuthDialog(context, widget.docId, "manager"),
                     tooltip: "Add Manager",
                   ),
               ],
