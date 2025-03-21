@@ -339,7 +339,7 @@ class _TemplatePageState extends State<TemplatePage> {
                                             topLeft: Radius.circular(12),
                                             topRight: Radius.circular(12)),
                                         child: Image.asset(
-                                          'assets/iitrpr.jpeg',
+                                          'assets/bg_img.jpg',
                                           height: 120,
                                           width: double.infinity,
                                           fit: BoxFit.cover,

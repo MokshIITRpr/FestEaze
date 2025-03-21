@@ -84,7 +84,8 @@ class CsvImporter {
       String venue = csvTable[i].length > 4 ? csvTable[i][4].toString() : "TBA";
       String description =
           csvTable[i].length > 3 ? csvTable[i][3].toString() : "No description";
-
+      String googleFormLink =
+          csvTable[i].length > 7 ? csvTable[i][7].toString() : "No link";
       var event = {
         "eventName": eventName,
         "eventDate": eventDate,
@@ -92,6 +93,7 @@ class CsvImporter {
         "eventEndTime": eventEndTime,
         "venue": venue,
         "description": description,
+        "googleFormLink": googleFormLink,
       };
 
       // Classify flagship and sub-events
