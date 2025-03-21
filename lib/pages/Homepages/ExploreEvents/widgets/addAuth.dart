@@ -11,7 +11,7 @@ void showAuthDialog(BuildContext context, String eventName) {
     builder: (context) => StatefulBuilder(
       builder: (context, setDialogState) {
         return AlertDialog(
-          title: const Text("Add Event Manager"),
+          title: const Text("Add Fest Manager"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

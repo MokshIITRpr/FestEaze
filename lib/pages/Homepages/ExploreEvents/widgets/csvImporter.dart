@@ -95,7 +95,7 @@ class CsvImporter {
       };
 
       // Classify flagship and sub-events
-      if (i - 2 < flagshipEventCount) {
+      if (i - 3 < flagshipEventCount) {
         flagshipEvents.add(event);
       } else {
         subEvents.add(event);
