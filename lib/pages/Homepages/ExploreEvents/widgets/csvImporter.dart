@@ -39,7 +39,7 @@ class CsvImporter {
       // Call CSV parsing function
       var csvData = CsvImporter.parseCsv(contents, fileName);
       print("✅ Parsed CSV Data: $csvData");
-
+      print("📂 File imported successfully!");
       return csvData;
     } catch (e, stackTrace) {
       print("❌ Error while importing CSV: $e");
@@ -48,26 +48,99 @@ class CsvImporter {
     }
   }
 
-  static Map<String, dynamic> parseCsv(String contents, String fileName) {
-    List<List<dynamic>> csvTable = const CsvToListConverter().convert(contents);
+  static Map<String, dynamic> parseCsv(String contents, String filePath) {
+    List<List<dynamic>> csvTable =
+        const CsvToListConverter().convert(contents, eol: '\n');
 
-    if (csvTable.length > 1) {
-      return {
-        "eventName": csvTable[1][0].toString(),
-        "startDate": _parseDate(csvTable[1][1].toString()),
-        "endDate": _parseDate(csvTable[1][2].toString()),
-        "fileName": fileName,
+    print("Parsed CSV Table: $csvTable");
+
+    // Extract fest details (First row)
+    String festName = csvTable[1][0].toString();
+    DateTime festStartDate = _parseDate(csvTable[1][1].toString());
+    DateTime festEndDate = _parseDate(csvTable[1][2].toString());
+    String aboutFest = csvTable[1][3].toString();
+
+    // Extract flagship event count (Second row)
+    int flagshipEventCount = int.tryParse(csvTable[2][0].toString()) ?? 0;
+
+    List<Map<String, dynamic>> flagshipEvents = [];
+    List<Map<String, dynamic>> subEvents = [];
+
+    // Loop through the events and classify them
+    for (int i = 3; i < csvTable.length; i++) {
+      if (csvTable[i].isEmpty || csvTable[i][0] == null) continue;
+
+      // Extract event details
+      String eventName = csvTable[i][0].toString();
+      String eventDate = csvTable[i][1].toString().isNotEmpty
+          ? _formatDate(csvTable[i][1].toString())
+          : "TBA";
+      String eventStartTime = csvTable[i].length > 5
+          ? _formatTime(csvTable[i][5].toString())
+          : "TBA";
+      String eventEndTime = csvTable[i].length > 6
+          ? _formatTime(csvTable[i][6].toString())
+          : "TBA";
+      String venue = csvTable[i].length > 4 ? csvTable[i][4].toString() : "TBA";
+      String description =
+          csvTable[i].length > 3 ? csvTable[i][3].toString() : "No description";
+
+      var event = {
+        "eventName": eventName,
+        "eventDate": eventDate,
+        "eventStartTime": eventStartTime,
+        "eventEndTime": eventEndTime,
+        "venue": venue,
+        "description": description,
       };
+
+      // Classify flagship and sub-events
+      if (i - 2 < flagshipEventCount) {
+        flagshipEvents.add(event);
+      } else {
+        subEvents.add(event);
+      }
     }
 
-    throw Exception("Invalid CSV Format");
+    return {
+      "eventName": festName,
+      "startDate": festStartDate,
+      "endDate": festEndDate,
+      "about": aboutFest,
+      "flagshipEvents": flagshipEvents,
+      "subEvents": subEvents,
+      "fileName": filePath.split('/').last,
+    };
   }
 
+  // Parse date safely
   static DateTime _parseDate(String dateString) {
     try {
       return DateFormat('yyyy-MM-dd').parse(dateString);
     } catch (e) {
-      throw Exception("Invalid date format in CSV: $dateString");
+      print("⚠️ Invalid date format: $dateString. Using default.");
+      return DateTime(2030);
+    }
+  }
+
+  // Ensure correct date format
+  static String _formatDate(String dateString) {
+    return dateString.isNotEmpty ? dateString : "TBA";
+  }
+
+  // Ensure correct time format
+  static String _formatTime(String timeString) {
+    if (timeString.isEmpty) return "TBA";
+
+    try {
+      List<String> parts = timeString.split(':');
+      int hours = int.parse(parts[0]);
+      int minutes = int.parse(parts[1]);
+
+      return "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}";
+    } catch (e) {
+      print("⚠️ Invalid time format: $timeString. Using default.");
+      return "TBA";
     }
   }
 }

@@ -2,15 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fest_app/pages/Fests/festTemplatePage.dart';
-import './csvImporter.dart'; // Import the new file
+import './csvImporter.dart';
+import '../utils/databaseHandler.dart';
 
 void showAddEventDialog(BuildContext context) {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final DatabaseHandler _dbHandler = DatabaseHandler();
+
   TextEditingController eventNameController = TextEditingController();
   DateTime? startDate;
   DateTime? endDate;
   String? errorMessage;
   String? selectedFileName; // Stores the CSV file name
+  String? about;
+  Map<String, dynamic>? csvData; // Store CSV Data for passing
 
   showDialog(
     context: context,
@@ -22,13 +27,11 @@ void showAddEventDialog(BuildContext context) {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Import from CSV Button
-
-                // Show file name if selected
+                // Show selected file name
                 if (selectedFileName != null) ...[
                   const SizedBox(height: 10),
                   Text(
-                    selectedFileName!,
+                    "Selected file: $selectedFileName",
                     style: const TextStyle(
                         fontSize: 14, fontWeight: FontWeight.bold),
                   ),
@@ -77,14 +80,19 @@ void showAddEventDialog(BuildContext context) {
                 ],
                 ElevatedButton.icon(
                   onPressed: () async {
-                    var csvData = await CsvImporter.importCsvFile();
-                    if (csvData != null) {
+                    var importedData = await CsvImporter.importCsvFile();
+                    if (importedData != null) {
                       setDialogState(() {
-                        eventNameController.text = csvData["eventName"];
-                        startDate = csvData["startDate"];
-                        endDate = csvData["endDate"];
-                        selectedFileName =
-                            "Selected File: event_data.csv"; // Placeholder
+                        csvData = importedData; // Store CSV Data for later
+                        selectedFileName = importedData["fileName"];
+
+                        // ✅ Parse and store CSV values
+                        eventNameController.text = importedData["eventName"];
+                        startDate =
+                            importedData["startDate"]; // Fix string to DateTime
+                        endDate =
+                            importedData["endDate"]; // Fix string to DateTime
+                        about = importedData["about"];
                       });
                     }
                   },
@@ -110,12 +118,27 @@ void showAddEventDialog(BuildContext context) {
               ElevatedButton(
                 child: const Text("Save"),
                 onPressed: () async {
-                  if (selectedFileName != null || // CSV selected
-                      (eventNameController.text.isNotEmpty &&
-                          startDate != null &&
-                          endDate != null)) {
+                  if (selectedFileName != null) {
+                    // ✅ CSV Import Mode
                     try {
-                      // Store event in Firestore
+                      DocumentReference festRef =
+                          await _dbHandler.addFestWithEvents(csvData!);
+
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => TemplatePage(
+                              title: eventNameController.text,
+                              docId: festRef.id), // 🔥 Navigate to details page
+                        ),
+                      );
+                    } catch (e) {
+                      print("❌ Error adding event from CSV: $e");
+                    }
+                  } else if (eventNameController.text.isNotEmpty &&
+                      startDate != null &&
+                      endDate != null) {
+                    // ✅ Manual Entry Mode
+                    try {
                       DocumentReference docRef =
                           await _firestore.collection('fests').add({
                         'title': eventNameController.text,
@@ -124,7 +147,8 @@ void showAddEventDialog(BuildContext context) {
                         'manager': [],
                         'pronite': [],
                         'subEvents': [],
-                        'about': "Add text here ...",
+                        'about': about,
+                        'createdAt': Timestamp.now(),
                       });
 
                       print("Event added with ID: ${docRef.id}");
@@ -140,7 +164,7 @@ void showAddEventDialog(BuildContext context) {
                         ),
                       );
                     } catch (e) {
-                      print("Error adding event: $e");
+                      print("❌ Error adding event: $e");
                     }
                   }
                 },
