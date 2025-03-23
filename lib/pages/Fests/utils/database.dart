@@ -71,155 +71,155 @@ void showEventDialog(
   String? errorMessage;
 
   showDialog(
-  context: context,
-  builder: (BuildContext context) {
-    return StatefulBuilder(
-      builder: (context, setDialogState) {
-        return AlertDialog(
-          title: const Text("Add Event"),
-          content: SingleChildScrollView(  // Wrap in SingleChildScrollView
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: "Event Name"),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: venueController,
-                  decoration: const InputDecoration(labelText: "Venue"),
-                ),
-                const SizedBox(height: 10),
-
-                // Event Date Picker
-                _datePicker(context, "Date", eventDate, DateTime.now(),
-                    (picked) {
-                  setDialogState(() {
-                    if (picked.isBefore(DateTime.now())) {
-                      errorMessage = "Date must be after today";
-                    } else {
-                      eventDate = picked;
-                      errorMessage = null;
-                    }
-                  });
-                }),
-
-                const SizedBox(height: 10),
-
-                // Start Time Picker
-                _timePicker(context, "Start Time", startTime, (picked) {
-                  setDialogState(() {
-                    startTime = picked;
-                    if (endTime != null &&
-                        (picked.hour > endTime!.hour ||
-                            (picked.hour == endTime!.hour &&
-                                picked.minute > endTime!.minute))) {
-                      errorMessage = "Start time must be before end time";
-                    } else {
-                      errorMessage = null;
-                    }
-                  });
-                }),
-
-                const SizedBox(height: 10),
-
-                // End Time Picker
-                _timePicker(context, "End Time", endTime, (picked) {
-                  setDialogState(() {
-                    if (startTime == null ||
-                        picked.hour > startTime!.hour ||
-                        (picked.hour == startTime!.hour &&
-                            picked.minute > startTime!.minute)) {
-                      endTime = picked;
-                      errorMessage = null;
-                    } else {
-                      errorMessage = "End time must be after start time";
-                    }
-                  });
-                }),
-
-                if (errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 14),
-                    ),
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text("Add Event"),
+            content: SingleChildScrollView(
+              // Wrap in SingleChildScrollView
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(labelText: "Event Name"),
                   ),
-              ],
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: venueController,
+                    decoration: const InputDecoration(labelText: "Venue"),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Event Date Picker
+                  _datePicker(context, "Date", eventDate, DateTime.now(),
+                      (picked) {
+                    setDialogState(() {
+                      if (picked.isBefore(DateTime.now())) {
+                        errorMessage = "Date must be after today";
+                      } else {
+                        eventDate = picked;
+                        errorMessage = null;
+                      }
+                    });
+                  }),
+
+                  const SizedBox(height: 10),
+
+                  // Start Time Picker
+                  _timePicker(context, "Start Time", startTime, (picked) {
+                    setDialogState(() {
+                      startTime = picked;
+                      if (endTime != null &&
+                          (picked.hour > endTime!.hour ||
+                              (picked.hour == endTime!.hour &&
+                                  picked.minute > endTime!.minute))) {
+                        errorMessage = "Start time must be before end time";
+                      } else {
+                        errorMessage = null;
+                      }
+                    });
+                  }),
+
+                  const SizedBox(height: 10),
+
+                  // End Time Picker
+                  _timePicker(context, "End Time", endTime, (picked) {
+                    setDialogState(() {
+                      if (startTime == null ||
+                          picked.hour > startTime!.hour ||
+                          (picked.hour == startTime!.hour &&
+                              picked.minute > startTime!.minute)) {
+                        endTime = picked;
+                        errorMessage = null;
+                      } else {
+                        errorMessage = "End time must be after start time";
+                      }
+                    });
+                  }),
+
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                if (titleController.text.isNotEmpty &&
-                    venueController.text.isNotEmpty &&
-                    eventDate != null &&
-                    startTime != null &&
-                    endTime != null) {
-                  try {
-                    // Combine date and time into DateTime objects
-                    DateTime startDateTime = DateTime(
-                      eventDate!.year,
-                      eventDate!.month,
-                      eventDate!.day,
-                      startTime!.hour,
-                      startTime!.minute,
-                    );
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  if (titleController.text.isNotEmpty &&
+                      venueController.text.isNotEmpty &&
+                      eventDate != null &&
+                      startTime != null &&
+                      endTime != null) {
+                    try {
+                      // Combine date and time into DateTime objects
+                      DateTime startDateTime = DateTime(
+                        eventDate!.year,
+                        eventDate!.month,
+                        eventDate!.day,
+                        startTime!.hour,
+                        startTime!.minute,
+                      );
 
-                    DateTime endDateTime = DateTime(
-                      eventDate!.year,
-                      eventDate!.month,
-                      eventDate!.day,
-                      endTime!.hour,
-                      endTime!.minute,
-                    );
+                      DateTime endDateTime = DateTime(
+                        eventDate!.year,
+                        eventDate!.month,
+                        eventDate!.day,
+                        endTime!.hour,
+                        endTime!.minute,
+                      );
 
-                    // Add event to Firestore in 'events' collection
-                    DocumentReference newEvent = await FirebaseFirestore
-                        .instance
-                        .collection('events')
-                        .add({
-                      'eventName': titleController.text,
-                      'venue': venueController.text,
-                      'date': Timestamp.fromDate(eventDate!),
-                      'startTime': Timestamp.fromDate(startDateTime),
-                      'endTime': Timestamp.fromDate(endDateTime),
-                      'parentFest': FirebaseFirestore.instance
+                      // Add event to Firestore in 'events' collection
+                      DocumentReference newEvent = await FirebaseFirestore
+                          .instance
+                          .collection('events')
+                          .add({
+                        'eventName': titleController.text,
+                        'venue': venueController.text,
+                        'date': Timestamp.fromDate(eventDate!),
+                        'startTime': Timestamp.fromDate(startDateTime),
+                        'endTime': Timestamp.fromDate(endDateTime),
+                        'parentFest': FirebaseFirestore.instance
+                            .collection('fests')
+                            .doc(docId),
+                        'createdAt': FieldValue.serverTimestamp(),
+                      });
+
+                      // Link event in parent fest document
+                      await FirebaseFirestore.instance
                           .collection('fests')
-                          .doc(docId),
-                      'createdAt': FieldValue.serverTimestamp(),
-                    });
+                          .doc(docId)
+                          .update({
+                        field: FieldValue.arrayUnion([newEvent]),
+                      });
 
-                    // Link event in parent fest document
-                    await FirebaseFirestore.instance
-                        .collection('fests')
-                        .doc(docId)
-                        .update({
-                      field: FieldValue.arrayUnion([newEvent]),
-                    });
-
-                    Navigator.pop(context); // Close the dialog
-                    _fetchText(); // Refresh UI
-                  } catch (e) {
-                    print("Error adding event: $e");
+                      Navigator.pop(context); // Close the dialog
+                      _fetchText(); // Refresh UI
+                    } catch (e) {
+                      print("Error adding event: $e");
+                    }
                   }
-                }
-              },
-              child: const Text("Add"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-          ],
-        );
-      },
-    );
-  },
-);
-
+                },
+                child: const Text("Add"),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
 
 // Date Picker Function

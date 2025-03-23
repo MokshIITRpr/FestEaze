@@ -8,14 +8,13 @@ import 'package:fest_app/pages/Fests/widgets/autoImageSlider.dart';
 
 class EventTemplatePage extends StatefulWidget {
   final String title;
-  final String docId;
   final bool isSuperAdmin;
-
+  final DocumentReference eventRef;
   const EventTemplatePage({
     super.key,
     required this.title,
-    required this.docId,
     required this.isSuperAdmin,
+    required this.eventRef,
   });
 
   @override
@@ -46,7 +45,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
 
   Future<void> _fetchUserData() async {
     var docSnapshot =
-        await _firestore.collection('events').doc(widget.docId).get();
+        await _firestore.collection('events').doc(widget.eventRef.id).get();
     if (docSnapshot.exists) {
       User? user = _auth.currentUser;
       if (user != null) {
@@ -72,7 +71,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
 
   Future<void> _fetchEventData() async {
     var docSnapshot =
-        await _firestore.collection('events').doc(widget.docId).get();
+        await _firestore.collection('events').doc(widget.eventRef.id).get();
     if (docSnapshot.exists) {
       setState(() {
         eventData = docSnapshot.data();
@@ -92,7 +91,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   }
 
   Future<void> _updateEventData() async {
-    await _firestore.collection('events').doc(widget.docId).update({
+    await _firestore.collection('events').doc(widget.eventRef.id).update({
       'date': Timestamp.fromDate(
           DateFormat('dd-MM-yyyy').parse(_dateController.text)),
       'startTime': Timestamp.fromDate(
@@ -153,14 +152,16 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                   IconButton(
                     icon: const Icon(Icons.person_add_alt_1_outlined,
                         color: Colors.white),
-                    onPressed: () => showAuthDialog(context, widget.docId, "volunteer"),
+                    onPressed: () => showAuthDialog(
+                        context, widget.eventRef.id, "volunteer"),
                     tooltip: "Add Volunteers",
                   ),
                 if (widget.isSuperAdmin)
                   IconButton(
                     icon: const Icon(Icons.person_add_alt_1_outlined,
                         color: Colors.white),
-                    onPressed: () => showAuthDialog(context, widget.docId, "manager"),
+                    onPressed: () =>
+                        showAuthDialog(context, widget.eventRef.id, "manager"),
                     tooltip: "Add Manager",
                   ),
               ],

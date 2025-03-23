@@ -40,13 +40,13 @@ class _TemplatePageState extends State<TemplatePage> {
   List<DocumentReference> subEventsList = [];
   List<DocumentReference> filteredEvents =
       []; // For filtered events based on search query
+  List<DocumentReference> favouriteEvents = [];
 
   @override
   void initState() {
     super.initState();
     _fetchText();
     _fetchUserData();
-    filteredEvents = proniteEvents;
   }
 
   Future<void> _fetchUserData() async {
@@ -64,11 +64,21 @@ class _TemplatePageState extends State<TemplatePage> {
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
           bool a1 = userData['admin'] ?? false;
-          bool a2 = docSnapshot['manager'].contains(userData['email']) ?? false;
+          bool a2 = false;
 
+          // Fetch favourites as List<DocumentReference>
+          List<DocumentReference> favs =
+              (userData['favourites'] as List<dynamic>)
+                  .map((e) => e as DocumentReference)
+                  .toList();
+          try {
+            a2 = docSnapshot['manager'].contains(userData['email']);
+          } catch (e) {
+            a2 = false;
+          }
           setState(() {
             _isAdmin = (a1 || a2);
-            // print(_isAdmin);
+            favouriteEvents = favs;
           });
         }
       }
@@ -135,6 +145,39 @@ class _TemplatePageState extends State<TemplatePage> {
 
   void _addEvent(String field) {
     showEventDialog(context, field, widget.docId, setState, _fetchText);
+  }
+
+  void toggleFavorite(DocumentReference eventRef, BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // Show a SnackBar prompting the user to log in
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to add favorites!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (favouriteEvents.contains(eventRef)) {
+      favouriteEvents.remove(eventRef); // Remove from favorites
+    } else {
+      favouriteEvents.add(eventRef); // Add to favorites
+    }
+
+    setState(() {}); // Update UI
+
+    // Firestore update
+    FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+      'favourites': favouriteEvents.toList(),
+    }).catchError((error) {
+      // Handle Firestore errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating favorites: $error')),
+      );
+    });
   }
 
   @override
@@ -303,8 +346,8 @@ class _TemplatePageState extends State<TemplatePage> {
                                   MaterialPageRoute(
                                     builder: (context) => EventTemplatePage(
                                       title: eventName,
-                                      docId: docId,
                                       isSuperAdmin: _isAdmin,
+                                      eventRef: eventRef,
                                     ),
                                   ),
                                 );
@@ -356,13 +399,45 @@ class _TemplatePageState extends State<TemplatePage> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              eventName,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                color: Colors.black87,
-                                              ),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    eventName,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Colors.black87,
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                    width:
+                                                        8), // Space before the star icon
+                                                GestureDetector(
+                                                  onTap: () => toggleFavorite(
+                                                      eventRef,
+                                                      context), // Toggle favorite
+                                                  child: Icon(
+                                                    favouriteEvents
+                                                            .contains(eventRef)
+                                                        ? Icons
+                                                            .star // Filled star if it's a favorite
+                                                        : Icons
+                                                            .star_border_outlined, // Outlined star otherwise
+                                                    size: 20,
+                                                    color: favouriteEvents
+                                                            .contains(eventRef)
+                                                        ? const Color.fromARGB(
+                                                            255, 236, 54, 54)
+                                                        : Colors.black,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                             const SizedBox(height: 4),
                                             Row(
