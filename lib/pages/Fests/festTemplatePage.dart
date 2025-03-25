@@ -28,6 +28,7 @@ class _TemplatePageState extends State<TemplatePage> {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isAdmin = false;
+  final _userdata = UserData();
 
   final List<String> _imagePaths = [
     'assets/aarohan.jpg',
@@ -58,8 +59,7 @@ class _TemplatePageState extends State<TemplatePage> {
     if (docSnapshot.exists) {
       User? user = _auth.currentUser;
       if (user != null) {
-        DocumentSnapshot userDoc =
-            await _firestore.collection('users').doc(user.uid).get();
+        DocumentSnapshot userDoc = await _userdata.getUser();
         if (userDoc.exists) {
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
@@ -67,9 +67,8 @@ class _TemplatePageState extends State<TemplatePage> {
           bool a2 = false;
 
           // Fetch favourites as List<DocumentReference>
-          List<String> favs = (userData['favourites'] as List<dynamic>)
-              .map((e) => e as String)
-              .toList();
+          List<String>? tempFav = _userdata.getFavorites();
+          List<String> favs = tempFav ?? [];
           try {
             a2 = docSnapshot['manager'].contains(userData['email']);
           } catch (e) {
@@ -168,15 +167,14 @@ class _TemplatePageState extends State<TemplatePage> {
 
     setState(() {}); // Update UI
 
-    // Firestore update
-    FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-      'favourites': favouriteEvents.toList(),
-    }).catchError((error) {
-      // Handle Firestore errors
+    try {
+      _userdata.updateWishlist(favouriteEvents);
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating favorites: $error')),
+        SnackBar(content: Text('Error updating favorites: $e')),
       );
-    });
+    }
+    ;
   }
 
   @override

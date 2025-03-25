@@ -14,6 +14,7 @@ class UserData {
   // Cache the future and the associated UID
   Future<DocumentSnapshot>? _user;
   String? _cachedUid;
+  List<String>? favs;
 
   Future<DocumentSnapshot> _fetchUser() async {
     final uid = _auth.currentUser?.uid;
@@ -22,6 +23,7 @@ class UserData {
     }
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
+      await _fetchFavorites();
       return doc;
     } catch (e) {
       throw Exception("Failed to load user: $e");
@@ -42,9 +44,38 @@ class UserData {
     return await _user!;
   }
 
+  void updateWishlist(List<String> favouriteEvents) {
+    final currentUid = _auth.currentUser?.uid;
+    try {
+      if (_user != null && _cachedUid == currentUid) {
+        final uid = _auth.currentUser?.uid;
+        _firestore.collection('users').doc(uid).update({
+          'favourites': favouriteEvents.toList(),
+        });
+        favs = favouriteEvents;
+      }
+    } catch (e) {
+      throw Exception("Could not update favorites");
+    }
+  }
+
+  Future<void> _fetchFavorites() async {
+    favs = List<String>.from((await FirebaseFirestore.instance
+                .collection('users')
+                .doc(_auth.currentUser!.uid)
+                .get())
+            .data()?['favourites'] ??
+        []);
+  }
+
+  List<String>? getFavorites() {
+    return favs;
+  }
+
   void clearCache() {
     print("Clearing cached user data...");
     _user = null;
     _cachedUid = null;
+    favs = null;
   }
 }

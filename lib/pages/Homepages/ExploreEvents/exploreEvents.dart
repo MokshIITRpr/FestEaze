@@ -84,7 +84,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
   }
 
   /// Builds a card widget for the given event.
-  Widget _buildEventCard(Event event) {
+  Widget _buildEventCard(Event event, bool ongoingEvent) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
       child: Card(
@@ -140,7 +140,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
                 ),
                 Spacer(),
                 // Icon for adding a manager for the event
-                if (_isAdmin)
+                if (ongoingEvent && _isAdmin)
                   GestureDetector(
                     onTap: () => showAuthDialog(context, event.name),
                     child: Icon(
@@ -157,10 +157,11 @@ class _ExploreEventsState extends State<ExploreEvents> {
   }
 
   /// Builds a list view of event cards.
-  Widget _buildEventList(List<Event> events) {
+  Widget _buildEventList(List<Event> events, bool ongoingEvent) {
     return ListView.builder(
       itemCount: events.length,
-      itemBuilder: (context, index) => _buildEventCard(events[index]),
+      itemBuilder: (context, index) =>
+          _buildEventCard(events[index], ongoingEvent),
     );
   }
 
@@ -240,17 +241,18 @@ class _ExploreEventsState extends State<ExploreEvents> {
                     children: [
                       // Ongoing Events Tab
                       eventsMap["Ongoing Events"]!.isNotEmpty
-                          ? _buildEventList(eventsMap["Ongoing Events"]!)
+                          ? _buildEventList(eventsMap["Ongoing Events"]!, true)
                           : const Center(
                               child: Text("No Ongoing Events available.")),
                       // Upcoming Events Tab
                       eventsMap["Upcoming Events"]!.isNotEmpty
-                          ? _buildEventList(eventsMap["Upcoming Events"]!)
+                          ? _buildEventList(
+                              eventsMap["Upcoming Events"]!, false)
                           : const Center(
                               child: Text("No Upcoming Events available.")),
                       // Past Events Tab
                       eventsMap["Past Events"]!.isNotEmpty
-                          ? _buildEventList(eventsMap["Past Events"]!)
+                          ? _buildEventList(eventsMap["Past Events"]!, false)
                           : const Center(
                               child: Text("No Past Events available.")),
                     ],
