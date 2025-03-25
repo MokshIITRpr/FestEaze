@@ -40,7 +40,7 @@ class _TemplatePageState extends State<TemplatePage> {
   List<DocumentReference> subEventsList = [];
   List<DocumentReference> filteredEvents =
       []; // For filtered events based on search query
-  List<DocumentReference> favouriteEvents = [];
+  List<String> favouriteEvents = [];
 
   @override
   void initState() {
@@ -67,10 +67,9 @@ class _TemplatePageState extends State<TemplatePage> {
           bool a2 = false;
 
           // Fetch favourites as List<DocumentReference>
-          List<DocumentReference> favs =
-              (userData['favourites'] as List<dynamic>)
-                  .map((e) => e as DocumentReference)
-                  .toList();
+          List<String> favs = (userData['favourites'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList();
           try {
             a2 = docSnapshot['manager'].contains(userData['email']);
           } catch (e) {
@@ -161,10 +160,10 @@ class _TemplatePageState extends State<TemplatePage> {
       return;
     }
 
-    if (favouriteEvents.contains(eventRef)) {
-      favouriteEvents.remove(eventRef); // Remove from favorites
+    if (favouriteEvents.contains(eventRef.id)) {
+      favouriteEvents.remove(eventRef.id); // Remove from favorites
     } else {
-      favouriteEvents.add(eventRef); // Add to favorites
+      favouriteEvents.add(eventRef.id); // Add to favorites
     }
 
     setState(() {}); // Update UI
@@ -423,15 +422,16 @@ class _TemplatePageState extends State<TemplatePage> {
                                                       eventRef,
                                                       context), // Toggle favorite
                                                   child: Icon(
-                                                    favouriteEvents
-                                                            .contains(eventRef)
+                                                    favouriteEvents.contains(
+                                                            eventRef.id)
                                                         ? Icons
                                                             .star // Filled star if it's a favorite
                                                         : Icons
                                                             .star_border_outlined, // Outlined star otherwise
                                                     size: 20,
                                                     color: favouriteEvents
-                                                            .contains(eventRef)
+                                                            .contains(
+                                                                eventRef.id)
                                                         ? const Color.fromARGB(
                                                             255, 236, 54, 54)
                                                         : Colors.black,
