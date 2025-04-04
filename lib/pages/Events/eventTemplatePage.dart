@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:fest_app/pages/Events/widgets/addAuth.dart';
 import 'package:fest_app/pages/Fests/widgets/autoImageSlider.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 
 class EventTemplatePage extends StatefulWidget {
   final String title;
@@ -28,13 +28,13 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isAdmin = false;
+  bool _isRegistered = false;
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
   final TextEditingController _venueController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _googleFormController = TextEditingController();
 
   @override
   void initState() {
@@ -85,8 +85,18 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
             .format((eventData!['endTime'] as Timestamp).toDate());
         _venueController.text = eventData!['venue'] ?? "";
         _descriptionController.text = eventData!['description'] ?? "";
-        _googleFormController.text = eventData!['googleFormLink'] ?? "";
       });
+
+      // Check if the current user is already registered
+      User? user = _auth.currentUser;
+      if (user != null && eventData != null) {
+        List registrations = eventData!['registrations'] ?? [];
+        bool alreadyRegistered =
+            registrations.any((reg) => reg['uid'] == user.uid);
+        setState(() {
+          _isRegistered = alreadyRegistered;
+        });
+      }
     }
   }
 
@@ -100,7 +110,6 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
           DateFormat('HH:mm').parse(_endTimeController.text)),
       'venue': _venueController.text,
       'description': _descriptionController.text,
-      'googleFormLink': _googleFormController.text,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -108,15 +117,146 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
     );
   }
 
-  void _launchGoogleForm() {
-    String? googleFormLink = eventData?['googleFormLink'];
-    if (googleFormLink != null &&
-        googleFormLink.isNotEmpty &&
-        googleFormLink != "") {
-      launchUrl(Uri.parse(googleFormLink));
+  // Registration method with duplicate-check
+  Future<void> _registerUser() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      if (_isRegistered) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("You have already registered to the event")),
+        );
+        return;
+      }
+      try {
+        await _firestore.collection('events').doc(widget.eventRef.id).update({
+          'registrations': FieldValue.arrayUnion([
+            {'uid': user.uid, 'ispresent': false}
+          ])
+        });
+        setState(() {
+          _isRegistered = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registered successfully!")),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration failed: $e")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No registration link available!")),
+        const SnackBar(content: Text("User not logged in!")),
+      );
+    }
+  }
+
+  // Method to show registration details in a popup dialog
+  Future<void> _showRegistrationsDialog() async {
+    List registrations = eventData?['registrations'] ?? [];
+    List<Map<String, dynamic>> registrationsDetails = [];
+
+    // Fetch user details for each registration
+    for (var reg in registrations) {
+      String uid = reg['uid'];
+      bool isPresent = reg['ispresent'];
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+        // Using "username" key; adjust if your user document key is different.
+        String username = userData['username'] ?? "No Name";
+        String email = userData['email'] ?? "No Email";
+        registrationsDetails.add({
+          'username': username,
+          'email': email,
+          'ispresent': isPresent,
+        });
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Registrations"),
+          content: Container(
+            width: double.maxFinite,
+            child: registrationsDetails.isNotEmpty
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: registrationsDetails.length,
+                    itemBuilder: (context, index) {
+                      var regDetail = registrationsDetails[index];
+                      return ListTile(
+                        title: Text(regDetail['username']),
+                        subtitle: Text(regDetail['email']),
+                        trailing: Text(
+                          regDetail['ispresent'] ? "Present" : "Absent",
+                          style: TextStyle(
+                            color: regDetail['ispresent']
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : const Center(child: Text("No registrations found")),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Close"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  // Method to scan QR code and mark user as present
+  Future<void> _scanQRCode() async {
+    try {
+      // This uses the barcode_scan2 package to scan the QR code.
+      var scanResult = await BarcodeScanner.scan();
+      String scannedUID = scanResult.rawContent;
+      if (scannedUID.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No QR code data found")),
+        );
+        return;
+      }
+      // Read current registrations from eventData.
+      List registrations = eventData?['registrations'] ?? [];
+      bool found = false;
+      for (int i = 0; i < registrations.length; i++) {
+        if (registrations[i]['uid'] == scannedUID) {
+          // Update the ispresent field for the matching registration.
+          registrations[i]['ispresent'] = true;
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        await _firestore.collection('events').doc(widget.eventRef.id).update({
+          'registrations': registrations,
+        });
+        // Refresh the event data.
+        await _fetchEventData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("User presence marked.")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("User not registered.")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("QR scan failed: $e")),
       );
     }
   }
@@ -129,15 +269,38 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Button styles: blue for not registered, green for registered.
+    final ButtonStyle blueStyle = ElevatedButton.styleFrom(
+      backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+    );
+    final ButtonStyle greenStyle =
+        ElevatedButton.styleFrom(backgroundColor: Colors.green);
+
     return Scaffold(
       appBar: _isLoading
           ? AppBar()
           : AppBar(
               backgroundColor: const Color.fromARGB(255, 84, 91, 216),
-              title: Text(eventData!['eventName'],
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white)),
+              title: Text(
+                eventData!['eventName'],
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.white),
+              ),
               actions: [
+                // QR Scanner icon (only visible to admins and event managers)
+                if (_isAdmin)
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                    tooltip: "Scan QR Code",
+                    onPressed: _scanQRCode,
+                  ),
+                // Registration details icon (visible to admins)
+                if (_isAdmin)
+                  IconButton(
+                    icon: const Icon(Icons.list_alt, color: Colors.white),
+                    tooltip: "View Registrations",
+                    onPressed: _showRegistrationsDialog,
+                  ),
                 if (_isAdmin)
                   IconButton(
                     icon: Icon(
@@ -195,7 +358,8 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                                 controller: _dateController,
                                 decoration: const InputDecoration(
                                     labelText: "Event Date",
-                                    border: OutlineInputBorder())),
+                                    border: OutlineInputBorder()),
+                              ),
                         const SizedBox(height: 10),
                         _isPreviewMode || !_isAdmin
                             ? Text(
@@ -203,18 +367,20 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                             : Row(
                                 children: [
                                   Expanded(
-                                      child: TextField(
-                                          controller: _startTimeController,
-                                          decoration: const InputDecoration(
-                                              labelText: "Start Time",
-                                              border: OutlineInputBorder()))),
+                                    child: TextField(
+                                        controller: _startTimeController,
+                                        decoration: const InputDecoration(
+                                            labelText: "Start Time",
+                                            border: OutlineInputBorder())),
+                                  ),
                                   const SizedBox(width: 10),
                                   Expanded(
-                                      child: TextField(
-                                          controller: _endTimeController,
-                                          decoration: const InputDecoration(
-                                              labelText: "End Time",
-                                              border: OutlineInputBorder()))),
+                                    child: TextField(
+                                        controller: _endTimeController,
+                                        decoration: const InputDecoration(
+                                            labelText: "End Time",
+                                            border: OutlineInputBorder())),
+                                  ),
                                 ],
                               ),
                         const SizedBox(height: 10),
@@ -224,8 +390,8 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                                 controller: _venueController,
                                 decoration: const InputDecoration(
                                     labelText: "Venue",
-                                    border: OutlineInputBorder())),
-
+                                    border: OutlineInputBorder()),
+                              ),
                         const SizedBox(height: 20),
                         if (_isPreviewMode || !_isAdmin)
                           const Text(
@@ -235,9 +401,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87),
                           ),
-
                         const SizedBox(height: 10),
-
                         _isPreviewMode || !_isAdmin
                             ? Container(
                                 padding: const EdgeInsets.all(12),
@@ -261,47 +425,37 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                                   border: OutlineInputBorder(),
                                 ),
                               ),
-
                         const SizedBox(height: 20),
-
-// If admin and NOT in preview mode, allow editing the Google Form link
-                        if (_isAdmin && !_isPreviewMode)
-                          TextField(
-                            controller: _googleFormController,
-                            decoration: const InputDecoration(
-                              labelText: "Google Form Link",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        const SizedBox(height: 20),
+                        // If admin is editing, show the Save Changes button.
                         if (!_isPreviewMode && _isAdmin)
                           ElevatedButton(
                               onPressed: _updateEventData,
                               child: const Text("Save Changes")),
+                        // Registration button (shown in preview mode or for non-admin users)
                         if (_isPreviewMode || !_isAdmin)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "🔗 Registration Link:",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                          Center(
+                            child: ElevatedButton(
+                              style: _isRegistered ? greenStyle : blueStyle,
+                              onPressed: () {
+                                if (_isRegistered) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "You have already registered to the event")),
+                                  );
+                                } else {
+                                  _registerUser();
+                                }
+                              },
+                              child: Text(
+                                _isRegistered ? "Registered" : "Register",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              eventData?['googleFormLink'] != null &&
-                                      eventData!['googleFormLink'].isNotEmpty
-                                  ? TextButton(
-                                      onPressed: _launchGoogleForm,
-                                      child: const Text(
-                                          "Click here to Register",
-                                          style: TextStyle(
-                                              color: Colors.blue,
-                                              fontSize: 16)),
-                                    )
-                                  : const Text(
-                                      "No registration link available!",
-                                      style: TextStyle(
-                                          color: Colors.red, fontSize: 16)),
-                            ],
+                            ),
                           ),
                       ],
                     ),

@@ -22,6 +22,7 @@ dependencies:
   url_launcher: ^6.2.4
   file_picker: ^8.0.0
   csv: ^5.0.0
+  barcode_scan2: ^4.5.1
 
 dev_dependencies:
   flutter_test:
