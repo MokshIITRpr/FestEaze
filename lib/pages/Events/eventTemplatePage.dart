@@ -151,8 +151,11 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
     }
   }
 
-  // Method to show registration details in a popup dialog
+  // Method to show registration details in a popup dialog.
+  // Now it first refreshes the event data.
   Future<void> _showRegistrationsDialog() async {
+    // Refresh event data to get the latest registrations.
+    await _fetchEventData();
     List registrations = eventData?['registrations'] ?? [];
     List<Map<String, dynamic>> registrationsDetails = [];
 
@@ -164,7 +167,6 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
           await _firestore.collection('users').doc(uid).get();
       if (userDoc.exists) {
         Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-        // Using "username" key; adjust if your user document key is different.
         String username = userData['username'] ?? "No Name";
         String email = userData['email'] ?? "No Email";
         registrationsDetails.add({
@@ -220,7 +222,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   // Method to scan QR code and mark user as present
   Future<void> _scanQRCode() async {
     try {
-      // This uses the barcode_scan2 package to scan the QR code.
+      // Scan the QR code using barcode_scan2 package.
       var scanResult = await BarcodeScanner.scan();
       String scannedUID = scanResult.rawContent;
       if (scannedUID.isEmpty) {
