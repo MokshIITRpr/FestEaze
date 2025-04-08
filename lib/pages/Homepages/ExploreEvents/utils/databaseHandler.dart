@@ -50,7 +50,7 @@ class DatabaseHandler {
               : null,
           'venue': eventData['venue'] ?? "TBA",
           'description': eventData['description'] ?? "No description",
-          'googleFormLink': eventData['googleFormLink'] ?? null,
+          'type': eventData['type'] ?? null,
           'parentFest': festRef, // 🔥 Store as DocumentReference
           'createdAt': Timestamp.now(),
         });

@@ -42,7 +42,7 @@ class _TemplatePageState extends State<TemplatePage> {
   List<DocumentReference> subEventsList = [];
   List<DocumentReference> filteredEvents = []; // For filtered events based on search query
   List<String> favouriteEvents = [];
-
+  List<String> observers = [];
   @override
   void initState() {
     super.initState();
@@ -291,6 +291,7 @@ class _TemplatePageState extends State<TemplatePage> {
                     String eventName = eventData['eventName'] ?? 'No title';
                     String venue = eventData['venue'] ?? 'Unknown';
                     String type = eventData['type'] ?? 'None';
+                    type = type.trim();
                     String imageType = (type == 'None' ? 'assets/bg_img.jpg' : 'assets/$type.jpeg');
 
                     // Handle Timestamp fields.
