@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fest_app/snackbar.dart';
 
 void showAuthDialog(BuildContext context, String docId, String position) {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -51,39 +52,39 @@ void showAuthDialog(BuildContext context, String docId, String position) {
 
                     if (docSnapshot.exists) {
                       DocumentReference eventDoc = docSnapshot.reference;
-                      position == 'manager'
-                          ? await eventDoc.update({
-                              'manager':
-                                  FieldValue.arrayUnion([nameController.text])
-                            })
-                          : await eventDoc.update({
-                              'volunteers':
-                                  FieldValue.arrayUnion([nameController.text])
-                            });
+                      if (position == 'manager') {
+                        await eventDoc.update({
+                          'manager': FieldValue.arrayUnion([nameController.text])
+                        });
+                        print("Manager added successfully to the event!");
+                      } else {
+                        await eventDoc.update({
+                          'volunteers': FieldValue.arrayUnion([nameController.text])
+                        });
+                        print("Volunteer added successfully to the event!");
+                      }
 
-                      // TODO : add checks for username matching in database and add user id here
-                      position == 'manager'
-                          ? print("Manager added successfully to the event!")
-                          : print("Volunteer added successfully to the event!");
                       Navigator.of(context).pop(); // Close dialog
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: position == 'manager'
-                                ? Text(
-                                    '${nameController.text} updated as manager')
-                                : Text(
-                                    '${nameController.text} updated as volunteer')),
+                      showCustomSnackBar(
+                        context,
+                        position == 'manager'
+                            ? '${nameController.text} updated as manager'
+                            : '${nameController.text} updated as volunteer',
+                        backgroundColor: Colors.green,
+                        icon: Icons.check_circle,
                       );
                     } else {
                       print("No event found with the docId : $docId");
                     }
                   } catch (e) {
                     print("Error adding manager: $e");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: position == 'manager'
-                              ? Text('Error adding manager: ${e}')
-                              : Text('Error adding volunteer: ${e}')),
+                    showCustomSnackBar(
+                      context,
+                      position == 'manager'
+                          ? 'Error adding manager: ${e}'
+                          : 'Error adding volunteer: ${e}',
+                      backgroundColor: Colors.red,
+                      icon: Icons.error,
                     );
                   }
                 }

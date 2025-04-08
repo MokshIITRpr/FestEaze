@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // For SystemUiOverlayStyle
+import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:fest_app/data.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/widgets.dart'; // For WidgetStateProperty
+import 'package:flutter/widgets.dart';
 import 'package:fest_app/pages/Events/eventTemplatePage.dart';
+import 'package:fest_app/snackbar.dart';
 
 class QRScreen extends StatefulWidget {
   const QRScreen({Key? key}) : super(key: key);
@@ -85,8 +86,12 @@ class _QRScreenState extends State<QRScreen> {
       await FirebaseAuth.instance.signOut();
       Navigator.pushReplacementNamed(context, '/homeScreen');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Logout failed. Please try again!")),
+      // Using custom snackbar instead of regular SnackBar
+      showCustomSnackBar(
+        context,
+        "Logout failed. Please try again!",
+        backgroundColor: Colors.red,
+        icon: Icons.error,
       );
     }
   }
@@ -97,8 +102,11 @@ class _QRScreenState extends State<QRScreen> {
       eventIds.remove(eventRef.id); // Remove from favorites
       favoriteEvents.remove(eventRef);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating favorites... Please retry')),
+      showCustomSnackBar(
+        context,
+        'Error updating favorites... Please retry',
+        backgroundColor: Colors.red,
+        icon: Icons.error,
       );
     }
 
@@ -107,8 +115,11 @@ class _QRScreenState extends State<QRScreen> {
     try {
       _userData.updateWishlist(eventIds);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating favorites: $e')),
+      showCustomSnackBar(
+        context,
+        'Error updating favorites: $e',
+        backgroundColor: Colors.red,
+        icon: Icons.error,
       );
     }
   }
@@ -222,12 +233,9 @@ class _QRScreenState extends State<QRScreen> {
                                   backgroundColor:
                                       WidgetStateProperty.resolveWith<Color>(
                                     (Set<MaterialState> states) {
-                                      // When the button is pressed, show the pressed effect
-                                      if (states
-                                          .contains(MaterialState.pressed)) {
+                                      if (states.contains(MaterialState.pressed)) {
                                         return Colors.redAccent;
                                       }
-                                      // Otherwise, use the hover state determined by the MouseRegion
                                       return _isHovered
                                           ? Colors.red.shade700
                                           : Colors.red;
@@ -263,8 +271,7 @@ class _QRScreenState extends State<QRScreen> {
                             Text(
                               favs.isNotEmpty ? "Favorites" : "Add Favorites",
                               style: TextStyle(
-                                fontFamily:
-                                    'PlayfairDisplay', // Optional custom font
+                                fontFamily: 'PlayfairDisplay',
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
@@ -278,8 +285,7 @@ class _QRScreenState extends State<QRScreen> {
                                 ],
                               ),
                             ),
-                            const SizedBox(
-                                width: 8), // Space between text and icon
+                            const SizedBox(width: 8),
                             favs.isNotEmpty
                                 ? Icon(
                                     Icons.favorite,
@@ -336,16 +342,13 @@ class _QRScreenState extends State<QRScreen> {
               Timestamp timestampEndTime =
                   eventData['endTime'] ?? Timestamp.now();
 
-              // Convert Timestamp to DateTime
               DateTime date = timestampDate.toDate();
               DateTime startTime = timestampStartTime.toDate();
               DateTime endTime = timestampEndTime.toDate();
 
-              // Format the date and time
               String formattedDate = DateFormat('dd-MM-yyyy').format(date);
               String formattedStartTime = DateFormat('HH:mm').format(startTime);
               String formattedEndTime = DateFormat('HH:mm').format(endTime);
-
               String timeRange = '$formattedStartTime - $formattedEndTime';
 
               return GestureDetector(
@@ -384,7 +387,6 @@ class _QRScreenState extends State<QRScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Header Container with background image and overlay icon.
                         Container(
                           height: 120,
                           decoration: BoxDecoration(
@@ -397,7 +399,6 @@ class _QRScreenState extends State<QRScreen> {
                               fit: BoxFit.cover,
                             ),
                           ),
-                          // Use Align to position the icon in the top-right without a full Stack.
                           child: Align(
                             alignment: Alignment.topRight,
                             child: Padding(
@@ -422,7 +423,6 @@ class _QRScreenState extends State<QRScreen> {
                             ),
                           ),
                         ),
-                        // The rest of your card content below.
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Column(

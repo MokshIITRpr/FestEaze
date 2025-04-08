@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:fest_app/snackbar.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -110,8 +111,9 @@ class _SignupPageState extends State<SignupPage> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
-                        border:
-                            Border.all(color: const Color.fromARGB(255, 84, 91, 216)),
+                        border: Border.all(
+                            color:
+                                const Color.fromARGB(255, 84, 91, 216)),
                         boxShadow: [
                           BoxShadow(
                             color: Color.fromRGBO(143, 148, 251, .2),
@@ -137,8 +139,10 @@ class _SignupPageState extends State<SignupPage> {
                                 border: InputBorder.none,
                                 labelText: usernameMessage,
                                 hintText: "Enter your username",
-                                hintStyle: TextStyle(color: Colors.grey[800]),
-                                labelStyle: TextStyle(color: Colors.black),
+                                hintStyle: TextStyle(
+                                    color: Colors.grey[800]),
+                                labelStyle:
+                                    TextStyle(color: Colors.black),
                               ),
                             ),
                           ),
@@ -157,8 +161,10 @@ class _SignupPageState extends State<SignupPage> {
                                 border: InputBorder.none,
                                 labelText: emailMessage,
                                 hintText: "Enter your email",
-                                hintStyle: TextStyle(color: Colors.grey[800]),
-                                labelStyle: TextStyle(color: Colors.black),
+                                hintStyle: TextStyle(
+                                    color: Colors.grey[800]),
+                                labelStyle:
+                                    TextStyle(color: Colors.black),
                               ),
                             ),
                           ),
@@ -172,8 +178,10 @@ class _SignupPageState extends State<SignupPage> {
                                 border: InputBorder.none,
                                 hintText: "Enter your password",
                                 labelText: passwordMessage,
-                                hintStyle: TextStyle(color: Colors.grey[800]),
-                                labelStyle: TextStyle(color: Colors.black),
+                                hintStyle: TextStyle(
+                                    color: Colors.grey[800]),
+                                labelStyle:
+                                    TextStyle(color: Colors.black),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscurePassword
@@ -182,7 +190,8 @@ class _SignupPageState extends State<SignupPage> {
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      _obscurePassword = !_obscurePassword;
+                                      _obscurePassword =
+                                          !_obscurePassword;
                                     });
                                   },
                                 ),
@@ -200,7 +209,8 @@ class _SignupPageState extends State<SignupPage> {
                     child: Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+                          backgroundColor:
+                              const Color.fromARGB(255, 84, 91, 216),
                           minimumSize: Size(double.infinity, 50),
                         ),
                         onPressed: () async {
@@ -211,9 +221,11 @@ class _SignupPageState extends State<SignupPage> {
                           if (_name.isEmpty ||
                               _email.isEmpty ||
                               _password.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Please fill in all fields')),
+                            showCustomSnackBar(
+                              context,
+                              'Please fill in all fields',
+                              backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+                              icon: Icons.error,
                             );
                           } else {
                             try {
@@ -221,8 +233,11 @@ class _SignupPageState extends State<SignupPage> {
                               Navigator.pushReplacementNamed(
                                   context, '/verificationScreen');
                             } on FirebaseAuthException catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.message!)),
+                              showCustomSnackBar(
+                                context,
+                                e.message!,
+                                backgroundColor: Colors.red,
+                                icon: Icons.error,
                               );
                             }
                           }
