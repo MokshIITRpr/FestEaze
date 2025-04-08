@@ -246,8 +246,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
                               child: Text("No Ongoing Events available.")),
                       // Upcoming Events Tab
                       eventsMap["Upcoming Events"]!.isNotEmpty
-                          ? _buildEventList(
-                              eventsMap["Upcoming Events"]!, false)
+                          ? _buildEventList(eventsMap["Upcoming Events"]!, true)
                           : const Center(
                               child: Text("No Upcoming Events available.")),
                       // Past Events Tab
