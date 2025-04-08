@@ -1,6 +1,6 @@
-# FestEaze  
+# FestEz  
 
-FestEaze is an ongoing project designed to streamline fest management and enhance the experience of attendees.  
+FestEz is an ongoing project designed to streamline fest management and enhance the experience of attendees.  
 
 ## 🚀 Tech Stack  
 - **Flutter** – For building a seamless and responsive cross-platform application.  
