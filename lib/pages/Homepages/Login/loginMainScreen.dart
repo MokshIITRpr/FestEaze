@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../messages/messages.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:fest_app/pages/Homepages/Login/loginTextWidget.dart';
 
 class LoginMainScreen extends StatefulWidget {
   const LoginMainScreen({super.key});
@@ -10,18 +11,15 @@ class LoginMainScreen extends StatefulWidget {
 }
 
 class _LoginMainScreenState extends State<LoginMainScreen> {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+  final GlobalKey<LoginTextWidgetState> _loginKey =
+      GlobalKey<LoginTextWidgetState>();
 
-  bool _obscurePassword = true;
   String _username = "";
   String _password = "";
 
   @override
   void dispose() {
-    usernameController.dispose();
-    passwordController.dispose();
     super.dispose();
   }
 
@@ -29,7 +27,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
     try {
       await _auth.signInWithEmailAndPassword(
           email: _username, password: _password);
-      
+
       // print(userCredentials);
     } on FirebaseAuthException catch (e) {
       print(e.message);
@@ -125,61 +123,7 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                                       blurRadius: 20.0,
                                       offset: Offset(0, 10))
                                 ]),
-                            child: Column(
-                              children: <Widget>[
-                                Container(
-                                  padding: EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              color: Color.fromRGBO(
-                                                  143, 148, 251, 1)))),
-                                  child: TextField(
-                                    controller: usernameController,
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      labelText: emailMessage,
-                                      hintText: "Enter your email",
-                                      hintStyle:
-                                          TextStyle(color: Colors.grey[800]),
-                                      labelStyle:
-                                          TextStyle(color: Colors.black),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: TextField(
-                                    obscureText: _obscurePassword,
-                                    controller: passwordController,
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: "Enter your password",
-                                      labelText: passwordMessage,
-                                      hintStyle:
-                                          TextStyle(color: Colors.grey[800]),
-                                      labelStyle:
-                                          TextStyle(color: Colors.black),
-                                      suffixIcon: IconButton(
-                                        icon: Icon(
-                                          _obscurePassword
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            _obscurePassword =
-                                                !_obscurePassword;
-                                            _username = usernameController.text;
-                                            _password = passwordController.text;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+                            child: LoginTextWidget(key: _loginKey),
                           )),
                       SizedBox(
                         height: 30,
@@ -187,14 +131,15 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                       FadeInUp(
                           duration: Duration(milliseconds: 950),
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/forgotPassword');
-                            },
-                          child: Text(
-                            forgotPassword,
-                            style: TextStyle(
-                                color: const Color.fromARGB(255, 84, 91, 216)),
-                          ))),
+                              onTap: () {
+                                Navigator.pushNamed(context, '/forgotPassword');
+                              },
+                              child: Text(
+                                forgotPassword,
+                                style: TextStyle(
+                                    color:
+                                        const Color.fromARGB(255, 84, 91, 216)),
+                              ))),
                       SizedBox(
                         height: 20,
                       ),
@@ -203,12 +148,13 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                         child: Center(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+                              backgroundColor:
+                                  const Color.fromARGB(255, 84, 91, 216),
                               minimumSize: Size(double.infinity, 50),
                             ),
                             onPressed: () async {
-                              _username = usernameController.text;
-                              _password = passwordController.text;
+                              _username = _loginKey.currentState!.username;
+                              _password = _loginKey.currentState!.password;
 
                               // null check
                               if (_username.isEmpty || _password.isEmpty) {
@@ -220,7 +166,8 @@ class _LoginMainScreenState extends State<LoginMainScreen> {
                               } else {
                                 try {
                                   await loginUser();
-                                  Navigator.pushReplacementNamed(context, '/homeScreen');
+                                  Navigator.pushReplacementNamed(
+                                      context, '/homeScreen');
                                 } on FirebaseAuthException catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(e.message!)),
