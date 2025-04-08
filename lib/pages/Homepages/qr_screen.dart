@@ -325,6 +325,9 @@ class _QRScreenState extends State<QRScreen> {
               // Extract event details
               String eventName = eventData['eventName'] ?? 'No title';
               String venue = eventData['venue'] ?? 'Unknown';
+              String type = eventData['type'] ?? 'None';
+              String imageType =
+                  (type == 'None' ? 'assets/bg_img.jpg' : 'assets/$type.jpeg');
 
               // Handle Timestamp fields
               Timestamp timestampDate = eventData['date'] ?? Timestamp.now();
@@ -389,8 +392,8 @@ class _QRScreenState extends State<QRScreen> {
                               topLeft: Radius.circular(12),
                               topRight: Radius.circular(12),
                             ),
-                            image: const DecorationImage(
-                              image: AssetImage('assets/bg_img.jpg'),
+                            image: DecorationImage(
+                              image: AssetImage(imageType),
                               fit: BoxFit.cover,
                             ),
                           ),

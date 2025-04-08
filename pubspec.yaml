@@ -37,7 +37,7 @@ flutter:
     - assets/clock.png
     - assets/light-1.png
     - assets/light-2.png
-    - assets/basketball.jpg
+    - assets/basketball.jpeg
     - assets/test_img1.jpg
     - assets/test_img2.jpg
     - assets/test_img3.jpeg
@@ -52,3 +52,11 @@ flutter:
     - assets/sponsor_3.jpg
     - assets/night_iitrpr.jpg
     - assets/bg_img.jpg
+    - assets/Basketball.jpeg
+    - assets/Star Night.jpeg
+    - assets/Volleyball.jpeg
+    - assets/DJ Night.jpeg
+    - assets/Cricket.jpeg
+    - assets/Coding.jpeg
+    - assets/Software.jpeg
+    - assets/Dance.jpeg

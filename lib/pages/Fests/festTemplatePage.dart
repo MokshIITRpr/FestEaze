@@ -174,7 +174,6 @@ class _TemplatePageState extends State<TemplatePage> {
         SnackBar(content: Text('Error updating favorites: $e')),
       );
     }
-    
   }
 
   @override
@@ -310,6 +309,10 @@ class _TemplatePageState extends State<TemplatePage> {
                                 eventData['eventName'] ?? 'No title';
                             String venue = eventData['venue'] ?? 'Unknown';
                             String docId = eventRef.id; // Get document ID
+                            String type = eventData['type'] ?? 'None';
+                            String imageType = (type == 'None'
+                                ? 'assets/bg_img.jpg'
+                                : 'assets/$type.jpeg');
 
                             // Handle Timestamp fields
                             Timestamp timestampDate =
@@ -379,7 +382,7 @@ class _TemplatePageState extends State<TemplatePage> {
                                             topLeft: Radius.circular(12),
                                             topRight: Radius.circular(12)),
                                         child: Image.asset(
-                                          'assets/bg_img.jpg',
+                                          imageType,
                                           height: 120,
                                           width: double.infinity,
                                           fit: BoxFit.cover,

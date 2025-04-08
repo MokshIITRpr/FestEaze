@@ -64,7 +64,18 @@ void showEventDialog(
 ) {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController venueController = TextEditingController();
-
+  final List<String> eventChoices = [
+    'DJ Night',
+    'Star Night',
+    'Coding',
+    'Software',
+    'Robotics',
+    'Dance',
+    'basketball',
+    'Volleyball',
+    'Cricket'
+  ];
+  String? selectedEvent;
   DateTime? eventDate;
   TimeOfDay? startTime;
   TimeOfDay? endTime;
@@ -92,6 +103,19 @@ void showEventDialog(
                     decoration: const InputDecoration(labelText: "Venue"),
                   ),
                   const SizedBox(height: 10),
+                  _eventPicker(
+                      context, "Event Type", selectedEvent, eventChoices,
+                      (picked) {
+                    setDialogState(() {
+                      if (picked.isEmpty) {
+                        errorMessage = "Please pick an Event Type";
+                      } else {
+                        selectedEvent = picked;
+                        errorMessage = null;
+                      }
+                    });
+                  }),
+                  SizedBox(height: 10),
 
                   // Event Date Picker
                   _datePicker(context, "Date", eventDate, DateTime.now(),
@@ -184,6 +208,7 @@ void showEventDialog(
                           .add({
                         'eventName': titleController.text,
                         'venue': venueController.text,
+                        'type': selectedEvent,
                         'date': Timestamp.fromDate(eventDate!),
                         'startTime': Timestamp.fromDate(startDateTime),
                         'endTime': Timestamp.fromDate(endDateTime),
@@ -268,6 +293,52 @@ Widget _timePicker(BuildContext context, String label, TimeOfDay? time,
           );
           if (picked != null) {
             onTimePicked(picked);
+          }
+        },
+      ),
+    ],
+  );
+}
+
+Widget _eventPicker(
+  BuildContext context,
+  String label,
+  String? selectedEvent,
+  List<String> eventOptions,
+  Function(String) onEventPicked,
+) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Expanded(
+        child: Text(
+          selectedEvent == null ? "$label: Not Set" : "$label: $selectedEvent",
+          style: const TextStyle(fontSize: 16),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      TextButton(
+        child: const Text("Choose"),
+        onPressed: () async {
+          String? picked = await showDialog<String>(
+            context: context,
+            builder: (BuildContext context) {
+              return SimpleDialog(
+                title: Text("Choose Event"),
+                children: eventOptions.map((event) {
+                  return SimpleDialogOption(
+                    onPressed: () {
+                      Navigator.pop(context, event);
+                    },
+                    child: Text(event),
+                  );
+                }).toList(),
+              );
+            },
+          );
+
+          if (picked != null) {
+            onEventPicked(picked);
           }
         },
       ),
