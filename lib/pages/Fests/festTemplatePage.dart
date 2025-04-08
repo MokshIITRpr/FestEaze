@@ -174,7 +174,7 @@ class _TemplatePageState extends State<TemplatePage> {
         SnackBar(content: Text('Error updating favorites: $e')),
       );
     }
-    ;
+    
   }
 
   @override

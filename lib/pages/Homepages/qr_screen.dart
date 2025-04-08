@@ -23,7 +23,7 @@ class _QRScreenState extends State<QRScreen> {
   bool _isHovered = false; // Tracks hover state for the logout button
   List<String> favs = [];
   bool _isAdmin = false;
-  List<DocumentReference> favroiteEvents = [];
+  List<DocumentReference> favoriteEvents = [];
 
   final List<String> sponsorImages = [
     'assets/sponsor.jpeg',
@@ -60,7 +60,7 @@ class _QRScreenState extends State<QRScreen> {
           _isAdmin = userDoc['admin'];
           isLoading = false;
           if (favs.isNotEmpty) {
-            favroiteEvents = favs
+            favoriteEvents = favs
                 .map((id) =>
                     FirebaseFirestore.instance.collection('events').doc(id))
                 .toList();
@@ -87,6 +87,28 @@ class _QRScreenState extends State<QRScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Logout failed. Please try again!")),
+      );
+    }
+  }
+
+  void _updateWishlist(DocumentReference eventRef) {
+    List<String> eventIds = favoriteEvents.map((docRef) => docRef.id).toList();
+    if (eventIds.contains(eventRef.id)) {
+      eventIds.remove(eventRef.id); // Remove from favorites
+      favoriteEvents.remove(eventRef);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating favorites... Please retry')),
+      );
+    }
+
+    setState(() {}); // Update UI
+
+    try {
+      _userData.updateWishlist(eventIds);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating favorites: $e')),
       );
     }
   }
@@ -271,7 +293,7 @@ class _QRScreenState extends State<QRScreen> {
                           ],
                         ),
                       ),
-                      if (favs.isNotEmpty) buildEventList(favroiteEvents),
+                      if (favs.isNotEmpty) buildEventList(favoriteEvents),
                     ],
                   ),
                 ),
@@ -359,25 +381,45 @@ class _QRScreenState extends State<QRScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
+                        // Header Container with background image and overlay icon.
+                        Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
+                            ),
+                            image: const DecorationImage(
+                              image: AssetImage('assets/bg_img.jpg'),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          child: Image.asset(
-                            'assets/bg_img.jpg',
-                            height: 120,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.broken_image,
-                                size: 100,
-                                color: Colors.red,
-                              );
-                            },
+                          // Use Align to position the icon in the top-right without a full Stack.
+                          child: Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _updateWishlist(eventRef);
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.redAccent.withOpacity(0.8),
+                                  ),
+                                  padding: const EdgeInsets.all(4),
+                                  child: const Icon(
+                                    Icons.remove,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
+                        // The rest of your card content below.
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Column(
