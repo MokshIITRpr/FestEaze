@@ -29,6 +29,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isAdmin = false;
+  bool isVolunteer = false;
   bool _isRegistered = false;
 
   final TextEditingController _dateController = TextEditingController();
@@ -57,11 +58,20 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
               userDoc.data() as Map<String, dynamic>;
           bool a1 = widget.isSuperAdmin;
           bool a2 = false;
+          bool a3 = false;
           try {
             a2 = docSnapshot['manager'].contains(userData['email']);
           } catch (e) {
             print(e);
           }
+          try {
+            a3 = docSnapshot['volunteers'].contains(userData['email']);
+          } catch (e) {
+            print(e);
+          }
+          setState(() {
+            isVolunteer = a3;
+          });
           setState(() {
             _isAdmin = a1 || a2;
           });
@@ -384,14 +394,14 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                     fontWeight: FontWeight.bold, color: Colors.white),
               ),
               actions: [
-                if (_isAdmin)
+                if (_isAdmin || isVolunteer)
                   IconButton(
-                    icon: const Icon(Icons.qr_code_scanner,
-                        color: Colors.white),
+                    icon:
+                        const Icon(Icons.qr_code_scanner, color: Colors.white),
                     tooltip: "Scan QR Code",
                     onPressed: _scanQRCode,
                   ),
-                if (_isAdmin)
+                if (_isAdmin || isVolunteer)
                   IconButton(
                     icon: const Icon(Icons.list_alt, color: Colors.white),
                     tooltip: "View Registrations",
@@ -404,8 +414,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                       color: Colors.white,
                     ),
                     onPressed: _togglePreviewMode,
-                    tooltip:
-                        _isPreviewMode ? "Exit Preview" : "Preview Mode",
+                    tooltip: _isPreviewMode ? "Exit Preview" : "Preview Mode",
                   ),
                 if (_isAdmin && !widget.isSuperAdmin)
                   IconButton(
