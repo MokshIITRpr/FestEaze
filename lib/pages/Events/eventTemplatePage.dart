@@ -76,7 +76,6 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
       setState(() {
         eventData = docSnapshot.data();
         _isLoading = false;
-
         _dateController.text = DateFormat('dd-MM-yyyy')
             .format((eventData!['date'] as Timestamp).toDate());
         _startTimeController.text = DateFormat('HH:mm')
@@ -112,19 +111,45 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
       'description': _descriptionController.text,
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Event updated successfully!")),
-    );
+    showCustomSnackBar("Event updated successfully!",backgroundColor: Colors.green, icon: Icons.check_circle);
   }
 
-  // Registration method with duplicate-check
+  // Custom SnackBar helper method.
+  void showCustomSnackBar(String message,
+      {Color? backgroundColor, IconData? icon}) {
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          if (icon != null)
+            Icon(icon, color: Colors.white, size: 20),
+          if (icon != null)
+            const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: backgroundColor ?? const Color.fromARGB(255, 84, 91, 216),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      duration: const Duration(seconds: 3),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  // Registration method with duplicate-check.
   Future<void> _registerUser() async {
     User? user = _auth.currentUser;
     if (user != null) {
       if (_isRegistered) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("You have already registered to the event")),
-        );
+        showCustomSnackBar("You have already registered to the event",
+            backgroundColor: Colors.green, icon: Icons.info);
         return;
       }
       try {
@@ -136,44 +161,49 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         setState(() {
           _isRegistered = true;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Registered successfully!")),
-        );
+        showCustomSnackBar("Registered successfully!",backgroundColor: const Color.fromARGB(255, 84, 91, 216), icon: Icons.check_circle);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration failed: $e")),
-        );
+        showCustomSnackBar("Registration failed: $e",
+            backgroundColor: Colors.red, icon: Icons.error);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User not logged in!")),
-      );
+      showCustomSnackBar("User not logged in!",
+          backgroundColor: Colors.red, icon: Icons.warning);
     }
   }
 
-  // Method to show registration details in a popup dialog.
-  // Now it first refreshes the event data.
+  // Improved registration dialog with themed header and serial numbering.
   Future<void> _showRegistrationsDialog() async {
     // Refresh event data to get the latest registrations.
     await _fetchEventData();
-    List registrations = eventData?['registrations'] ?? [];
+    // Safely retrieve the registrations list from eventData.
+    List registrations = (eventData != null && eventData!['registrations'] != null)
+        ? eventData!['registrations']
+        : [];
     List<Map<String, dynamic>> registrationsDetails = [];
 
-    // Fetch user details for each registration
+    // Fetch user details for each registration.
     for (var reg in registrations) {
-      String uid = reg['uid'];
-      bool isPresent = reg['ispresent'];
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(uid).get();
-      if (userDoc.exists) {
-        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-        String username = userData['username'] ?? "No Name";
-        String email = userData['email'] ?? "No Email";
-        registrationsDetails.add({
-          'username': username,
-          'email': email,
-          'ispresent': isPresent,
-        });
+      try {
+        String uid = reg['uid'] ?? "";
+        bool isPresent = reg['ispresent'] ?? false;
+        if (uid.isNotEmpty) {
+          DocumentSnapshot userDoc =
+              await _firestore.collection('users').doc(uid).get();
+          if (userDoc.exists && userDoc.data() != null) {
+            Map<String, dynamic> userData =
+                userDoc.data() as Map<String, dynamic>;
+            String username = userData['username'] ?? "No Name";
+            String email = userData['email'] ?? "No Email";
+            registrationsDetails.add({
+              'username': username,
+              'email': email,
+              'ispresent': isPresent,
+            });
+          }
+        }
+      } catch (e) {
+        print("Error fetching user for registration: $e");
       }
     }
 
@@ -181,37 +211,98 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Registrations"),
+          titlePadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Container(
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 84, 91, 216),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: Text(
+                "Registrations (${registrationsDetails.length})",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
           content: Container(
             width: double.maxFinite,
-            child: registrationsDetails.isNotEmpty
-                ? ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: registrationsDetails.length,
-                    itemBuilder: (context, index) {
-                      var regDetail = registrationsDetails[index];
-                      return ListTile(
-                        title: Text(regDetail['username']),
-                        subtitle: Text(regDetail['email']),
-                        trailing: Text(
-                          regDetail['ispresent'] ? "Present" : "Absent",
-                          style: TextStyle(
-                            color: regDetail['ispresent']
-                                ? Colors.green
-                                : Colors.red,
+            child: SizedBox(
+              height: 300,
+              child: registrationsDetails.isNotEmpty
+                  ? ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: registrationsDetails.length,
+                      separatorBuilder: (context, index) => Divider(
+                        color: Colors.grey.shade300,
+                        height: 10,
+                      ),
+                      itemBuilder: (context, index) {
+                        var regDetail = registrationsDetails[index];
+                        String username = regDetail['username'] ?? "No Name";
+                        String email = regDetail['email'] ?? "No Email";
+                        bool isPresent = regDetail['ispresent'] ?? false;
+                        return ListTile(
+                          leading: Text(
+                            "${index + 1}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
+                          title: Text(
+                            username,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          subtitle: Text(
+                            email,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          trailing: Text(
+                            isPresent ? "Present" : "Absent",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: isPresent ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : SizedBox(
+                      height: 100,
+                      child: Center(
+                        child: Text(
+                          "No registrations found",
+                          style: TextStyle(
+                              fontSize: 16, color: Colors.grey.shade600),
                         ),
-                      );
-                    },
-                  )
-                : const Center(child: Text("No registrations found")),
+                      ),
+                    ),
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("Close"),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue,
+              ),
+              child: const Text(
+                "Close",
+                style: TextStyle(fontSize: 16),
+              ),
             )
           ],
         );
@@ -219,24 +310,20 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
     );
   }
 
-  // Method to scan QR code and mark user as present
+  // Method to scan QR code and mark user as present.
   Future<void> _scanQRCode() async {
     try {
-      // Scan the QR code using barcode_scan2 package.
       var scanResult = await BarcodeScanner.scan();
       String scannedUID = scanResult.rawContent;
       if (scannedUID.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No QR code data found")),
-        );
+        showCustomSnackBar("No QR code data found",
+            backgroundColor: Colors.red, icon: Icons.error);
         return;
       }
-      // Read current registrations from eventData.
       List registrations = eventData?['registrations'] ?? [];
       bool found = false;
       for (int i = 0; i < registrations.length; i++) {
         if (registrations[i]['uid'] == scannedUID) {
-          // Update the ispresent field for the matching registration.
           registrations[i]['ispresent'] = true;
           found = true;
           break;
@@ -246,20 +333,15 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         await _firestore.collection('events').doc(widget.eventRef.id).update({
           'registrations': registrations,
         });
-        // Refresh the event data.
         await _fetchEventData();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User presence marked.")),
-        );
+        showCustomSnackBar("User presence marked.", backgroundColor: Colors.green, icon: Icons.check_circle);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User not registered.")),
-        );
+        showCustomSnackBar("User not registered.",
+            backgroundColor: const Color.fromARGB(255, 84, 91, 216), icon: Icons.info);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("QR scan failed: $e")),
-      );
+      showCustomSnackBar("QR scan failed: $e",
+          backgroundColor: Colors.red, icon: Icons.error);
     }
   }
 
@@ -271,7 +353,6 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Button styles: blue for not registered, green for registered.
     final ButtonStyle blueStyle = ElevatedButton.styleFrom(
       backgroundColor: const Color.fromARGB(255, 84, 91, 216),
     );
@@ -289,14 +370,13 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                     fontWeight: FontWeight.bold, color: Colors.white),
               ),
               actions: [
-                // QR Scanner icon (only visible to admins and event managers)
                 if (_isAdmin)
                   IconButton(
-                    icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                    icon: const Icon(Icons.qr_code_scanner,
+                        color: Colors.white),
                     tooltip: "Scan QR Code",
                     onPressed: _scanQRCode,
                   ),
-                // Registration details icon (visible to admins)
                 if (_isAdmin)
                   IconButton(
                     icon: const Icon(Icons.list_alt, color: Colors.white),
@@ -348,11 +428,13 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                           'assets/sponsor.jpeg',
                         ]),
                         const SizedBox(height: 20),
-                        Text(eventData!['eventName'],
-                            style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87)),
+                        Text(
+                          eventData!['eventName'],
+                          style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87),
+                        ),
                         const SizedBox(height: 10),
                         _isPreviewMode || !_isAdmin
                             ? Text("📅 Date: ${_dateController.text}")
@@ -428,23 +510,18 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                                 ),
                               ),
                         const SizedBox(height: 20),
-                        // If admin is editing, show the Save Changes button.
                         if (!_isPreviewMode && _isAdmin)
                           ElevatedButton(
                               onPressed: _updateEventData,
                               child: const Text("Save Changes")),
-                        // Registration button (shown in preview mode or for non-admin users)
                         if (_isPreviewMode || !_isAdmin)
                           Center(
                             child: ElevatedButton(
                               style: _isRegistered ? greenStyle : blueStyle,
                               onPressed: () {
                                 if (_isRegistered) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            "You have already registered to the event")),
-                                  );
+                                  showCustomSnackBar("You have already registered to the event",
+                                      backgroundColor: Colors.green, icon: Icons.info);
                                 } else {
                                   _registerUser();
                                 }
