@@ -4,6 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:fest_app/pages/Fests/festTemplatePage.dart';
 import './csvImporter.dart';
 import '../utils/databaseHandler.dart';
+import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 
 void showAddEventDialog(BuildContext context) {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -98,6 +102,25 @@ void showAddEventDialog(BuildContext context) {
                   },
                   icon: const Icon(Icons.upload_file),
                   label: const Text("Import from CSV"),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    // Load PDF bytes from assets
+                    final pdfBytes =
+                        await rootBundle.load('assets/template.pdf');
+
+                    // Get temporary directory to store the file
+                    final tempDir = await getTemporaryDirectory();
+                    final file = File('${tempDir.path}/template.pdf');
+
+                    // Write bytes to file
+                    await file.writeAsBytes(pdfBytes.buffer.asUint8List());
+
+                    // Open the file using default PDF viewer
+                    await OpenFile.open(file.path);
+                  },
+                  icon: const Icon(Icons.download),
+                  label: const Text("Open PDF Template"),
                 ),
                 // Show error message
                 if (errorMessage != null)

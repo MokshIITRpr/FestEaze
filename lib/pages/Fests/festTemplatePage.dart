@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fest_app/data.dart';
 import 'package:fest_app/pages/Events/eventTemplatePage.dart';
+import 'package:fest_app/snackbar.dart';
 
 class TemplatePage extends StatefulWidget {
   final String title;
@@ -39,10 +40,9 @@ class _TemplatePageState extends State<TemplatePage> {
 
   List<DocumentReference> proniteEvents = [];
   List<DocumentReference> subEventsList = [];
-  List<DocumentReference> filteredEvents =
-      []; // For filtered events based on search query
+  List<DocumentReference> filteredEvents = []; // For filtered events based on search query
   List<String> favouriteEvents = [];
-
+  List<String> observers = [];
   @override
   void initState() {
     super.initState();
@@ -61,8 +61,7 @@ class _TemplatePageState extends State<TemplatePage> {
       if (user != null) {
         DocumentSnapshot userDoc = await _userdata.getUser();
         if (userDoc.exists) {
-          Map<String, dynamic> userData =
-              userDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
           bool a1 = userData['admin'] ?? false;
           bool a2 = false;
 
@@ -92,16 +91,14 @@ class _TemplatePageState extends State<TemplatePage> {
     if (docSnapshot.exists) {
       setState(() {
         _aboutController.text = docSnapshot['about'] ?? '';
-        proniteEvents =
-            List<DocumentReference>.from(docSnapshot['pronite'] ?? []);
-        subEventsList =
-            List<DocumentReference>.from(docSnapshot['subEvents'] ?? []);
+        proniteEvents = List<DocumentReference>.from(docSnapshot['pronite'] ?? []);
+        subEventsList = List<DocumentReference>.from(docSnapshot['subEvents'] ?? []);
         filteredEvents = subEventsList; // Initial events list
       });
     }
   }
 
-  // This function filters the events based on the search query
+  // This function filters the events based on the search query.
   Future<void> _filterEvents(String query) async {
     if (query.isEmpty) {
       setState(() {
@@ -114,7 +111,7 @@ class _TemplatePageState extends State<TemplatePage> {
 
     for (var eventRef in subEventsList) {
       var eventSnapshot = await eventRef.get();
-      // Check if the document exists and its data is not null
+      // Check if the document exists and its data is not null.
       if (!eventSnapshot.exists || eventSnapshot.data() == null) {
         continue;
       }
@@ -149,29 +146,33 @@ class _TemplatePageState extends State<TemplatePage> {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      // Show a SnackBar prompting the user to log in
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to add favorites!'),
-          duration: Duration(seconds: 2),
-        ),
+      // Use custom snackbar to prompt login.
+      showCustomSnackBar(
+        context,
+        'Please log in to add favorites!',
+        backgroundColor: Colors.redAccent,
+        icon: Icons.error,
       );
       return;
     }
 
     if (favouriteEvents.contains(eventRef.id)) {
-      favouriteEvents.remove(eventRef.id); // Remove from favorites
+      favouriteEvents.remove(eventRef.id); // Remove from favorites.
     } else {
-      favouriteEvents.add(eventRef.id); // Add to favorites
+      favouriteEvents.add(eventRef.id); // Add to favorites.
     }
 
-    setState(() {}); // Update UI
+    setState(() {}); // Update UI.
 
     try {
       _userdata.updateWishlist(favouriteEvents);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating favorites: $e')),
+      // Use custom snackbar to display error.
+      showCustomSnackBar(
+        context,
+        'Error updating favorites: $e',
+        backgroundColor: Colors.redAccent,
+        icon: Icons.error,
       );
     }
   }
@@ -180,16 +181,14 @@ class _TemplatePageState extends State<TemplatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(
-            255, 84, 91, 216), // Black background for app bar
+        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
         title: Text(
           widget.title,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
         ),
         child: Padding(
@@ -215,31 +214,25 @@ class _TemplatePageState extends State<TemplatePage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                buildEditableSection("Flagship Events", _proniteController,
-                    'pronite', proniteEvents),
-
+                buildEditableSection("Flagship Events", _proniteController, 'pronite', proniteEvents),
                 const SizedBox(height: 20),
-                buildEventList(proniteEvents), // Display filtered events
+                buildEventList(proniteEvents), // Display filtered events.
                 const SizedBox(height: 20),
-                buildEditableSection("Explore Club Events",
-                    _subEventsController, 'subEvents', subEventsList),
+                buildEditableSection("Explore Club Events", _subEventsController, 'subEvents', subEventsList),
                 const SizedBox(height: 20),
-                // Search bar for searching events
+                // Search bar for searching events.
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
                     labelText: 'Search Events',
-                    prefixIcon: const Icon(Icons.search,
-                        color: Colors.black), // White icon
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.search, color: Colors.black),
+                    border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: const Color.fromARGB(255, 255, 255, 255)
-                        .withOpacity(
-                            0.2), // Slightly transparent white background
+                    fillColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2),
                     labelStyle: const TextStyle(color: Colors.white),
                   ),
                   onChanged: (query) {
-                    _filterEvents(query); // Filter events as the user types
+                    _filterEvents(query); // Filter events as the user types.
                   },
                 ),
                 const SizedBox(height: 20),
@@ -252,8 +245,7 @@ class _TemplatePageState extends State<TemplatePage> {
     );
   }
 
-  Widget buildEditableSection(String title, TextEditingController controller,
-      String field, List<DocumentReference> eventList) {
+  Widget buildEditableSection(String title, TextEditingController controller, String field, List<DocumentReference> eventList) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -262,16 +254,11 @@ class _TemplatePageState extends State<TemplatePage> {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             if (_isAdmin)
               IconButton(
-                icon: const Icon(Icons.add,
-                    color:
-                        Color.fromRGBO(30, 215, 96, 1)), // Spotify Green color
+                icon: const Icon(Icons.add, color: Color.fromRGBO(30, 215, 96, 1)), // Spotify Green color.
                 onPressed: () {
                   if (isEditing) {
                     updateText(field, controller.text);
@@ -288,21 +275,17 @@ class _TemplatePageState extends State<TemplatePage> {
   Widget buildEventList(List<DocumentReference> eventList) {
     return eventList.isNotEmpty
         ? SizedBox(
-            height: 250, // Fixed height for square cards
+            height: 250, // Fixed height for square cards.
             child: ListView(
-              scrollDirection: Axis.horizontal, // Horizontal scrolling
-              children: eventList
-                  .map((eventRef) => FutureBuilder<DocumentSnapshot>(
-                        future: eventRef.get(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasData && snapshot.data!.exists) {
-                            var eventData =
-                                snapshot.data!.data() as Map<String, dynamic>;
+              scrollDirection: Axis.horizontal, // Horizontal scrolling.
+              children: eventList.map((eventRef) => FutureBuilder<DocumentSnapshot>(
+                future: eventRef.get(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasData && snapshot.data!.exists) {
+                    var eventData = snapshot.data!.data() as Map<String, dynamic>;
 
                             // Extract event details
                             String eventName =
@@ -311,190 +294,145 @@ class _TemplatePageState extends State<TemplatePage> {
                             String docId = eventRef.id; // Get document ID
                             String type = eventData['type'] ?? 'None';
                             String imageType = (type == 'None'
-                                ? 'assets/Default.jpeg'
+                                ? 'assets/Default.jpg'
                                 : 'assets/$type.jpeg');
 
-                            // Handle Timestamp fields
-                            Timestamp timestampDate =
-                                eventData['date'] ?? Timestamp.now();
-                            Timestamp timestampStartTime =
-                                eventData['startTime'] ?? Timestamp.now();
-                            Timestamp timestampEndTime =
-                                eventData['endTime'] ?? Timestamp.now();
+                    // Handle Timestamp fields.
+                    Timestamp timestampDate = eventData['date'] ?? Timestamp.now();
+                    Timestamp timestampStartTime = eventData['startTime'] ?? Timestamp.now();
+                    Timestamp timestampEndTime = eventData['endTime'] ?? Timestamp.now();
 
-                            // Convert Timestamp to DateTime
-                            DateTime date = timestampDate.toDate();
-                            DateTime startTime = timestampStartTime.toDate();
-                            DateTime endTime = timestampEndTime.toDate();
+                    DateTime date = timestampDate.toDate();
+                    DateTime startTime = timestampStartTime.toDate();
+                    DateTime endTime = timestampEndTime.toDate();
 
-                            // Format the date and time
-                            String formattedDate =
-                                DateFormat('dd-MM-yyyy').format(date);
-                            String formattedStartTime =
-                                DateFormat('HH:mm').format(startTime);
-                            String formattedEndTime =
-                                DateFormat('HH:mm').format(endTime);
+                    String formattedDate = DateFormat('dd-MM-yyyy').format(date);
+                    String formattedStartTime = DateFormat('HH:mm').format(startTime);
+                    String formattedEndTime = DateFormat('HH:mm').format(endTime);
 
-                            String timeRange =
-                                '$formattedStartTime - $formattedEndTime';
+                    String timeRange = '$formattedStartTime - $formattedEndTime';
 
-                            return GestureDetector(
-                              onTap: () {
-                                // Navigate to TemplatePage
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EventTemplatePage(
-                                      title: eventName,
-                                      isSuperAdmin: _isAdmin,
-                                      eventRef: eventRef,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EventTemplatePage(
+                              title: eventName,
+                              isSuperAdmin: _isAdmin,
+                              eventRef: eventRef,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 200, // Fixed width for square-shaped card.
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white, // Background color.
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Card(
+                          elevation: 4,
+                          margin: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(12),
+                                ),
+                                child: Image.asset(
+                                  imageType,
+                                  height: 120,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(Icons.broken_image, size: 100, color: Colors.red);
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            eventName,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.black87,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        GestureDetector(
+                                          onTap: () => toggleFavorite(eventRef, context),
+                                          child: Icon(
+                                            favouriteEvents.contains(eventRef.id)
+                                                ? Icons.star
+                                                : Icons.star_border_outlined,
+                                            size: 20,
+                                            color: favouriteEvents.contains(eventRef.id)
+                                                ? const Color.fromARGB(255, 236, 54, 54)
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width:
-                                    200, // Fixed width for square-shaped card
-                                margin: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white, // Background color
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 6,
-                                      offset: Offset(0, 2),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.calendar_today, size: 20, color: Colors.black),
+                                        const SizedBox(width: 8),
+                                        Text(' $formattedDate', style: const TextStyle(color: Colors.black)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.access_time, size: 20, color: Colors.black),
+                                        const SizedBox(width: 8),
+                                        Text(' $timeRange', style: const TextStyle(color: Colors.black)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on, size: 20, color: Colors.black),
+                                        const SizedBox(width: 8),
+                                        Text(' $venue', style: const TextStyle(color: Colors.black)),
+                                      ],
                                     ),
                                   ],
                                 ),
-                                child: Card(
-                                  elevation: 4,
-                                  margin: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            topRight: Radius.circular(12)),
-                                        child: Image.asset(
-                                          imageType,
-                                          height: 120,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Icon(Icons.broken_image,
-                                                size: 100, color: Colors.red);
-                                          },
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    eventName,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16,
-                                                      color: Colors.black87,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 1,
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                    width:
-                                                        8), // Space before the star icon
-                                                GestureDetector(
-                                                  onTap: () => toggleFavorite(
-                                                      eventRef,
-                                                      context), // Toggle favorite
-                                                  child: Icon(
-                                                    favouriteEvents.contains(
-                                                            eventRef.id)
-                                                        ? Icons
-                                                            .star // Filled star if it's a favorite
-                                                        : Icons
-                                                            .star_border_outlined, // Outlined star otherwise
-                                                    size: 20,
-                                                    color: favouriteEvents
-                                                            .contains(
-                                                                eventRef.id)
-                                                        ? const Color.fromARGB(
-                                                            255, 236, 54, 54)
-                                                        : Colors.black,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.calendar_today,
-                                                    size: 20,
-                                                    color: Colors.black),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  ' $formattedDate',
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.access_time,
-                                                    size: 20,
-                                                    color: Colors.black),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  ' $timeRange',
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.location_on,
-                                                    size: 20,
-                                                    color: Colors.black),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  ' $venue',
-                                                  style: const TextStyle(
-                                                      color: Colors.black),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               ),
-                            );
-                          }
-                          return const SizedBox();
-                        },
-                      ))
-                  .toList(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox();
+                },
+              )).toList(),
             ),
           )
         : const Center(child: Text('No events available.'));

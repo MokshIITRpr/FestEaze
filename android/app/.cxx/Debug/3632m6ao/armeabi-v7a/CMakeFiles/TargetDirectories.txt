@@ -1,0 +1,2 @@
+/home/shravan/Documents/major-projects/FestEaze/android/app/.cxx/Debug/3632m6ao/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/shravan/Documents/major-projects/FestEaze/android/app/.cxx/Debug/3632m6ao/armeabi-v7a/CMakeFiles/rebuild_cache.dir

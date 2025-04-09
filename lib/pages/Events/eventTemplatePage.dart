@@ -1,3 +1,4 @@
+import 'package:fest_app/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +29,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isAdmin = false;
+  bool isVolunteer = false;
   bool _isRegistered = false;
 
   final TextEditingController _dateController = TextEditingController();
@@ -56,11 +58,20 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
               userDoc.data() as Map<String, dynamic>;
           bool a1 = widget.isSuperAdmin;
           bool a2 = false;
+          bool a3 = false;
           try {
             a2 = docSnapshot['manager'].contains(userData['email']);
           } catch (e) {
             print(e);
           }
+          try {
+            a3 = docSnapshot['volunteers'].contains(userData['email']);
+          } catch (e) {
+            print(e);
+          }
+          setState(() {
+            isVolunteer = a3;
+          });
           setState(() {
             _isAdmin = a1 || a2;
           });
@@ -111,36 +122,13 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
       'description': _descriptionController.text,
     });
 
-    showCustomSnackBar("Event updated successfully!",backgroundColor: Colors.green, icon: Icons.check_circle);
-  }
-
-  // Custom SnackBar helper method.
-  void showCustomSnackBar(String message,
-      {Color? backgroundColor, IconData? icon}) {
-    final snackBar = SnackBar(
-      content: Row(
-        children: [
-          if (icon != null)
-            Icon(icon, color: Colors.white, size: 20),
-          if (icon != null)
-            const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: backgroundColor ?? const Color.fromARGB(255, 84, 91, 216),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      duration: const Duration(seconds: 3),
+    // Using custom snackbar for success message.
+    showCustomSnackBar(
+      context,
+      "Event updated successfully!",
+      backgroundColor: Colors.green,
+      icon: Icons.check_circle,
     );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   // Registration method with duplicate-check.
@@ -148,8 +136,12 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
     User? user = _auth.currentUser;
     if (user != null) {
       if (_isRegistered) {
-        showCustomSnackBar("You have already registered to the event",
-            backgroundColor: Colors.green, icon: Icons.info);
+        showCustomSnackBar(
+          context,
+          "You have already registered to the event",
+          backgroundColor: Colors.green,
+          icon: Icons.info,
+        );
         return;
       }
       try {
@@ -161,14 +153,27 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         setState(() {
           _isRegistered = true;
         });
-        showCustomSnackBar("Registered successfully!",backgroundColor: const Color.fromARGB(255, 84, 91, 216), icon: Icons.check_circle);
+        showCustomSnackBar(
+          context,
+          "Registered successfully!",
+          backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+          icon: Icons.check_circle,
+        );
       } catch (e) {
-        showCustomSnackBar("Registration failed: $e",
-            backgroundColor: Colors.red, icon: Icons.error);
+        showCustomSnackBar(
+          context,
+          "Registration failed: $e",
+          backgroundColor: Colors.red,
+          icon: Icons.error,
+        );
       }
     } else {
-      showCustomSnackBar("User not logged in!",
-          backgroundColor: Colors.red, icon: Icons.warning);
+      showCustomSnackBar(
+        context,
+        "User not logged in!",
+        backgroundColor: Colors.red,
+        icon: Icons.warning,
+      );
     }
   }
 
@@ -177,9 +182,10 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
     // Refresh event data to get the latest registrations.
     await _fetchEventData();
     // Safely retrieve the registrations list from eventData.
-    List registrations = (eventData != null && eventData!['registrations'] != null)
-        ? eventData!['registrations']
-        : [];
+    List registrations =
+        (eventData != null && eventData!['registrations'] != null)
+            ? eventData!['registrations']
+            : [];
     List<Map<String, dynamic>> registrationsDetails = [];
 
     // Fetch user details for each registration.
@@ -297,7 +303,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                 Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(
-                foregroundColor: Colors.blue,
+                foregroundColor: const Color.fromARGB(255, 84, 91, 216),
               ),
               child: const Text(
                 "Close",
@@ -316,8 +322,12 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
       var scanResult = await BarcodeScanner.scan();
       String scannedUID = scanResult.rawContent;
       if (scannedUID.isEmpty) {
-        showCustomSnackBar("No QR code data found",
-            backgroundColor: Colors.red, icon: Icons.error);
+        showCustomSnackBar(
+          context,
+          "No QR code data found",
+          backgroundColor: Colors.red,
+          icon: Icons.error,
+        );
         return;
       }
       List registrations = eventData?['registrations'] ?? [];
@@ -330,18 +340,32 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         }
       }
       if (found) {
-        await _firestore.collection('events').doc(widget.eventRef.id).update({
-          'registrations': registrations,
-        });
+        await _firestore
+            .collection('events')
+            .doc(widget.eventRef.id)
+            .update({'registrations': registrations});
         await _fetchEventData();
-        showCustomSnackBar("User presence marked.", backgroundColor: Colors.green, icon: Icons.check_circle);
+        showCustomSnackBar(
+          context,
+          "User presence marked.",
+          backgroundColor: Colors.green,
+          icon: Icons.check_circle,
+        );
       } else {
-        showCustomSnackBar("User not registered.",
-            backgroundColor: const Color.fromARGB(255, 84, 91, 216), icon: Icons.info);
+        showCustomSnackBar(
+          context,
+          "User not registered.",
+          backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+          icon: Icons.info,
+        );
       }
     } catch (e) {
-      showCustomSnackBar("QR scan failed: $e",
-          backgroundColor: Colors.red, icon: Icons.error);
+      showCustomSnackBar(
+        context,
+        "QR scan failed: $e",
+        backgroundColor: Colors.red,
+        icon: Icons.error,
+      );
     }
   }
 
@@ -370,14 +394,14 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                     fontWeight: FontWeight.bold, color: Colors.white),
               ),
               actions: [
-                if (_isAdmin)
+                if (_isAdmin || isVolunteer)
                   IconButton(
-                    icon: const Icon(Icons.qr_code_scanner,
-                        color: Colors.white),
+                    icon:
+                        const Icon(Icons.qr_code_scanner, color: Colors.white),
                     tooltip: "Scan QR Code",
                     onPressed: _scanQRCode,
                   ),
-                if (_isAdmin)
+                if (_isAdmin || isVolunteer)
                   IconButton(
                     icon: const Icon(Icons.list_alt, color: Colors.white),
                     tooltip: "View Registrations",
@@ -386,10 +410,9 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                 if (_isAdmin)
                   IconButton(
                     icon: Icon(
-                        _isPreviewMode
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.white),
+                      _isPreviewMode ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.white,
+                    ),
                     onPressed: _togglePreviewMode,
                     tooltip: _isPreviewMode ? "Exit Preview" : "Preview Mode",
                   ),
@@ -520,8 +543,12 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                               style: _isRegistered ? greenStyle : blueStyle,
                               onPressed: () {
                                 if (_isRegistered) {
-                                  showCustomSnackBar("You have already registered to the event",
-                                      backgroundColor: Colors.green, icon: Icons.info);
+                                  showCustomSnackBar(
+                                    context,
+                                    "You have already registered to the event",
+                                    backgroundColor: Colors.green,
+                                    icon: Icons.info,
+                                  );
                                 } else {
                                   _registerUser();
                                 }

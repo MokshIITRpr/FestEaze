@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:fest_app/snackbar.dart';
 
 class ForgotPass extends StatefulWidget {
   const ForgotPass({super.key});
@@ -19,22 +20,35 @@ class _ForgotPassState extends State<ForgotPass> {
     super.dispose();
   }
 
-  /// Function to reset password
+  /// Function to reset password using custom Snackbar notifications.
   Future<void> resetPassword() async {
     String email = emailController.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Please enter your email')));
+      // Show a custom snackbar if email is empty.
+      showCustomSnackBar(
+        context,
+        'Please enter your email',
+        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+        icon: Icons.error,
+      );
       return;
     }
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password reset email sent!')),
+      // Show success message with custom snackbar.
+      showCustomSnackBar(
+        context,
+        'Password reset email sent!',
+        backgroundColor: Colors.green,
+        icon: Icons.check_circle,
       );
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Error occurred')),
+      // Show error message with custom snackbar.
+      showCustomSnackBar(
+        context,
+        e.message ?? 'Error occurred',
+        backgroundColor: Colors.red,
+        icon: Icons.error,
       );
     }
   }
@@ -88,8 +102,8 @@ class _ForgotPassState extends State<ForgotPass> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
-                        border:
-                            Border.all(color: Color.fromRGBO(143, 148, 251, 1)),
+                        border: Border.all(
+                            color: const Color.fromARGB(255, 84, 91, 216)),
                         boxShadow: [
                           BoxShadow(
                             color: Color.fromRGBO(143, 148, 251, .2),
@@ -116,7 +130,8 @@ class _ForgotPassState extends State<ForgotPass> {
                     child: Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromRGBO(143, 148, 251, 1),
+                          backgroundColor:
+                              const Color.fromARGB(255, 84, 91, 216),
                           minimumSize: Size(double.infinity, 50),
                         ),
                         onPressed: resetPassword,
@@ -140,7 +155,7 @@ class _ForgotPassState extends State<ForgotPass> {
                       child: Text(
                         "Back to Login",
                         style: TextStyle(
-                          color: Color.fromRGBO(143, 148, 251, 1),
+                          color: const Color.fromARGB(255, 84, 91, 216),
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                         ),

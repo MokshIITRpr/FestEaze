@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fest_app/snackbar.dart';
 
 void showAuthDialog(BuildContext context, String eventName) {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -61,15 +62,21 @@ void showAuthDialog(BuildContext context, String eventName) {
                     }
 
                     Navigator.of(context).pop(); // Close dialog
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(
-                              '${nameController.text} updated as manager for ${eventName}')),
+                    // Use custom snackbar for success message.
+                    showCustomSnackBar(
+                      context,
+                      '${nameController.text} updated as manager for ${eventName}',
+                      backgroundColor: Colors.green,
+                      icon: Icons.check_circle,
                     );
                   } catch (e) {
                     print("Error adding manager: $e");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error adding manager: ${e}')),
+                    // Use custom snackbar for error message.
+                    showCustomSnackBar(
+                      context,
+                      'Error adding manager: ${e}',
+                      backgroundColor: Colors.red,
+                      icon: Icons.error,
                     );
                   }
                 }
