@@ -28,110 +28,112 @@ void showAddEventDialog(BuildContext context) {
         builder: (context, setDialogState) {
           return AlertDialog(
             title: const Text("Add Event"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Show selected file name
-                if (selectedFileName != null) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    "Selected file: $selectedFileName",
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                ],
-
-                // Hide manual input if file is selected
-                if (selectedFileName == null) ...[
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: eventNameController,
-                    decoration: const InputDecoration(
-                      labelText: "Event Name",
-                      border: OutlineInputBorder(),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Show selected file name
+                  if (selectedFileName != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      "Selected file: $selectedFileName",
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  _datePicker(context, "Start Dt.", startDate, DateTime.now(),
-                      (picked) {
-                    setDialogState(() {
-                      if (picked.isBefore(DateTime.now())) {
-                        errorMessage = "Start Date must be after today";
-                      } else {
-                        startDate = picked;
-                        if (endDate != null && endDate!.isBefore(startDate!)) {
-                          endDate = startDate;
-                        }
-                        errorMessage = null;
-                      }
-                    });
-                  }),
-                  _datePicker(
-                      context, "End Dt.", endDate, startDate ?? DateTime.now(),
-                      (picked) {
-                    setDialogState(() {
-                      if (startDate == null ||
-                          picked.isAfter(startDate!) ||
-                          picked.isAtSameMomentAs(startDate!)) {
-                        endDate = picked;
-                        errorMessage = null;
-                      } else {
-                        errorMessage =
-                            "End Date must be after or equal to Start Date";
-                      }
-                    });
-                  }),
-                ],
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    var importedData = await CsvImporter.importCsvFile();
-                    if (importedData != null) {
+                  ],
+
+                  // Hide manual input if file is selected
+                  if (selectedFileName == null) ...[
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: eventNameController,
+                      decoration: const InputDecoration(
+                        labelText: "Event Name",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _datePicker(context, "Start Dt.", startDate, DateTime.now(),
+                        (picked) {
                       setDialogState(() {
-                        csvData = importedData; // Store CSV Data for later
-                        selectedFileName = importedData["fileName"];
-
-                        // ✅ Parse and store CSV values
-                        eventNameController.text = importedData["eventName"];
-                        startDate =
-                            importedData["startDate"]; // Fix string to DateTime
-                        endDate =
-                            importedData["endDate"]; // Fix string to DateTime
-                        about = importedData["about"];
+                        if (picked.isBefore(DateTime.now())) {
+                          errorMessage = "Start Date must be after today";
+                        } else {
+                          startDate = picked;
+                          if (endDate != null &&
+                              endDate!.isBefore(startDate!)) {
+                            endDate = startDate;
+                          }
+                          errorMessage = null;
+                        }
                       });
-                    }
-                  },
-                  icon: const Icon(Icons.upload_file),
-                  label: const Text("Import from CSV"),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    // Load PDF bytes from assets
-                    final pdfBytes =
-                        await rootBundle.load('assets/template.pdf');
+                    }),
+                    _datePicker(context, "End Dt.", endDate,
+                        startDate ?? DateTime.now(), (picked) {
+                      setDialogState(() {
+                        if (startDate == null ||
+                            picked.isAfter(startDate!) ||
+                            picked.isAtSameMomentAs(startDate!)) {
+                          endDate = picked;
+                          errorMessage = null;
+                        } else {
+                          errorMessage =
+                              "End Date must be after or equal to Start Date";
+                        }
+                      });
+                    }),
+                  ],
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      var importedData = await CsvImporter.importCsvFile();
+                      if (importedData != null) {
+                        setDialogState(() {
+                          csvData = importedData; // Store CSV Data for later
+                          selectedFileName = importedData["fileName"];
 
-                    // Get temporary directory to store the file
-                    final tempDir = await getTemporaryDirectory();
-                    final file = File('${tempDir.path}/template.pdf');
-
-                    // Write bytes to file
-                    await file.writeAsBytes(pdfBytes.buffer.asUint8List());
-
-                    // Open the file using default PDF viewer
-                    await OpenFile.open(file.path);
-                  },
-                  icon: const Icon(Icons.download),
-                  label: const Text("Open PDF Template"),
-                ),
-                // Show error message
-                if (errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 14),
-                    ),
+                          // ✅ Parse and store CSV values
+                          eventNameController.text = importedData["eventName"];
+                          startDate = importedData[
+                              "startDate"]; // Fix string to DateTime
+                          endDate =
+                              importedData["endDate"]; // Fix string to DateTime
+                          about = importedData["about"];
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.upload_file),
+                    label: const Text("Import from CSV"),
                   ),
-              ],
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      // Load PDF bytes from assets
+                      final pdfBytes =
+                          await rootBundle.load('assets/template.pdf');
+
+                      // Get temporary directory to store the file
+                      final tempDir = await getTemporaryDirectory();
+                      final file = File('${tempDir.path}/template.pdf');
+
+                      // Write bytes to file
+                      await file.writeAsBytes(pdfBytes.buffer.asUint8List());
+
+                      // Open the file using default PDF viewer
+                      await OpenFile.open(file.path);
+                    },
+                    icon: const Icon(Icons.download),
+                    label: const Text("Open PDF Template"),
+                  ),
+                  // Show error message
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                      ),
+                    ),
+                ],
+              ),
             ),
             actions: [
               TextButton(
