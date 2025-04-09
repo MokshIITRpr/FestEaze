@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fest_app/snackbar.dart';
 
 Future<void> fetchDataFromFirestore({
   required String docId,
@@ -57,13 +58,18 @@ Future<void> updateDataInFirestore({
 
 void showEventDialog(
   BuildContext context,
+  DocumentReference eventRef,
+  bool add,
+  Map<String, dynamic> eventData,
   String field,
   String docId,
   Function setStateCallback,
   Function _fetchText,
 ) {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController venueController = TextEditingController();
+  final TextEditingController titleController =
+      TextEditingController(text: add ? "" : eventData['eventName']);
+  final TextEditingController venueController =
+      TextEditingController(text: add ? "" : eventData['venue']);
   final List<String> eventChoices = [
     'Default',
     'DJ Night',
@@ -80,7 +86,19 @@ void showEventDialog(
   DateTime? eventDate;
   TimeOfDay? startTime;
   TimeOfDay? endTime;
+  DocumentReference currentEvent;
   String? errorMessage;
+
+  if (!add) {
+    if (eventData['type'] != null) selectedEvent = eventData['type'];
+    if (eventData['date'] != null) eventDate = eventData['date'].toDate();
+    if (eventData['startTime'] != null) {
+      startTime = TimeOfDay.fromDateTime(eventData['startTime'].toDate());
+    }
+    if (eventData['endTime'] != null) {
+      endTime = TimeOfDay.fromDateTime(eventData['endTime'].toDate());
+    }
+  }
 
   showDialog(
     context: context,
@@ -88,7 +106,7 @@ void showEventDialog(
       return StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: const Text("Add Event"),
+            title: add ? Text("Add Event") : Text("Update Event"),
             content: SingleChildScrollView(
               // Wrap in SingleChildScrollView
               child: Column(
@@ -202,39 +220,58 @@ void showEventDialog(
                         endTime!.minute,
                       );
 
-                      // Add event to Firestore in 'events' collection
-                      DocumentReference newEvent = await FirebaseFirestore
-                          .instance
-                          .collection('events')
-                          .add({
-                        'eventName': titleController.text,
-                        'venue': venueController.text,
-                        'type': selectedEvent,
-                        'date': Timestamp.fromDate(eventDate!),
-                        'startTime': Timestamp.fromDate(startDateTime),
-                        'endTime': Timestamp.fromDate(endDateTime),
-                        'parentFest': FirebaseFirestore.instance
-                            .collection('fests')
-                            .doc(docId),
-                        'createdAt': FieldValue.serverTimestamp(),
-                      });
+                      if (add) {
+                        // Add event to Firestore in 'events' collection
+                        DocumentReference newEvent = await FirebaseFirestore
+                            .instance
+                            .collection('events')
+                            .add({
+                          'eventName': titleController.text,
+                          'venue': venueController.text,
+                          'type': selectedEvent,
+                          'date': Timestamp.fromDate(eventDate!),
+                          'startTime': Timestamp.fromDate(startDateTime),
+                          'endTime': Timestamp.fromDate(endDateTime),
+                          'parentFest': FirebaseFirestore.instance
+                              .collection('fests')
+                              .doc(docId),
+                          'createdAt': FieldValue.serverTimestamp(),
+                        });
 
-                      // Link event in parent fest document
-                      await FirebaseFirestore.instance
-                          .collection('fests')
-                          .doc(docId)
-                          .update({
-                        field: FieldValue.arrayUnion([newEvent]),
-                      });
+                        // Link event in parent fest document
+                        await FirebaseFirestore.instance
+                            .collection('fests')
+                            .doc(docId)
+                            .update({
+                          field: FieldValue.arrayUnion([newEvent]),
+                        });
+                      } else {
+                        await FirebaseFirestore.instance
+                            .collection('events')
+                            .doc(eventRef.id)
+                            .update({
+                          'eventName': titleController.text,
+                          'venue': venueController.text,
+                          'type': selectedEvent,
+                          'date': Timestamp.fromDate(eventDate!),
+                          'startTime': Timestamp.fromDate(startDateTime),
+                          'endTime': Timestamp.fromDate(endDateTime),
+                          'parentFest': FirebaseFirestore.instance
+                              .collection('fests')
+                              .doc(docId),
+                          'createdAt': FieldValue.serverTimestamp(),
+                        });
+                      }
 
                       Navigator.pop(context); // Close the dialog
                       _fetchText(); // Refresh UI
                     } catch (e) {
-                      print("Error adding event: $e");
+                      showCustomSnackBar(context,
+                          "Error in Creating or Updating the event....");
                     }
                   }
                 },
-                child: const Text("Add"),
+                child: add ? Text("Add") : Text("Update"),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
