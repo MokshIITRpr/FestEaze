@@ -311,7 +311,7 @@ class _TemplatePageState extends State<TemplatePage> {
                             String docId = eventRef.id; // Get document ID
                             String type = eventData['type'] ?? 'None';
                             String imageType = (type == 'None'
-                                ? 'assets/bg_img.jpg'
+                                ? 'assets/Default.jpeg'
                                 : 'assets/$type.jpeg');
 
                             // Handle Timestamp fields

@@ -326,8 +326,9 @@ class _QRScreenState extends State<QRScreen> {
               String eventName = eventData['eventName'] ?? 'No title';
               String venue = eventData['venue'] ?? 'Unknown';
               String type = eventData['type'] ?? 'None';
-              String imageType =
-                  (type == 'None' ? 'assets/bg_img.jpg' : 'assets/$type.jpeg');
+              String imageType = (type == 'None'
+                  ? 'assets/Default.jpeg'
+                  : 'assets/$type.jpeg');
 
               // Handle Timestamp fields
               Timestamp timestampDate = eventData['date'] ?? Timestamp.now();

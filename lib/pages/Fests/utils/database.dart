@@ -65,13 +65,14 @@ void showEventDialog(
   final TextEditingController titleController = TextEditingController();
   final TextEditingController venueController = TextEditingController();
   final List<String> eventChoices = [
+    'Default',
     'DJ Night',
     'Star Night',
     'Coding',
     'Software',
     'Robotics',
     'Dance',
-    'basketball',
+    'Basketball',
     'Volleyball',
     'Cricket'
   ];
