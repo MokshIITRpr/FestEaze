@@ -245,6 +245,8 @@ void showEventDialog(
                             .update({
                           field: FieldValue.arrayUnion([newEvent]),
                         });
+                        showCustomSnackBar(
+                            context, "Event Added Successfully!");
                       } else {
                         await FirebaseFirestore.instance
                             .collection('events')
@@ -261,6 +263,8 @@ void showEventDialog(
                               .doc(docId),
                           'createdAt': FieldValue.serverTimestamp(),
                         });
+                        showCustomSnackBar(
+                            context, "Event Updated Successfully!");
                       }
 
                       Navigator.pop(context); // Close the dialog

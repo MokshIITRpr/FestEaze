@@ -191,6 +191,55 @@ class _TemplatePageState extends State<TemplatePage> {
     }
   }
 
+  void _removeEvent(String field, DocumentReference eventRef) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+                content: SingleChildScrollView(
+                  child: Text("Are you sure you want to remove the event?"),
+                ),
+                actions: [
+                  TextButton(
+                    child: Text("Yes"),
+                    onPressed: () async {
+                      try {
+                        await _firestore
+                            .collection('events')
+                            .doc(eventRef.id)
+                            .delete();
+                        await _firestore
+                            .collection('fests')
+                            .doc(widget.docId)
+                            .update({
+                          field: FieldValue.arrayRemove([eventRef]),
+                        });
+                        showCustomSnackBar(
+                            context, "Event Deleted Successfully");
+                      } catch (e) {
+                        showCustomSnackBar(
+                            context, 'Error in deleting Event $e');
+                      }
+                      Navigator.pop(context);
+                      _fetchText();
+                    },
+                  ),
+                  TextButton(
+                    child: Text("No"),
+                    onPressed: () {
+                      showCustomSnackBar(context, "Event Not Deleted");
+                      Navigator.pop(context);
+                    },
+                  ),
+                ]);
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -400,33 +449,78 @@ class _TemplatePageState extends State<TemplatePage> {
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
-                                              child: Align(
-                                                alignment: Alignment.topRight,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      _updateEvent(eventRef,
-                                                          field, eventData);
-                                                    },
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        color: Colors.green
-                                                            .withOpacity(0.8),
-                                                      ),
+                                              child: Stack(
+                                                children: [
+                                                  // Edit icon on the top right
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    child: Padding(
                                                       padding:
                                                           const EdgeInsets.all(
-                                                              4),
-                                                      child: const Icon(
-                                                        Icons.edit,
-                                                        color: Colors.white,
-                                                        size: 20,
+                                                              8.0),
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          _updateEvent(eventRef,
+                                                              field, eventData);
+                                                        },
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            color: Colors.green
+                                                                .withOpacity(
+                                                                    0.8),
+                                                          ),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4),
+                                                          child: const Icon(
+                                                            Icons.edit,
+                                                            color: Colors.white,
+                                                            size: 20,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
+                                                  // Remove icon on the top left
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.topLeft,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          _removeEvent(
+                                                              field, eventRef);
+                                                        },
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            color: Colors.black
+                                                                .withOpacity(
+                                                                    0.8),
+                                                          ),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4),
+                                                          child: const Icon(
+                                                            Icons.delete,
+                                                            color:
+                                                                Colors.white70,
+                                                            size: 20,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             )
                                           : ClipRRect(
