@@ -1,0 +1,2 @@
+/Users/rajyadav/Desktop/FestEaze/android/app/.cxx/Debug/a4l5kn6s/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/rajyadav/Desktop/FestEaze/android/app/.cxx/Debug/a4l5kn6s/arm64-v8a/CMakeFiles/rebuild_cache.dir

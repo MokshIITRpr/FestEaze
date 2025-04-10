@@ -319,6 +319,49 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
   // Method to scan QR code and mark user as present.
   Future<void> _scanQRCode() async {
     try {
+      // Ensure eventData is available
+      if (eventData == null) {
+        showCustomSnackBar(
+          context,
+          "Event data not available.",
+          backgroundColor: Colors.red,
+          icon: Icons.error,
+        );
+        return;
+      }
+      
+      // Get current time
+      DateTime now = DateTime.now();
+      // Extract start and end times as DateTime objects from eventData
+      DateTime eventStartTime = (eventData!['startTime'] as Timestamp).toDate();
+      DateTime eventEndTime = (eventData!['endTime'] as Timestamp).toDate();
+      
+      // Calculate time boundaries: one hour before start and one hour after end.
+      DateTime scanningStartTime = eventStartTime.subtract(Duration(hours: 1));
+      DateTime scanningEndTime = eventEndTime.add(Duration(hours: 1));
+      
+      // Check if current time is within the allowed scanning window.
+      if (now.isBefore(scanningStartTime)) {
+        showCustomSnackBar(
+          context,
+          "The event has not started yet.",
+          backgroundColor: Colors.orange,
+          icon: Icons.info_outline,
+        );
+        return;
+      }
+
+      if(now.isAfter(scanningEndTime)){
+        showCustomSnackBar(
+          context,
+          "The event has ended.",
+          backgroundColor: Colors.orange,
+          icon: Icons.info_outline,
+        );
+        return;
+      }
+      
+      // Proceed with QR scanning if within the allowed time.
       var scanResult = await BarcodeScanner.scan();
       String scannedUID = scanResult.rawContent;
       if (scannedUID.isEmpty) {
@@ -330,35 +373,59 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         );
         return;
       }
+      
       List registrations = eventData?['registrations'] ?? [];
       bool found = false;
+      bool alreadyPresent = false;
+      // Loop through the registrations to search for the user.
       for (int i = 0; i < registrations.length; i++) {
         if (registrations[i]['uid'] == scannedUID) {
-          registrations[i]['ispresent'] = true;
           found = true;
+          // Check if already marked present.
+          if (registrations[i]['ispresent'] == true) {
+            alreadyPresent = true;
+          } else {
+            // Mark the user as present.
+            registrations[i]['ispresent'] = true;
+          }
           break;
         }
       }
-      if (found) {
-        await _firestore
-            .collection('events')
-            .doc(widget.eventRef.id)
-            .update({'registrations': registrations});
-        await _fetchEventData();
-        showCustomSnackBar(
-          context,
-          "User presence marked.",
-          backgroundColor: Colors.green,
-          icon: Icons.check_circle,
-        );
-      } else {
+      
+      // If the user isn't registered.
+      if (!found) {
         showCustomSnackBar(
           context,
           "User not registered.",
           backgroundColor: const Color.fromARGB(255, 84, 91, 216),
           icon: Icons.info,
         );
+        return;
       }
+      
+      // Inform if the user has already been marked present.
+      if (alreadyPresent) {
+        showCustomSnackBar(
+          context,
+          "User already marked present.",
+          backgroundColor: Colors.orange,
+          icon: Icons.info_outline,
+        );
+        return;
+      }
+      
+      // Update the event document with the updated registrations.
+      await _firestore
+          .collection('events')
+          .doc(widget.eventRef.id)
+          .update({'registrations': registrations});
+      await _fetchEventData();
+      showCustomSnackBar(
+        context,
+        "User presence marked.",
+        backgroundColor: Colors.green,
+        icon: Icons.check_circle,
+      );
     } catch (e) {
       showCustomSnackBar(
         context,
@@ -368,6 +435,8 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
       );
     }
   }
+
+
 
   void _togglePreviewMode() {
     setState(() {

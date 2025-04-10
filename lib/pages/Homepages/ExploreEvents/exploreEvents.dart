@@ -105,7 +105,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12.0),
               image: DecorationImage(
-                image: AssetImage('assets/night_iitrpr.jpg'),
+                image: AssetImage('assets/iitrpr.jpeg'),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.5),
@@ -123,7 +123,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
                     Text(
                       event.name,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -132,7 +132,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
                     Text(
                       event.date,
                       style: const TextStyle(
-                        fontSize: 15,
+                        fontSize: 17,
                         color: Colors.white,
                       ),
                     ),
