@@ -25,6 +25,7 @@ class _TemplatePageState extends State<TemplatePage> {
   final TextEditingController _subEventsController = TextEditingController();
   final TextEditingController _searchController =
       TextEditingController(); // Search controller
+  final FocusNode _searchFocusNode = FocusNode(); // Added FocusNode for search
   bool isEditing = false;
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -44,6 +45,7 @@ class _TemplatePageState extends State<TemplatePage> {
       []; // For filtered events based on search query
   List<String> favouriteEvents = [];
   List<String> observers = [];
+
   @override
   void initState() {
     super.initState();
@@ -198,120 +200,92 @@ class _TemplatePageState extends State<TemplatePage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-                content: SingleChildScrollView(
-                  child: Text("Are you sure you want to remove the event?"),
+              content: SingleChildScrollView(
+                child: Text("Are you sure you want to remove the event?"),
+              ),
+              actions: [
+                TextButton(
+                  child: Text("Yes"),
+                  onPressed: () async {
+                    try {
+                      await _firestore
+                          .collection('events')
+                          .doc(eventRef.id)
+                          .delete();
+                      await _firestore.collection('fests').doc(widget.docId)
+                          .update({
+                        field: FieldValue.arrayRemove([eventRef]),
+                      });
+                      showCustomSnackBar(
+                          context, "Event Deleted Successfully");
+                    } catch (e) {
+                      showCustomSnackBar(
+                          context, 'Error in deleting Event $e');
+                    }
+                    Navigator.pop(context);
+                    _fetchText();
+                  },
                 ),
-                actions: [
-                  TextButton(
-                    child: Text("Yes"),
-                    onPressed: () async {
-                      try {
-                        await _firestore
-                            .collection('events')
-                            .doc(eventRef.id)
-                            .delete();
-                        await _firestore
-                            .collection('fests')
-                            .doc(widget.docId)
-                            .update({
-                          field: FieldValue.arrayRemove([eventRef]),
-                        });
-                        showCustomSnackBar(
-                            context, "Event Deleted Successfully");
-                      } catch (e) {
-                        showCustomSnackBar(
-                            context, 'Error in deleting Event $e');
-                      }
-                      Navigator.pop(context);
-                      _fetchText();
-                    },
-                  ),
-                  TextButton(
-                    child: Text("No"),
-                    onPressed: () {
-                      showCustomSnackBar(context, "Event Not Deleted");
-                      Navigator.pop(context);
-                    },
-                  ),
-                ]);
+                TextButton(
+                  child: Text("No"),
+                  onPressed: () {
+                    showCustomSnackBar(context, "Event Not Deleted");
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
           },
         );
       },
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 84, 91, 216),
-        title: Text(
-          widget.title,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoImageSlider(imagePaths: _imagePaths),
-                const SizedBox(height: 20),
-                TextFieldSection(
-                  title: "About",
-                  controller: _aboutController,
-                  isEditing: isEditing,
-                  isAdmin: _isAdmin,
-                  onEdit: () {
-                    if (isEditing) {
-                      updateText('about', _aboutController.text);
-                    }
-                    setState(() {
-                      isEditing = !isEditing;
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                buildEditableSection("Flagship Events", _proniteController,
-                    'pronite', proniteEvents),
-                const SizedBox(height: 20),
-                buildEventList(
-                    proniteEvents, 'pronite'), // Display filtered events.
-                const SizedBox(height: 20),
-                buildEditableSection("Explore Club Events",
-                    _subEventsController, 'subEvents', subEventsList),
-                const SizedBox(height: 20),
-                // Search bar for searching events.
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: 'Search Events',
-                    prefixIcon: const Icon(Icons.search, color: Colors.black),
-                    border: const OutlineInputBorder(),
-                    filled: true,
-                    fillColor: const Color.fromARGB(255, 255, 255, 255)
-                        .withOpacity(0.2),
-                    labelStyle: const TextStyle(color: Colors.white),
-                  ),
-                  onChanged: (query) {
-                    _filterEvents(query); // Filter events as the user types.
-                  },
-                ),
-                const SizedBox(height: 20),
-                buildEventList(filteredEvents, 'subEvents'),
-              ],
-            ),
+  // Improved search bar widget with dedicated FocusNode and clear button.
+  Widget buildSearchBar() {
+    return SizedBox(
+      height: 50, // Constrains the TextField's height.
+      child: TextField(
+        textAlignVertical: TextAlignVertical.center,
+        focusNode: _searchFocusNode,
+        controller: _searchController,
+        decoration: InputDecoration(
+          labelText: 'Search Events',
+          prefixIcon: const Icon(Icons.search, color: Colors.black),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
+          // With a fixed height, set vertical padding to zero or a minimal amount,
+          // so that the text and cursor are centered without overflowing.
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.2),
+          labelStyle: const TextStyle(color: Colors.white),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.black),
+                  onPressed: () {
+                    _searchController.clear();
+                    _filterEvents('');
+                    _searchFocusNode.unfocus();
+                    setState(() {});
+                  },
+                )
+              : null,
         ),
+        onChanged: (query) {
+          _filterEvents(query);
+          setState(() {}); // Refresh UI for suffix icon.
+        },
+        onSubmitted: (value) {
+          _searchFocusNode.unfocus();
+        },
       ),
     );
   }
+
+
+
 
   Widget buildEditableSection(String title, TextEditingController controller,
       String field, List<DocumentReference> eventList) {
@@ -352,291 +326,330 @@ class _TemplatePageState extends State<TemplatePage> {
             height: 250, // Fixed height for square cards.
             child: ListView(
               scrollDirection: Axis.horizontal, // Horizontal scrolling.
-              children: eventList
-                  .map((eventRef) => FutureBuilder<DocumentSnapshot>(
-                        future: eventRef.get(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasData && snapshot.data!.exists) {
-                            var eventData =
-                                snapshot.data!.data() as Map<String, dynamic>;
+              children: eventList.map((eventRef) {
+                return FutureBuilder<DocumentSnapshot>(
+                  future: eventRef.get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasData && snapshot.data!.exists) {
+                      var eventData =
+                          snapshot.data!.data() as Map<String, dynamic>;
 
-                            // Extract event details
-                            String eventName =
-                                eventData['eventName'] ?? 'No title';
-                            String venue = eventData['venue'] ?? 'Unknown';
-                            String docId = eventRef.id; // Get document ID
-                            String type = eventData['type'] ?? 'None';
-                            String imageType = (type == 'None'
-                                ? 'assets/Default.jpg'
-                                : 'assets/$type.jpeg');
+                      // Extract event details.
+                      String eventName =
+                          eventData['eventName'] ?? 'No title';
+                      String venue = eventData['venue'] ?? 'Unknown';
+                      // Document ID.
+                      String docId = eventRef.id;
+                      String type = eventData['type'] ?? 'None';
+                      String imageType = (type == 'None'
+                          ? 'assets/Default.jpg'
+                          : 'assets/$type.jpeg');
 
-                            // Handle Timestamp fields.
-                            Timestamp timestampDate =
-                                eventData['date'] ?? Timestamp.now();
-                            Timestamp timestampStartTime =
-                                eventData['startTime'] ?? Timestamp.now();
-                            Timestamp timestampEndTime =
-                                eventData['endTime'] ?? Timestamp.now();
+                      // Handle Timestamp fields.
+                      Timestamp timestampDate =
+                          eventData['date'] ?? Timestamp.now();
+                      Timestamp timestampStartTime =
+                          eventData['startTime'] ?? Timestamp.now();
+                      Timestamp timestampEndTime =
+                          eventData['endTime'] ?? Timestamp.now();
 
-                            DateTime date = timestampDate.toDate();
-                            DateTime startTime = timestampStartTime.toDate();
-                            DateTime endTime = timestampEndTime.toDate();
+                      DateTime date = timestampDate.toDate();
+                      DateTime startTime = timestampStartTime.toDate();
+                      DateTime endTime = timestampEndTime.toDate();
 
-                            String formattedDate =
-                                DateFormat('dd-MM-yyyy').format(date);
-                            String formattedStartTime =
-                                DateFormat('HH:mm').format(startTime);
-                            String formattedEndTime =
-                                DateFormat('HH:mm').format(endTime);
+                      String formattedDate =
+                          DateFormat('dd-MM-yyyy').format(date);
+                      String formattedStartTime =
+                          DateFormat('HH:mm').format(startTime);
+                      String formattedEndTime =
+                          DateFormat('HH:mm').format(endTime);
 
-                            String timeRange =
-                                '$formattedStartTime - $formattedEndTime';
+                      String timeRange =
+                          '$formattedStartTime - $formattedEndTime';
 
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EventTemplatePage(
-                                      title: eventName,
-                                      isSuperAdmin: _isAdmin,
-                                      eventRef: eventRef,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width:
-                                    200, // Fixed width for square-shaped card.
-                                margin: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white, // Background color.
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Card(
-                                  elevation: 4,
-                                  margin: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      _isAdmin
-                                          ? Container(
-                                              height: 120,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    const BorderRadius.only(
-                                                  topLeft: Radius.circular(12),
-                                                  topRight: Radius.circular(12),
-                                                ),
-                                                image: DecorationImage(
-                                                  image: AssetImage(imageType),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              child: Stack(
-                                                children: [
-                                                  // Edit icon on the top right
-                                                  Align(
-                                                    alignment:
-                                                        Alignment.topRight,
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          _updateEvent(eventRef,
-                                                              field, eventData);
-                                                        },
-                                                        child: Container(
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            color: Colors.green
-                                                                .withOpacity(
-                                                                    0.8),
-                                                          ),
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(4),
-                                                          child: const Icon(
-                                                            Icons.edit,
-                                                            color: Colors.white,
-                                                            size: 20,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  // Remove icon on the top left
-                                                  Align(
-                                                    alignment:
-                                                        Alignment.topLeft,
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          _removeEvent(
-                                                              field, eventRef);
-                                                        },
-                                                        child: Container(
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            color: Colors.black
-                                                                .withOpacity(
-                                                                    0.8),
-                                                          ),
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(4),
-                                                          child: const Icon(
-                                                            Icons.delete,
-                                                            color:
-                                                                Colors.white70,
-                                                            size: 20,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                          : ClipRRect(
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                topLeft: Radius.circular(12),
-                                                topRight: Radius.circular(12),
-                                              ),
-                                              child: Image.asset(
-                                                imageType,
-                                                height: 120,
-                                                width: double.infinity,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error,
-                                                    stackTrace) {
-                                                  return const Icon(
-                                                      Icons.broken_image,
-                                                      size: 100,
-                                                      color: Colors.red);
-                                                },
-                                              ),
-                                            ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EventTemplatePage(
+                                title: eventName,
+                                isSuperAdmin: _isAdmin,
+                                eventRef: eventRef,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 200, // Fixed width for square-shaped card.
+                          margin: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white, // Background color.
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Card(
+                            elevation: 4,
+                            margin: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _isAdmin
+                                    ? Container(
+                                        height: 120,
+                                        decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(12),
+                                            topRight: Radius.circular(12),
+                                          ),
+                                          image: DecorationImage(
+                                            image: AssetImage(imageType),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        child: Stack(
                                           children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    eventName,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16,
-                                                      color: Colors.black87,
+                                            // Edit icon on the top right.
+                                            Align(
+                                              alignment: Alignment.topRight,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    _updateEvent(
+                                                        eventRef, field, eventData);
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.green
+                                                          .withOpacity(0.8),
                                                     ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 1,
+                                                    padding:
+                                                        const EdgeInsets.all(4),
+                                                    child: const Icon(
+                                                      Icons.edit,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
                                                   ),
                                                 ),
-                                                const SizedBox(width: 8),
-                                                GestureDetector(
-                                                  onTap: () => toggleFavorite(
-                                                      eventRef, context),
-                                                  child: Icon(
-                                                    favouriteEvents.contains(
-                                                            eventRef.id)
-                                                        ? Icons.star
-                                                        : Icons
-                                                            .star_border_outlined,
-                                                    size: 20,
-                                                    color: favouriteEvents
-                                                            .contains(
-                                                                eventRef.id)
-                                                        ? const Color.fromARGB(
-                                                            255, 236, 54, 54)
-                                                        : Colors.black,
+                                              ),
+                                            ),
+                                            // Remove icon on the top left.
+                                            Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    _removeEvent(field, eventRef);
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.black
+                                                          .withOpacity(0.8),
+                                                    ),
+                                                    padding:
+                                                        const EdgeInsets.all(4),
+                                                    child: const Icon(
+                                                      Icons.delete,
+                                                      color: Colors.white70,
+                                                      size: 20,
+                                                    ),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.calendar_today,
-                                                    size: 20,
-                                                    color: Colors.black),
-                                                const SizedBox(width: 8),
-                                                Text(' $formattedDate',
-                                                    style: const TextStyle(
-                                                        color: Colors.black)),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.access_time,
-                                                    size: 20,
-                                                    color: Colors.black),
-                                                const SizedBox(width: 8),
-                                                Text(' $timeRange',
-                                                    style: const TextStyle(
-                                                        color: Colors.black)),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.location_on,
-                                                    size: 20,
-                                                    color: Colors.black),
-                                                const SizedBox(width: 8),
-                                                Text(' $venue',
-                                                    style: const TextStyle(
-                                                        color: Colors.black)),
-                                              ],
+                                              ),
                                             ),
                                           ],
                                         ),
+                                      )
+                                    : ClipRRect(
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(12),
+                                          topRight: Radius.circular(12),
+                                        ),
+                                        child: Image.asset(
+                                          imageType,
+                                          height: 120,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error,
+                                              stackTrace) {
+                                            return const Icon(
+                                              Icons.broken_image,
+                                              size: 100,
+                                              color: Colors.red,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              eventName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: Colors.black87,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          GestureDetector(
+                                            onTap: () =>
+                                                toggleFavorite(eventRef, context),
+                                            child: Icon(
+                                              favouriteEvents
+                                                      .contains(eventRef.id)
+                                                  ? Icons.star
+                                                  : Icons.star_border_outlined,
+                                              size: 20,
+                                              color: favouriteEvents
+                                                      .contains(eventRef.id)
+                                                  ? const Color.fromARGB(
+                                                      255, 236, 54, 54)
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.calendar_today,
+                                              size: 20, color: Colors.black),
+                                          const SizedBox(width: 8),
+                                          Text(' $formattedDate',
+                                              style: const TextStyle(
+                                                  color: Colors.black)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.access_time,
+                                              size: 20, color: Colors.black),
+                                          const SizedBox(width: 8),
+                                          Text(' $timeRange',
+                                              style: const TextStyle(
+                                                  color: Colors.black)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.location_on,
+                                              size: 20, color: Colors.black),
+                                          const SizedBox(width: 8),
+                                          Text(' $venue',
+                                              style: const TextStyle(
+                                                  color: Colors.black)),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                            );
-                          }
-                          return const SizedBox();
-                        },
-                      ))
-                  .toList(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                );
+              }).toList(),
             ),
           )
         : const Center(child: Text('No events available.'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Wrap entire page with GestureDetector to dismiss focus when tapping outside.
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 84, 91, 216),
+          title: Text(
+            widget.title,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+        body: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoImageSlider(imagePaths: _imagePaths),
+                  const SizedBox(height: 20),
+                  TextFieldSection(
+                    title: "About",
+                    controller: _aboutController,
+                    isEditing: isEditing,
+                    isAdmin: _isAdmin,
+                    onEdit: () {
+                      if (isEditing) {
+                        updateText('about', _aboutController.text);
+                      }
+                      setState(() {
+                        isEditing = !isEditing;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  buildEditableSection("Flagship Events", _proniteController,
+                      'pronite', proniteEvents),
+                  const SizedBox(height: 20),
+                  buildEventList(proniteEvents, 'pronite'),
+                  const SizedBox(height: 20),
+                  buildEditableSection("Explore Club Events",
+                      _subEventsController, 'subEvents', subEventsList),
+                  const SizedBox(height: 20),
+                  // Improved Search Bar.
+                  buildSearchBar(),
+                  const SizedBox(height: 20),
+                  buildEventList(filteredEvents, 'subEvents'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
