@@ -6,6 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fest_app/pages/Events/widgets/addAuth.dart';
 import 'package:fest_app/pages/Fests/widgets/autoImageSlider.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart'
+    hide Row, Column, Alignment;
+import 'dart:io';
 
 class EventTemplatePage extends StatefulWidget {
   final String title;
@@ -177,6 +182,22 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
     }
   }
 
+  Future<void> _createExcel() async {
+    final Workbook workbook = Workbook();
+    final Worksheet sheet = workbook.worksheets[0];
+    sheet.getRangeByName('A1').setText('Number');
+    sheet.getRangeByName('B1').setText('Name');
+    sheet.getRangeByName('C1').setText('Attendance');
+    final List<int> bytes = workbook.saveAsStream();
+    workbook.dispose();
+
+    final String path = (await getApplicationSupportDirectory()).path;
+    final String fileName = '$path/Output.xlsx';
+    final File file = File(fileName);
+    await file.writeAsBytes(bytes, flush: true);
+    OpenFile.open(fileName);
+  }
+
   // Improved registration dialog with themed header and serial numbering.
   Future<void> _showRegistrationsDialog() async {
     // Refresh event data to get the latest registrations.
@@ -299,6 +320,16 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
           ),
           actions: [
             TextButton(
+              onPressed: _createExcel,
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 84, 91, 216),
+              ),
+              child: const Text(
+                "Download Excel",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -329,17 +360,17 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         );
         return;
       }
-      
+
       // Get current time
       DateTime now = DateTime.now();
       // Extract start and end times as DateTime objects from eventData
       DateTime eventStartTime = (eventData!['startTime'] as Timestamp).toDate();
       DateTime eventEndTime = (eventData!['endTime'] as Timestamp).toDate();
-      
+
       // Calculate time boundaries: one hour before start and one hour after end.
       DateTime scanningStartTime = eventStartTime.subtract(Duration(hours: 1));
       DateTime scanningEndTime = eventEndTime.add(Duration(hours: 1));
-      
+
       // Check if current time is within the allowed scanning window.
       if (now.isBefore(scanningStartTime)) {
         showCustomSnackBar(
@@ -351,7 +382,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         return;
       }
 
-      if(now.isAfter(scanningEndTime)){
+      if (now.isAfter(scanningEndTime)) {
         showCustomSnackBar(
           context,
           "The event has ended.",
@@ -360,7 +391,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         );
         return;
       }
-      
+
       // Proceed with QR scanning if within the allowed time.
       var scanResult = await BarcodeScanner.scan();
       String scannedUID = scanResult.rawContent;
@@ -373,7 +404,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         );
         return;
       }
-      
+
       List registrations = eventData?['registrations'] ?? [];
       bool found = false;
       bool alreadyPresent = false;
@@ -391,7 +422,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
           break;
         }
       }
-      
+
       // If the user isn't registered.
       if (!found) {
         showCustomSnackBar(
@@ -402,7 +433,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         );
         return;
       }
-      
+
       // Inform if the user has already been marked present.
       if (alreadyPresent) {
         showCustomSnackBar(
@@ -413,7 +444,7 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
         );
         return;
       }
-      
+
       // Update the event document with the updated registrations.
       await _firestore
           .collection('events')
@@ -435,8 +466,6 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
       );
     }
   }
-
-
 
   void _togglePreviewMode() {
     setState(() {

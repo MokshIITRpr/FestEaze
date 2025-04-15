@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  syncfusion_flutter_xlsio: ^29.1.38
   firebase_core: ^3.10.1
   firebase_auth: ^5.4.1
   cupertino_icons: ^1.0.2
@@ -64,3 +65,4 @@ flutter:
     - assets/Software.jpeg
     - assets/Dance.jpeg
     - assets/template.pdf
+    - assets/Robotics.jpeg
