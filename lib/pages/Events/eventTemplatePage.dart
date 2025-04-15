@@ -182,12 +182,24 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
     }
   }
 
-  Future<void> _createExcel() async {
+  Future<void> _createExcel(
+      List<Map<String, dynamic>> registrationsDetails) async {
     final Workbook workbook = Workbook();
     final Worksheet sheet = workbook.worksheets[0];
     sheet.getRangeByName('A1').setText('Number');
     sheet.getRangeByName('B1').setText('Name');
     sheet.getRangeByName('C1').setText('Attendance');
+
+    for (int index = 0; index < registrationsDetails.length; index++) {
+      sheet.getRangeByName('A${index + 2}').setText('${index + 1}');
+      var regDetail = registrationsDetails[index];
+      String username = regDetail['username'] ?? "No Name";
+      bool isPresent = regDetail['ispresent'] ?? false;
+      sheet.getRangeByName('B${index + 2}').setText(username);
+      sheet
+          .getRangeByName('C${index + 2}')
+          .setText(isPresent ? 'Present' : 'Absent');
+    }
     final List<int> bytes = workbook.saveAsStream();
     workbook.dispose();
 
@@ -320,7 +332,9 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
           ),
           actions: [
             TextButton(
-              onPressed: _createExcel,
+              onPressed: () async {
+                await _createExcel(registrationsDetails);
+              },
               style: TextButton.styleFrom(
                 foregroundColor: const Color.fromARGB(255, 84, 91, 216),
               ),
