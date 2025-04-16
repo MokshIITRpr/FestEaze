@@ -343,7 +343,7 @@ class _TemplatePageState extends State<TemplatePage> {
                       String venue = eventData['venue'] ?? 'Unknown';
                       // Document ID.
                       String docId = eventRef.id;
-                      String type = eventData['type'] ?? 'None';
+                      String type = eventData['type'].trim() ?? 'None';
                       String imageType = (type == 'None'
                           ? 'assets/Default.jpg'
                           : 'assets/$type.jpeg');
