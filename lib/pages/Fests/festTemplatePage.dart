@@ -45,6 +45,7 @@ class _TemplatePageState extends State<TemplatePage> {
       []; // For filtered events based on search query
   List<String> favouriteEvents = [];
   List<String> observers = [];
+  int _lastRequestId = 0;
 
   @override
   void initState() {
@@ -105,7 +106,9 @@ class _TemplatePageState extends State<TemplatePage> {
   }
 
   // This function filters the events based on the search query.
-  Future<void> _filterEvents(String query) async {
+  Future<void> _filterEvents(String rawQuery) async {
+    final int requestId = ++_lastRequestId;
+    final query = rawQuery.trim().toLowerCase();
     if (query.isEmpty) {
       setState(() {
         filteredEvents = subEventsList; // If query is empty, show all events
@@ -116,6 +119,7 @@ class _TemplatePageState extends State<TemplatePage> {
     List<DocumentReference> filteredList = [];
 
     for (var eventRef in subEventsList) {
+      if (requestId != _lastRequestId) return;
       var eventSnapshot = await eventRef.get();
       // Check if the document exists and its data is not null.
       if (!eventSnapshot.exists || eventSnapshot.data() == null) {
@@ -123,11 +127,12 @@ class _TemplatePageState extends State<TemplatePage> {
       }
       var eventData = eventSnapshot.data() as Map<String, dynamic>;
       String eventName = (eventData['eventName'] ?? '').toLowerCase();
-      if (eventName.contains(query.toLowerCase())) {
+      if (eventName.contains(query)) {
         filteredList.add(eventRef);
       }
     }
 
+    if (requestId != _lastRequestId) return;
     setState(() {
       filteredEvents = filteredList;
     });
@@ -212,15 +217,15 @@ class _TemplatePageState extends State<TemplatePage> {
                           .collection('events')
                           .doc(eventRef.id)
                           .delete();
-                      await _firestore.collection('fests').doc(widget.docId)
+                      await _firestore
+                          .collection('fests')
+                          .doc(widget.docId)
                           .update({
                         field: FieldValue.arrayRemove([eventRef]),
                       });
-                      showCustomSnackBar(
-                          context, "Event Deleted Successfully");
+                      showCustomSnackBar(context, "Event Deleted Successfully");
                     } catch (e) {
-                      showCustomSnackBar(
-                          context, 'Error in deleting Event $e');
+                      showCustomSnackBar(context, 'Error in deleting Event $e');
                     }
                     Navigator.pop(context);
                     _fetchText();
@@ -244,22 +249,21 @@ class _TemplatePageState extends State<TemplatePage> {
   // Improved search bar widget with dedicated FocusNode and clear button.
   Widget buildSearchBar() {
     return SizedBox(
-      height: 50, // Constrains the TextField's height.
       child: TextField(
         textAlignVertical: TextAlignVertical.center,
         focusNode: _searchFocusNode,
         controller: _searchController,
         decoration: InputDecoration(
-          labelText: 'Search Events',
           prefixIcon: const Icon(Icons.search, color: Colors.black),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
           // With a fixed height, set vertical padding to zero or a minimal amount,
           // so that the text and cursor are centered without overflowing.
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
           filled: true,
-          fillColor: Colors.white.withOpacity(0.2),
+          fillColor: Colors.white,
           labelStyle: const TextStyle(color: Colors.white),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -283,9 +287,6 @@ class _TemplatePageState extends State<TemplatePage> {
       ),
     );
   }
-
-
-
 
   Widget buildEditableSection(String title, TextEditingController controller,
       String field, List<DocumentReference> eventList) {
@@ -338,8 +339,7 @@ class _TemplatePageState extends State<TemplatePage> {
                           snapshot.data!.data() as Map<String, dynamic>;
 
                       // Extract event details.
-                      String eventName =
-                          eventData['eventName'] ?? 'No title';
+                      String eventName = eventData['eventName'] ?? 'No title';
                       String venue = eventData['venue'] ?? 'Unknown';
                       // Document ID.
                       String docId = eventRef.id;
@@ -429,8 +429,8 @@ class _TemplatePageState extends State<TemplatePage> {
                                                     const EdgeInsets.all(8.0),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    _updateEvent(
-                                                        eventRef, field, eventData);
+                                                    _updateEvent(eventRef,
+                                                        field, eventData);
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -457,7 +457,8 @@ class _TemplatePageState extends State<TemplatePage> {
                                                     const EdgeInsets.all(8.0),
                                                 child: GestureDetector(
                                                   onTap: () {
-                                                    _removeEvent(field, eventRef);
+                                                    _removeEvent(
+                                                        field, eventRef);
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -489,8 +490,8 @@ class _TemplatePageState extends State<TemplatePage> {
                                           height: 120,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (context, error,
-                                              stackTrace) {
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
                                             return const Icon(
                                               Icons.broken_image,
                                               size: 100,
@@ -521,8 +522,8 @@ class _TemplatePageState extends State<TemplatePage> {
                                           ),
                                           const SizedBox(width: 8),
                                           GestureDetector(
-                                            onTap: () =>
-                                                toggleFavorite(eventRef, context),
+                                            onTap: () => toggleFavorite(
+                                                eventRef, context),
                                             child: Icon(
                                               favouriteEvents
                                                       .contains(eventRef.id)
