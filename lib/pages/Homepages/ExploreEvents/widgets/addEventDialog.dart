@@ -53,35 +53,55 @@ void showAddEventDialog(BuildContext context) {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _datePicker(context, "Start Dt.", startDate, DateTime.now(),
-                        (picked) {
-                      setDialogState(() {
-                        if (picked.isBefore(DateTime.now())) {
-                          errorMessage = "Start Date must be after today";
-                        } else {
-                          startDate = picked;
-                          if (endDate != null &&
-                              endDate!.isBefore(startDate!)) {
-                            endDate = startDate;
+                    _datePicker(
+                      context,
+                      "Start Dt.",
+                      startDate,
+                      DateTime.now(),
+                      (picked) {
+                        setDialogState(() {
+                          // Allow today: compare only date portion
+                          final today = DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                          );
+                          final pickedDate = DateTime(
+                            picked.year,
+                            picked.month,
+                            picked.day,
+                          );
+                          if (pickedDate.isBefore(today)) {
+                            errorMessage = "Start Date must be today or later";
+                          } else {
+                            startDate = picked;
+                            if (endDate != null && endDate!.isBefore(startDate!)) {
+                              endDate = startDate;
+                            }
+                            errorMessage = null;
                           }
-                          errorMessage = null;
-                        }
-                      });
-                    }),
-                    _datePicker(context, "End Dt.", endDate,
-                        startDate ?? DateTime.now(), (picked) {
-                      setDialogState(() {
-                        if (startDate == null ||
-                            picked.isAfter(startDate!) ||
-                            picked.isAtSameMomentAs(startDate!)) {
-                          endDate = picked;
-                          errorMessage = null;
-                        } else {
-                          errorMessage =
-                              "End Date must be after or equal to Start Date";
-                        }
-                      });
-                    }),
+                        });
+                      },
+                    ),
+                    _datePicker(
+                      context,
+                      "End Dt.",
+                      endDate,
+                      startDate ?? DateTime.now(),
+                      (picked) {
+                        setDialogState(() {
+                          if (startDate == null ||
+                              picked.isAfter(startDate!) ||
+                              picked.isAtSameMomentAs(startDate!)) {
+                            endDate = picked;
+                            errorMessage = null;
+                          } else {
+                            errorMessage =
+                                "End Date must be after or equal to Start Date";
+                          }
+                        });
+                      },
+                    ),
                   ],
                   ElevatedButton.icon(
                     onPressed: () async {

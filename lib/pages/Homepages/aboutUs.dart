@@ -142,7 +142,7 @@ class _AboutUsState extends State<AboutUs> {
                   const Text(
                     'About FestEz',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color.fromARGB(255, 84, 91, 216),
                     ),
@@ -157,7 +157,7 @@ class _AboutUsState extends State<AboutUs> {
                   const Text(
                     'What is FestEz?',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color.fromARGB(255, 84, 91, 216),
                     ),
@@ -172,7 +172,7 @@ class _AboutUsState extends State<AboutUs> {
                   const Text(
                     'Why FestEz Helps',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color.fromARGB(255, 84, 91, 216),
                     ),
@@ -229,7 +229,7 @@ class _AboutUsState extends State<AboutUs> {
                   const Text(
                     'Our Vision',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color.fromARGB(255, 84, 91, 216),
                     ),

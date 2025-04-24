@@ -90,7 +90,6 @@ void showEventDialog(
   DateTime? eventDate;
   TimeOfDay? startTime;
   TimeOfDay? endTime;
-  DocumentReference currentEvent;
   String? errorMessage;
 
   if (!add) {
@@ -112,7 +111,6 @@ void showEventDialog(
           return AlertDialog(
             title: add ? Text("Add Event") : Text("Update Event"),
             content: SingleChildScrollView(
-              // Wrap in SingleChildScrollView
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -138,14 +136,17 @@ void showEventDialog(
                       }
                     });
                   }),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                  // Event Date Picker
+                  // Date Picker (allows today)
                   _datePicker(context, "Date", eventDate, DateTime.now(),
                       (picked) {
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+
                     setDialogState(() {
-                      if (picked.isBefore(DateTime.now())) {
-                        errorMessage = "Date must be after today";
+                      if (picked.isBefore(today)) {
+                        errorMessage = "Date must be today or later";
                       } else {
                         eventDate = picked;
                         errorMessage = null;
@@ -346,6 +347,7 @@ Widget _timePicker(BuildContext context, String label, TimeOfDay? time,
   );
 }
 
+// Event Type Picker
 Widget _eventPicker(
   BuildContext context,
   String label,
