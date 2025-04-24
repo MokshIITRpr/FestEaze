@@ -557,10 +557,11 @@ class _EventTemplatePageState extends State<EventTemplatePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AutoImageSlider(imagePaths: [
-                          'assets/aarohan.jpg',
+                          'assets/iitrpr.jpeg',
                           'assets/zeitgeist.jpeg',
+                          'assets/aarohan.jpg',
+                          'assets/iitropar11.jpg',
                           'assets/advitiya.jpeg',
-                          'assets/sponsor.jpeg',
                         ]),
                         const SizedBox(height: 20),
                         Text(

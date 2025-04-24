@@ -34,10 +34,11 @@ class _TemplatePageState extends State<TemplatePage> {
   final _userdata = UserData();
 
   final List<String> _imagePaths = [
-    'assets/aarohan.jpg',
+    'assets/iitrpr.jpeg',
     'assets/zeitgeist.jpeg',
+    'assets/aarohan.jpg',
+    'assets/iitropar11.jpg',
     'assets/advitiya.jpeg',
-    'assets/sponsor.jpeg',
   ];
 
   List<DocumentReference> proniteEvents = [];

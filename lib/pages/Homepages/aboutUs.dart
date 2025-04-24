@@ -14,9 +14,9 @@ class _AboutUsState extends State<AboutUs> {
   final List<String> _imagePaths = [
     'assets/iitrpr.jpeg',
     'assets/zeitgeist.jpeg',
-    'assets/advitiya.jpeg',
     'assets/aarohan.jpg',
     'assets/iitropar11.jpg',
+    'assets/advitiya.jpeg',
   ];
 
   @override
