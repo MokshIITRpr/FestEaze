@@ -80,7 +80,11 @@ void showEventDialog(
     'Dance',
     'Basketball',
     'Volleyball',
-    'Cricket'
+    'Cricket',
+    'Soccer',
+    'Music',
+    'Sports',
+    'Athletics'
   ];
   String? selectedEvent;
   DateTime? eventDate;
