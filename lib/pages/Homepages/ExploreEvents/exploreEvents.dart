@@ -8,6 +8,8 @@ import 'package:fest_app/pages/Fests/festTemplatePage.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addEventDialog.dart';
 import 'package:fest_app/pages/Homepages/ExploreEvents/widgets/addAuth.dart';
 import 'package:intl/intl.dart';
+import 'package:fest_app/snackbar.dart';
+import 'package:fest_app/messages/messages.dart';
 
 class ExploreEvents extends StatefulWidget {
   const ExploreEvents({super.key});
@@ -22,6 +24,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
   final UserData _userData = UserData();
   late Future<DocumentSnapshot> _user;
   bool _isAdmin = false;
+  final bool _isLoggedIn = FirebaseAuth.instance.currentUser != null;
 
   @override
   void initState() {
@@ -95,10 +98,14 @@ class _ExploreEventsState extends State<ExploreEvents> {
         child: InkWell(
           borderRadius: BorderRadius.circular(12.0),
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => event.navigateTo),
-            );
+            if (_isLoggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => event.navigateTo),
+              );
+            } else {
+              showCustomSnackBar(context, loginToUse);
+            }
           },
           child: Container(
             height: 150.0,
@@ -233,7 +240,7 @@ class _ExploreEventsState extends State<ExploreEvents> {
                   }
 
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text("No events available."));
+                    return const Center(child: Text("No Events Currently!"));
                   }
 
                   final eventsMap = snapshot.data!;

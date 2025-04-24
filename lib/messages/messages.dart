@@ -13,3 +13,4 @@ const String verifyingEmailMessage =
     "Please check your inbox and click the verification link.";
 const String verificationFailedMessage =
     "Your account was deleted because you didn't verify your email in time.";
+const String loginToUse = "Please Login To Access the Event";
