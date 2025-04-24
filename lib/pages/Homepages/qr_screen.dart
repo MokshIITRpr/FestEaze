@@ -233,7 +233,8 @@ class _QRScreenState extends State<QRScreen> {
                                   backgroundColor:
                                       WidgetStateProperty.resolveWith<Color>(
                                     (Set<MaterialState> states) {
-                                      if (states.contains(MaterialState.pressed)) {
+                                      if (states
+                                          .contains(MaterialState.pressed)) {
                                         return Colors.redAccent;
                                       }
                                       return _isHovered
@@ -331,7 +332,7 @@ class _QRScreenState extends State<QRScreen> {
               // Extract event details
               String eventName = eventData['eventName'] ?? 'No title';
               String venue = eventData['venue'] ?? 'Unknown';
-              String type = eventData['type'] ?? 'None';
+              String type = eventData['type'].trim() ?? 'None';
               String imageType = (type == 'None'
                   ? 'assets/Default.jpeg'
                   : 'assets/$type.jpeg');

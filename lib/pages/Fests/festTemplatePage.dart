@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fest_app/data.dart';
 import 'package:fest_app/pages/Events/eventTemplatePage.dart';
 import 'package:fest_app/snackbar.dart';
+import 'package:fest_app/pages/Fests/festCard.dart';
 
 class TemplatePage extends StatefulWidget {
   final String title;
@@ -183,8 +184,6 @@ class _TemplatePageState extends State<TemplatePage> {
       favouriteEvents.add(eventRef.id); // Add to favorites.
     }
 
-    setState(() {}); // Update UI.
-
     try {
       _userdata.updateWishlist(favouriteEvents);
     } catch (e) {
@@ -338,248 +337,16 @@ class _TemplatePageState extends State<TemplatePage> {
                       var eventData =
                           snapshot.data!.data() as Map<String, dynamic>;
 
-                      // Extract event details.
-                      String eventName = eventData['eventName'] ?? 'No title';
-                      String venue = eventData['venue'] ?? 'Unknown';
-                      // Document ID.
-                      String docId = eventRef.id;
-                      String type = eventData['type'].trim() ?? 'None';
-                      String imageType = (type == 'None'
-                          ? 'assets/Default.jpg'
-                          : 'assets/$type.jpeg');
-
-                      // Handle Timestamp fields.
-                      Timestamp timestampDate =
-                          eventData['date'] ?? Timestamp.now();
-                      Timestamp timestampStartTime =
-                          eventData['startTime'] ?? Timestamp.now();
-                      Timestamp timestampEndTime =
-                          eventData['endTime'] ?? Timestamp.now();
-
-                      DateTime date = timestampDate.toDate();
-                      DateTime startTime = timestampStartTime.toDate();
-                      DateTime endTime = timestampEndTime.toDate();
-
-                      String formattedDate =
-                          DateFormat('dd-MM-yyyy').format(date);
-                      String formattedStartTime =
-                          DateFormat('HH:mm').format(startTime);
-                      String formattedEndTime =
-                          DateFormat('HH:mm').format(endTime);
-
-                      String timeRange =
-                          '$formattedStartTime - $formattedEndTime';
-
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EventTemplatePage(
-                                title: eventName,
-                                isSuperAdmin: _isAdmin,
-                                eventRef: eventRef,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 200, // Fixed width for square-shaped card.
-                          margin: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white, // Background color.
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Card(
-                            elevation: 4,
-                            margin: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _isAdmin
-                                    ? Container(
-                                        height: 120,
-                                        decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            topRight: Radius.circular(12),
-                                          ),
-                                          image: DecorationImage(
-                                            image: AssetImage(imageType),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        child: Stack(
-                                          children: [
-                                            // Edit icon on the top right.
-                                            Align(
-                                              alignment: Alignment.topRight,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    _updateEvent(eventRef,
-                                                        field, eventData);
-                                                  },
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: Colors.green
-                                                          .withOpacity(0.8),
-                                                    ),
-                                                    padding:
-                                                        const EdgeInsets.all(4),
-                                                    child: const Icon(
-                                                      Icons.edit,
-                                                      color: Colors.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            // Remove icon on the top left.
-                                            Align(
-                                              alignment: Alignment.topLeft,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    _removeEvent(
-                                                        field, eventRef);
-                                                  },
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: Colors.black
-                                                          .withOpacity(0.8),
-                                                    ),
-                                                    padding:
-                                                        const EdgeInsets.all(4),
-                                                    child: const Icon(
-                                                      Icons.delete,
-                                                      color: Colors.white70,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    : ClipRRect(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          topRight: Radius.circular(12),
-                                        ),
-                                        child: Image.asset(
-                                          imageType,
-                                          height: 120,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return const Icon(
-                                              Icons.broken_image,
-                                              size: 100,
-                                              color: Colors.red,
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              eventName,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                color: Colors.black87,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          GestureDetector(
-                                            onTap: () => toggleFavorite(
-                                                eventRef, context),
-                                            child: Icon(
-                                              favouriteEvents
-                                                      .contains(eventRef.id)
-                                                  ? Icons.star
-                                                  : Icons.star_border_outlined,
-                                              size: 20,
-                                              color: favouriteEvents
-                                                      .contains(eventRef.id)
-                                                  ? const Color.fromARGB(
-                                                      255, 236, 54, 54)
-                                                  : Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.calendar_today,
-                                              size: 20, color: Colors.black),
-                                          const SizedBox(width: 8),
-                                          Text(' $formattedDate',
-                                              style: const TextStyle(
-                                                  color: Colors.black)),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.access_time,
-                                              size: 20, color: Colors.black),
-                                          const SizedBox(width: 8),
-                                          Text(' $timeRange',
-                                              style: const TextStyle(
-                                                  color: Colors.black)),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.location_on,
-                                              size: 20, color: Colors.black),
-                                          const SizedBox(width: 8),
-                                          Text(' $venue',
-                                              style: const TextStyle(
-                                                  color: Colors.black)),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
+                      bool isFav = favouriteEvents.contains(eventRef.id);
+                      return FestCard(
+                          isAdmin: _isAdmin,
+                          eventRef: eventRef,
+                          eventData: eventData,
+                          updateEvent: _updateEvent,
+                          removeEvent: _removeEvent,
+                          toggleFavorite: toggleFavorite,
+                          isFav: isFav,
+                          field: field);
                     }
                     return const SizedBox();
                   },
