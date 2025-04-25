@@ -28,6 +28,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
     ];
 
     return Scaffold(
+      extendBody: true, // allow content under the nav bar
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 500),
         child: IndexedStack(
@@ -36,41 +37,43 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
           children: _pages,
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 8,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            backgroundColor: const Color.fromARGB(255, 84, 91, 216), // Deep blue
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white70,
-            elevation: 0,
-            type: BottomNavigationBarType.fixed,
-            selectedFontSize: 14,
-            unselectedFontSize: 12,
-            items: [
-              _buildNavItem(Icons.info, 'About'),
-              _buildNavItem(Icons.event, 'Events'),
-              _buildNavItem(Icons.map, 'Map'),
-              _buildNavItem(
-                user != null ? Icons.account_circle : Icons.login,
-                user != null ? 'Profile' : 'Login',
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 84, 91, 216), // deep blue
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.5),
+                blurRadius: 8,
+                offset: Offset(0, 4),
               ),
             ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: (index) => setState(() => _selectedIndex = index),
+              backgroundColor:
+                  Colors.transparent, // container provides the color & shape
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.white70,
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              selectedFontSize: 14,
+              unselectedFontSize: 12,
+              items: [
+                _buildNavItem(Icons.info, 'About'),
+                _buildNavItem(Icons.event, 'Events'),
+                _buildNavItem(Icons.map, 'Map'),
+                _buildNavItem(
+                  user != null ? Icons.account_circle : Icons.login,
+                  user != null ? 'Profile' : 'Login',
+                ),
+              ],
+            ),
           ),
         ),
       ),

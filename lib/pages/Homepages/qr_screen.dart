@@ -127,6 +127,7 @@ class _QRScreenState extends State<QRScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -134,6 +135,7 @@ class _QRScreenState extends State<QRScreen> {
           statusBarBrightness: Brightness.light,
         ),
         child: SafeArea(
+          bottom: false,
           child: Stack(
             children: [
               // Background Sponsors - Fill the entire screen with repeated images
