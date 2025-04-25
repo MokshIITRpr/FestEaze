@@ -203,68 +203,91 @@ class _ExploreEventsState extends State<ExploreEvents> {
                     onPressed: () => showAddEventDialog(context),
                   ),
               ],
-              bottom: const TabBar(
-                tabs: [
-                  Tab(
-                    child: Text(
-                      "Ongoing",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Tab(
-                    child: Text(
-                      "Upcoming",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Tab(
-                    child: Text(
-                      "Past",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
+              elevation: 0,
             ),
             backgroundColor: Colors.grey[200],
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: StreamBuilder<Map<String, List<Event>>>(
-                stream: _fetchEvents(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+            body: Column(
+              children: [
+                // Floating Tab Bar just below the AppBar
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 84, 91, 216),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: TabBar(
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorPadding: EdgeInsets.zero,
+                      labelColor: const Color.fromARGB(255, 255, 255, 255),
+                      unselectedLabelColor: const Color.fromARGB(255, 168, 166, 166),
+                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      unselectedLabelStyle:
+                          const TextStyle(fontWeight: FontWeight.normal),
+                      indicator: BoxDecoration(
+                        color: const Color.fromARGB(255, 216, 214, 214)
+                            .withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      tabs: const [
+                        Tab(text: "Ongoing"),
+                        Tab(text: "Upcoming"),
+                        Tab(text: "Past"),
+                      ],
+                    ),
+                  ),
+                ),
 
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text("No Events Currently!"));
-                  }
-
-                  final eventsMap = snapshot.data!;
-                  return TabBarView(
-                    children: [
-                      // Ongoing Events Tab
-                      eventsMap["Ongoing Events"]!.isNotEmpty
-                          ? _buildEventList(eventsMap["Ongoing Events"]!, true)
-                          : const Center(
-                              child: Text("No Ongoing Events available.")),
-                      // Upcoming Events Tab
-                      eventsMap["Upcoming Events"]!.isNotEmpty
-                          ? _buildEventList(eventsMap["Upcoming Events"]!, true)
-                          : const Center(
-                              child: Text("No Upcoming Events available.")),
-                      // Past Events Tab
-                      eventsMap["Past Events"]!.isNotEmpty
-                          ? _buildEventList(eventsMap["Past Events"]!, false)
-                          : const Center(
-                              child: Text("No Past Events available.")),
-                    ],
-                  );
-                },
-              ),
+                // The tab pages
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: StreamBuilder<Map<String, List<Event>>>(
+                      stream: _fetchEvents(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const Center(
+                              child: Text("No Events Currently!"));
+                        }
+                        final eventsMap = snapshot.data!;
+                        return TabBarView(
+                          children: [
+                            eventsMap["Ongoing Events"]!.isNotEmpty
+                                ? _buildEventList(
+                                    eventsMap["Ongoing Events"]!, true)
+                                : const Center(
+                                    child:
+                                        Text("No Ongoing Events available.")),
+                            eventsMap["Upcoming Events"]!.isNotEmpty
+                                ? _buildEventList(
+                                    eventsMap["Upcoming Events"]!, true)
+                                : const Center(
+                                    child:
+                                        Text("No Upcoming Events available.")),
+                            eventsMap["Past Events"]!.isNotEmpty
+                                ? _buildEventList(
+                                    eventsMap["Past Events"]!, false)
+                                : const Center(
+                                    child: Text("No Past Events available.")),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
